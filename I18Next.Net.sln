@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "I18Next.Net", "src\I18Next.Net\I18Next.Net.csproj", "{71F47BEC-C9FB-4393-AA78-8D7AD2D51863}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "I18Next.Net.Extensions", "src\I18Next.Net.Extensions\I18Next.Net.Extensions.csproj", "{96A82CDF-B1FF-41D8-976E-52ECF9CFD82A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "I18Next.Net.ICU", "src\I18Next.Net.ICU\I18Next.Net.ICU.csproj", "{D79824CC-B177-4BD7-9B06-C780AA573B8F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "I18Next.Net.PolyglotJs", "src\I18Next.Net.PolyglotJs\I18Next.Net.PolyglotJs.csproj", "{0A39C392-2FB2-4D24-9A82-919F5C626A68}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "I18Next.Net.Tests", "tests\I18Next.Net.Tests\I18Next.Net.Tests.csproj", "{8041F656-7FAD-48A8-91C5-1D7239984CB5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{71F47BEC-C9FB-4393-AA78-8D7AD2D51863}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71F47BEC-C9FB-4393-AA78-8D7AD2D51863}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71F47BEC-C9FB-4393-AA78-8D7AD2D51863}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71F47BEC-C9FB-4393-AA78-8D7AD2D51863}.Release|Any CPU.Build.0 = Release|Any CPU
+		{96A82CDF-B1FF-41D8-976E-52ECF9CFD82A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{96A82CDF-B1FF-41D8-976E-52ECF9CFD82A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{96A82CDF-B1FF-41D8-976E-52ECF9CFD82A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{96A82CDF-B1FF-41D8-976E-52ECF9CFD82A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D79824CC-B177-4BD7-9B06-C780AA573B8F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D79824CC-B177-4BD7-9B06-C780AA573B8F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D79824CC-B177-4BD7-9B06-C780AA573B8F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D79824CC-B177-4BD7-9B06-C780AA573B8F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A39C392-2FB2-4D24-9A82-919F5C626A68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A39C392-2FB2-4D24-9A82-919F5C626A68}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A39C392-2FB2-4D24-9A82-919F5C626A68}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A39C392-2FB2-4D24-9A82-919F5C626A68}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8041F656-7FAD-48A8-91C5-1D7239984CB5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8041F656-7FAD-48A8-91C5-1D7239984CB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8041F656-7FAD-48A8-91C5-1D7239984CB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8041F656-7FAD-48A8-91C5-1D7239984CB5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
