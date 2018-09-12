@@ -7,11 +7,11 @@ using I18Next.Net.Plugins;
 
 namespace I18Next.Net
 {
-    public class I18Next : II18Next
+    public class I18NextNet : II18Next
     {
         private string _language;
 
-        public I18Next(ITranslationBackend backend, ITranslator translator)
+        public I18NextNet(ITranslationBackend backend, ITranslator translator)
         {
             Backend = backend ?? throw new ArgumentNullException(nameof(backend));
             Translator = translator ?? throw new ArgumentNullException(nameof(translator));
@@ -56,22 +56,37 @@ namespace I18Next.Net
 
         public string T(string key, object args = null)
         {
-            if (DetectLanguageOnEachTranslation)
-                UseDetectedLanguage();
-
-            var argsDict = args.ToDictionary();
-
-            return Translator.TranslateAsync(_language, DefaultNamespace, key, argsDict).Result;
+            return Ta(_language, key, args).Result;
         }
 
-        public async Task<string> Ta(string key, object args = null)
+        public string T(string language, string key, object args = null)
+        {
+            return Ta(language, key, args).Result;
+        }
+
+        public string T(string language, string defaultNamespace, string key, object args = null)
+        {
+            return Ta(language, defaultNamespace, key, args).Result;
+        }
+
+        public Task<string> Ta(string key, object args = null)
+        {
+            return Ta(_language, key, args);
+        }
+
+        public Task<string> Ta(string language, string key, object args = null)
+        {
+            return Ta(language, DefaultNamespace, key, args);
+        }
+
+        public async Task<string> Ta(string language, string defaultNamespace, string key, object args = null)
         {
             if (DetectLanguageOnEachTranslation)
                 UseDetectedLanguage();
 
             var argsDict = args.ToDictionary();
 
-            return await Translator.TranslateAsync(_language, DefaultNamespace, key, argsDict);
+            return await Translator.TranslateAsync(language, defaultNamespace, key, argsDict);
         }
 
         public event EventHandler<LanguageChangedEventArgs> LanguageChanged;

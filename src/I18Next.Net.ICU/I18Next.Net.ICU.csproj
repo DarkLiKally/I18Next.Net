@@ -8,10 +8,10 @@
     <RepositoryUrl>https://github.com/DarkLiKally/I18Next.Net</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <Product>I18Next.Net</Product>
-    <Version>0.5.0</Version>
+    <Version>0.5.1</Version>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="MessageFormat" Version="2.1.0" />
+    <PackageReference Include="MessageFormat" Version="3.0.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\I18Next.Net\I18Next.Net.csproj" />

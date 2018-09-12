@@ -10,6 +10,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "I18Next.Net.PolyglotJs", "s
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "I18Next.Net.Tests", "tests\I18Next.Net.Tests\I18Next.Net.Tests.csproj", "{8041F656-7FAD-48A8-91C5-1D7239984CB5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "I18Next.Net.AspNetCore", "src\I18Next.Net.AspNetCore\I18Next.Net.AspNetCore.csproj", "{AC1CFDD9-1DBC-4E21-A1CF-F9C154BBF177}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Example.WebApp", "examples\Example.WebApp\Example.WebApp.csproj", "{7A9BDD90-BC7A-4B7D-A3F0-42A83D04E6C3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +40,13 @@ Global
 		{8041F656-7FAD-48A8-91C5-1D7239984CB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8041F656-7FAD-48A8-91C5-1D7239984CB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8041F656-7FAD-48A8-91C5-1D7239984CB5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC1CFDD9-1DBC-4E21-A1CF-F9C154BBF177}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC1CFDD9-1DBC-4E21-A1CF-F9C154BBF177}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC1CFDD9-1DBC-4E21-A1CF-F9C154BBF177}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC1CFDD9-1DBC-4E21-A1CF-F9C154BBF177}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A9BDD90-BC7A-4B7D-A3F0-42A83D04E6C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A9BDD90-BC7A-4B7D-A3F0-42A83D04E6C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A9BDD90-BC7A-4B7D-A3F0-42A83D04E6C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A9BDD90-BC7A-4B7D-A3F0-42A83D04E6C3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

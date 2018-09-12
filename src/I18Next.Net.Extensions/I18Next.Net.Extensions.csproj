@@ -4,7 +4,7 @@
     <Product>I18Next.Net</Product>
     <Authors>DarkLiKally</Authors>
     <Company>DarkLiKally</Company>
-    <Version>0.5.0</Version>
+    <Version>0.5.1</Version>
     <RepositoryUrl>https://github.com/DarkLiKally/I18Next.Net</RepositoryUrl>
     <PackageProjectUrl>https://github.com/DarkLiKally/I18Next.Net</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
@@ -13,6 +13,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.Localization.Abstractions" Version="2.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\I18Next.Net\I18Next.Net.csproj" />

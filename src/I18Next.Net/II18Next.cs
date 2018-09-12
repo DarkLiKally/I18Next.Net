@@ -8,6 +8,14 @@ namespace I18Next.Net
 
         string T(string key, object args = null);
 
+        string T(string language, string key, object args = null);
+
+        string T(string language, string defaultNamespace, string key, object args = null);
+
         Task<string> Ta(string key, object args = null);
+
+        Task<string> Ta(string language, string key, object args = null);
+
+        Task<string> Ta(string language, string defaultNamespace, string key, object args = null);
     }
 }

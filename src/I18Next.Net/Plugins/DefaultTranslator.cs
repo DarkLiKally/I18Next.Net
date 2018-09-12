@@ -128,6 +128,11 @@ namespace I18Next.Net.Plugins
 
         private async Task<string> ResolveTranslationAsync(string language, string ns, string key, IDictionary<string, object> args)
         {
+            var translationTree = await ResolveTranslationTreeAsync(language, ns);
+
+            if (translationTree == null)
+                return null;
+            
             var needsPluralHandling = (args?.ContainsKey("count") ?? false) && args["count"] is int && _pluralResolver.NeedsPlural(language);
             var needsContextHandling = (args?.ContainsKey("context") ?? false) && args["context"] is string;
 
@@ -160,9 +165,7 @@ namespace I18Next.Net.Plugins
                 finalKey = $"{finalKey}{pluralSuffix}";
                 possibleKeys.Push(finalKey);
             }
-
-            var translationTree = await ResolveTranslationTreeAsync(language, ns);
-
+            
             string result = null;
             // Iterate over the possible keys starting with most specific pluralkey (-> contextkey only) -> singularkey only
             while (possibleKeys.Count > 0)
