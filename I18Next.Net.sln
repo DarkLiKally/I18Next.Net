@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "I18Next.Net.AspNetCore", "s
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Example.WebApp", "examples\Example.WebApp\Example.WebApp.csproj", "{7A9BDD90-BC7A-4B7D-A3F0-42A83D04E6C3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "I18Next.Net.Abstractions", "src\I18Next.Net.Abstractions\I18Next.Net.Abstractions.csproj", "{42AB2562-8DA6-41E1-ABD5-152DDD622E6D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,5 +50,9 @@ Global
 		{7A9BDD90-BC7A-4B7D-A3F0-42A83D04E6C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7A9BDD90-BC7A-4B7D-A3F0-42A83D04E6C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7A9BDD90-BC7A-4B7D-A3F0-42A83D04E6C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42AB2562-8DA6-41E1-ABD5-152DDD622E6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42AB2562-8DA6-41E1-ABD5-152DDD622E6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42AB2562-8DA6-41E1-ABD5-152DDD622E6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42AB2562-8DA6-41E1-ABD5-152DDD622E6D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

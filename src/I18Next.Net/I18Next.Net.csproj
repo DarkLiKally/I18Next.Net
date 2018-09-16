@@ -12,4 +12,7 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\I18Next.Net.Abstractions\I18Next.Net.Abstractions.csproj" />
+  </ItemGroup>
 </Project>
