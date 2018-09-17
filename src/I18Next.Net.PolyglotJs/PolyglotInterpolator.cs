@@ -94,6 +94,8 @@ namespace I18Next.Net.PolyglotJs
             return false;
         }
 
+        public List<IFormatter> Formatters { get; } = new List<IFormatter>();
+
         /// <summary>
         ///     <para>
         ///         Takes a phrase string and transforms it by choosing the correct
@@ -167,14 +169,28 @@ namespace I18Next.Net.PolyglotJs
             foreach (Match match in matches)
             {
                 var expression = match.Groups[0].Value;
-                
+
                 if (args == null || !args.ContainsKey(expression))
                 {
                     result = result.ReplaceFirst(match.Value, expression);
                     continue;
                 }
 
-                result.ReplaceFirst(match.Value, args[expression].ToString());
+                var value = args[expression];
+                string resultValue = null;
+                string format = null;
+
+                if (args.ContainsKey(expression + "_format"))
+                    format = args[expression + "_format"].ToString();
+
+                foreach (var formatter in Formatters)
+                    if (formatter.CanFormat(value, format, language))
+                        resultValue = formatter.Format(value, format, language);
+
+                if (resultValue == null)
+                    resultValue = value.ToString();
+
+                result = result.ReplaceFirst(match.Value, resultValue);
             }
 
             return Task.FromResult(result);

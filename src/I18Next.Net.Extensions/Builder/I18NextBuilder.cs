@@ -39,6 +39,9 @@ namespace I18Next.Net.Extensions.Builder
             foreach (var postProcessor in _options.PostProcessors)
                 i18Next.PostProcessors.Add(postProcessor);
 
+            foreach (var formatter in _options.Formatters)
+                _options.Interpolator.Formatters.Add(formatter);
+
             foreach (var callback in _configureCallbacks)
                 callback?.Invoke(i18Next);
 
@@ -215,7 +218,7 @@ namespace I18Next.Net.Extensions.Builder
             return this;
         }
 
-        public I18NextBuilder UsePostprocessor(IPostProcessor postProcessor)
+        public I18NextBuilder AddPostProcessor(IPostProcessor postProcessor)
         {
             if (!_options.PostProcessors.Contains(postProcessor))
                 _options.PostProcessors.Add(postProcessor);
@@ -223,7 +226,7 @@ namespace I18Next.Net.Extensions.Builder
             return this;
         }
 
-        public I18NextBuilder UsePostprocessor<T>()
+        public I18NextBuilder AddPostProcessor<T>()
             where T : IPostProcessor
         {
             var postProcessor = Activator.CreateInstance<T>();
@@ -233,7 +236,7 @@ namespace I18Next.Net.Extensions.Builder
             return this;
         }
 
-        public I18NextBuilder UsePostprocessor<T>(Action<T> configure)
+        public I18NextBuilder AddPostProcessor<T>(Action<T> configure)
             where T : IPostProcessor
         {
             var postProcessor = Activator.CreateInstance<T>();
@@ -241,6 +244,36 @@ namespace I18Next.Net.Extensions.Builder
             configure?.Invoke(postProcessor);
 
             _options.PostProcessors.Add(postProcessor);
+
+            return this;
+        }
+
+        public I18NextBuilder AddFormatter(IFormatter postProcessor)
+        {
+            if (!_options.Formatters.Contains(postProcessor))
+                _options.Formatters.Add(postProcessor);
+
+            return this;
+        }
+
+        public I18NextBuilder AddFormatter<T>()
+            where T : IFormatter
+        {
+            var postProcessor = Activator.CreateInstance<T>();
+
+            _options.Formatters.Add(postProcessor);
+
+            return this;
+        }
+
+        public I18NextBuilder AddFormatter<T>(Action<T> configure)
+            where T : IFormatter
+        {
+            var postProcessor = Activator.CreateInstance<T>();
+
+            configure?.Invoke(postProcessor);
+
+            _options.Formatters.Add(postProcessor);
 
             return this;
         }

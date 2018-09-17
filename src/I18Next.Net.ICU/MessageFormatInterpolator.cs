@@ -9,8 +9,13 @@ namespace I18Next.Net.ICU
 {
     public class MessageFormatInterpolator : IInterpolator
     {
+        private readonly ConcurrentDictionary<string, MessageFormatter> _messageFormatters = new ConcurrentDictionary<string, MessageFormatter>();
         private readonly bool _useCache;
-        private readonly ConcurrentDictionary<string, MessageFormatter> _formatters = new ConcurrentDictionary<string, MessageFormatter>();
+
+        public MessageFormatInterpolator()
+            : this(true)
+        {
+        }
 
         public MessageFormatInterpolator(bool useCache)
         {
@@ -22,13 +27,14 @@ namespace I18Next.Net.ICU
             return false;
         }
 
+        public List<IFormatter> Formatters => throw new NotSupportedException("Formatters are not supported by the ICU message format interpolator.");
+
         public Task<string> InterpolateAsync(string source, string key, string language, IDictionary<string, object> args)
         {
             if (source == null)
                 return Task.FromResult((string) null);
 
-            if (!_formatters.TryGetValue(language, out var messageFormatter))
-                _formatters.TryAdd(language, messageFormatter = new MessageFormatter(_useCache, language));
+            var messageFormatter = EnsureMessageFormatter(language);
 
             return Task.FromResult(messageFormatter.FormatMessage(source, args));
         }
@@ -36,6 +42,21 @@ namespace I18Next.Net.ICU
         public Task<string> NestAsync(string source, string language, IDictionary<string, object> args, TranslateAsyncDelegate translateAsync)
         {
             throw new NotSupportedException("Nesting is not supported by the ICU message format interpolator.");
+        }
+
+        public void ConfigureMessageFormatter(string language, Action<MessageFormatter> formatter)
+        {
+            var messageFormatter = EnsureMessageFormatter(language);
+
+            formatter?.Invoke(messageFormatter);
+        }
+
+        private MessageFormatter EnsureMessageFormatter(string language)
+        {
+            if (!_messageFormatters.TryGetValue(language, out var messageFormatter))
+                _messageFormatters.TryAdd(language, messageFormatter = new MessageFormatter(_useCache, language));
+
+            return messageFormatter;
         }
     }
 }

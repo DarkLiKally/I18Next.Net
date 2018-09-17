@@ -12,5 +12,7 @@ namespace I18Next.Net.Plugins
         Task<string> InterpolateAsync(string source, string key, string language, IDictionary<string, object> args);
 
         Task<string> NestAsync(string source, string language, IDictionary<string, object> args, TranslateAsyncDelegate translateAsync);
+        
+        List<IFormatter> Formatters { get; }
     }
 }

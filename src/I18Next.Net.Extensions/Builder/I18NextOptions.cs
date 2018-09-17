@@ -24,5 +24,7 @@ namespace I18Next.Net.Extensions.Builder
         public ITranslator Translator { get; set; }
         
         public List<IPostProcessor> PostProcessors = new List<IPostProcessor>();
+        
+        public List<IFormatter> Formatters = new List<IFormatter>();
     }
 }
