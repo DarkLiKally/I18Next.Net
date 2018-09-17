@@ -68,6 +68,27 @@ namespace I18Next.Net.Plugins
             return await ExtendTranslationAsync(result, actualNamespace, key, language, args);
         }
 
+        private static bool CheckForSpecialArg(IDictionary<string, object> args, string key, params Type[] allowedTypes)
+        {
+            if (args == null)
+                return false;
+
+            if (!args.ContainsKey(key))
+                return false;
+
+            var value = args["count"];
+
+            for (var i = 0; i < allowedTypes.Length; i++)
+            {
+                var type = allowedTypes[i];
+
+                if (value.GetType() == type)
+                    return true;
+            }
+
+            return false;
+        }
+
         private async Task<string> ExtendTranslationAsync(string result, string ns, string key, string language, IDictionary<string, object> args)
         {
             IDictionary<string, object> replaceArgs;
@@ -132,9 +153,9 @@ namespace I18Next.Net.Plugins
 
             if (translationTree == null)
                 return null;
-            
-            var needsPluralHandling = (args?.ContainsKey("count") ?? false) && args["count"] is int && _pluralResolver.NeedsPlural(language);
-            var needsContextHandling = (args?.ContainsKey("context") ?? false) && args["context"] is string;
+
+            var needsPluralHandling = CheckForSpecialArg(args, "count", typeof(int), typeof(long)) && _pluralResolver.NeedsPlural(language);
+            var needsContextHandling = CheckForSpecialArg(args, "context", typeof(string));
 
             var finalKey = key;
             var possibleKeys = new Stack<string>();
@@ -143,7 +164,7 @@ namespace I18Next.Net.Plugins
 
             if (needsPluralHandling)
             {
-                var count = (int) args["count"];
+                var count = (int)Convert.ChangeType(args["count"], typeof(int));
                 pluralSuffix = _pluralResolver.GetPluralSuffix(language, count);
 
                 // Fallback for plural if context was not found
@@ -165,7 +186,7 @@ namespace I18Next.Net.Plugins
                 finalKey = $"{finalKey}{pluralSuffix}";
                 possibleKeys.Push(finalKey);
             }
-            
+
             string result = null;
             // Iterate over the possible keys starting with most specific pluralkey (-> contextkey only) -> singularkey only
             while (possibleKeys.Count > 0)
