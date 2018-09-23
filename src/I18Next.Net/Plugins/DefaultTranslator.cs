@@ -76,7 +76,7 @@ namespace I18Next.Net.Plugins
             if (!args.ContainsKey(key))
                 return false;
 
-            var value = args["count"];
+            var value = args[key];
 
             for (var i = 0; i < allowedTypes.Length; i++)
             {
