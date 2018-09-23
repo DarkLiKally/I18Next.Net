@@ -72,7 +72,7 @@ namespace I18Next.Net.Backends
 
         private static void PopulateTreeBuilder(SimpleIniParser iniReader, ITranslationTreeBuilder builder)
         {
-            foreach (var iniSection in iniReader.GetSections().Concat(new [] { "" }))
+            foreach (var iniSection in iniReader.GetSections().Concat(new[] { "" }))
             {
                 var section = iniSection;
 

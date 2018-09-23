@@ -22,8 +22,8 @@ namespace I18Next.Net.AspNetCore
             get
             {
                 if (name == null)
-                    throw new ArgumentNullException(nameof (name));
-                
+                    throw new ArgumentNullException(nameof(name));
+
                 return ToHtmlString(_localizer[name, arguments]);
             }
         }

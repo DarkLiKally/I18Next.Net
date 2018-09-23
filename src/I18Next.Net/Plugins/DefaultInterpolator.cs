@@ -26,6 +26,7 @@ namespace I18Next.Net.Plugins
 
         private static readonly Regex NestingRegex = new Regex($"{NestingPrefix}(.+?){NestingSuffix}");
 
+
         private List<IFormatter> _formatters;
 
         public IFormatter DefaultFormatter { get; set; } = new DefaultFormatter();
@@ -33,8 +34,6 @@ namespace I18Next.Net.Plugins
         public bool EscapeValues { get; set; } = true;
 
         public string FormatSeparator { get; set; } = ",";
-
-        public List<IFormatter> Formatters => _formatters ?? (_formatters = new List<IFormatter>());
 
         public int MaximumReplaces { get; set; } = 1000;
 
@@ -46,6 +45,8 @@ namespace I18Next.Net.Plugins
         {
             return UseFastNestingMatch ? source.Contains(NestingPrefixPlain) : NestingRegex.IsMatch(source);
         }
+
+        public List<IFormatter> Formatters => _formatters ?? (_formatters = new List<IFormatter>());
 
         public virtual Task<string> InterpolateAsync(string source, string key, string language, IDictionary<string, object> args)
         {
@@ -119,7 +120,7 @@ namespace I18Next.Net.Plugins
         {
             if (args == null)
                 return null;
-            
+
             if (key.IndexOf('.') < 0)
                 return args.TryGetValue(key, out var value) ? value : null;
 
@@ -159,7 +160,7 @@ namespace I18Next.Net.Plugins
         protected virtual string GetValueForExpression(string key, string language, IDictionary<string, object> args)
         {
             key = key.Trim();
-            
+
             if (key.IndexOf(FormatSeparator, StringComparison.Ordinal) < 0)
                 return GetValue(key, args)?.ToString();
 
@@ -242,7 +243,7 @@ namespace I18Next.Net.Plugins
             argsString = await InterpolateAsync(argsString, null, language, parentArgs);
             argsString = argsString.Replace('\'', '"');
 
-            IDictionary<string, object> args = (JObject.Parse(argsString)).ToObject<Dictionary<string, object>>();
+            IDictionary<string, object> args = JObject.Parse(argsString).ToObject<Dictionary<string, object>>();
 
             if (parentArgs != null)
                 args = parentArgs.MergeLeft(args);

@@ -12,6 +12,11 @@ namespace I18Next.Net
         private string _language;
 
         public I18NextNet(ITranslationBackend backend, ITranslator translator)
+            : this(backend, translator, null)
+        {
+        }
+
+        public I18NextNet(ITranslationBackend backend, ITranslator translator, ILanguageDetector languageDetector)
         {
             Backend = backend ?? throw new ArgumentNullException(nameof(backend));
             Translator = translator ?? throw new ArgumentNullException(nameof(translator));
@@ -19,8 +24,16 @@ namespace I18Next.Net
             Language = "en-US";
             DefaultNamespace = "translation";
             Logger = new TraceLogger();
-            LanguageDetector = new DefaultLanguageDetector(Language);
+            LanguageDetector = languageDetector ?? new DefaultLanguageDetector("en-US");
         }
+
+        public ILanguageDetector LanguageDetector { get; set; }
+
+        public ILogger Logger { get; set; }
+
+        public List<IPostProcessor> PostProcessors => Translator.PostProcessors;
+
+        public ITranslator Translator { get; }
 
         public ITranslationBackend Backend { get; }
 
@@ -46,13 +59,7 @@ namespace I18Next.Net
             }
         }
 
-        public ILanguageDetector LanguageDetector { get; set; }
-
-        public ILogger Logger { get; set; }
-
-        public List<IPostProcessor> PostProcessors => Translator.PostProcessors;
-
-        public ITranslator Translator { get; }
+        public event EventHandler<LanguageChangedEventArgs> LanguageChanged;
 
         public string T(string key, object args = null)
         {
@@ -88,8 +95,6 @@ namespace I18Next.Net
 
             return await Translator.TranslateAsync(language, defaultNamespace, key, argsDict);
         }
-
-        public event EventHandler<LanguageChangedEventArgs> LanguageChanged;
 
         public void UseDetectedLanguage()
         {

@@ -5,8 +5,8 @@ namespace I18Next.Net.Plugins
 {
     public interface ITranslator
     {
-        Task<string> TranslateAsync(string language, string defaultNamespace, string key, IDictionary<string, object> args);
-        
         List<IPostProcessor> PostProcessors { get; }
+
+        Task<string> TranslateAsync(string language, string defaultNamespace, string key, IDictionary<string, object> args);
     }
 }

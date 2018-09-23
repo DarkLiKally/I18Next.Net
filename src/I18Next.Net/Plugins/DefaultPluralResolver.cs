@@ -117,9 +117,9 @@ namespace I18Next.Net.Plugins
             }
         }
 
-        public bool UseLegacyMode { get; set; }
-
         public string PluralSeparator { get; set; } = "_";
+
+        public bool UseLegacyMode { get; set; }
 
         public bool UseSimplePluralSuffixIfPossible { get; set; } = true;
 

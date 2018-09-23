@@ -5,15 +5,21 @@ namespace I18Next.Net.Extensions
 {
     public class I18NextStringLocalizerFactory : IStringLocalizerFactory
     {
-        private readonly I18NextNet _i18NextNet;
+        private readonly II18Next _i18NextNet;
 
-        public I18NextStringLocalizerFactory(I18NextNet i18NextNet)
+        public I18NextStringLocalizerFactory(II18Next i18NextNet)
         {
             _i18NextNet = i18NextNet;
         }
-        
-        public IStringLocalizer Create(Type resourceSource) => new I18NextStringLocalizer(_i18NextNet);
 
-        public IStringLocalizer Create(string baseName, string location) => new I18NextStringLocalizer(_i18NextNet);
+        public IStringLocalizer Create(Type resourceSource)
+        {
+            return new I18NextStringLocalizer(_i18NextNet);
+        }
+
+        public IStringLocalizer Create(string baseName, string location)
+        {
+            return new I18NextStringLocalizer(_i18NextNet);
+        }
     }
 }

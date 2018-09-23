@@ -6,8 +6,8 @@ namespace I18Next.Net.TranslationTrees
     {
         string Namespace { get; set; }
 
-        string GetValue(string key, IDictionary<string, object> args);
-
         IDictionary<string, string> GetAllValues();
+
+        string GetValue(string key, IDictionary<string, object> args);
     }
 }

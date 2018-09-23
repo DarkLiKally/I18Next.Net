@@ -8,9 +8,9 @@ namespace I18Next.Net.AspNetCore
         public static I18NextBuilder IntegrateToAspNetCore(this I18NextBuilder builder)
         {
             builder
-                .UseLanguageDetector<ThreadLanguageDetector>()
-                .UseInterpolator<HtmlInterpolator>()
-                .Configure(i18N => i18N.DetectLanguageOnEachTranslation = true);
+                .AddLanguageDetector<ThreadLanguageDetector>()
+                .AddInterpolator<HtmlInterpolator>()
+                .Configure(o => o.DetectLanguageOnEachTranslation = true);
 
             return builder;
         }

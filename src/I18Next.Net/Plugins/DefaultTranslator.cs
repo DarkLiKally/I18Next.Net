@@ -164,7 +164,7 @@ namespace I18Next.Net.Plugins
 
             if (needsPluralHandling)
             {
-                var count = (int)Convert.ChangeType(args["count"], typeof(int));
+                var count = (int) Convert.ChangeType(args["count"], typeof(int));
                 pluralSuffix = _pluralResolver.GetPluralSuffix(language, count);
 
                 // Fallback for plural if context was not found

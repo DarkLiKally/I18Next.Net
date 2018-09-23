@@ -7,12 +7,12 @@ namespace I18Next.Net.Plugins
 
     public interface IInterpolator
     {
+        List<IFormatter> Formatters { get; }
+
         bool CanNest(string source);
 
         Task<string> InterpolateAsync(string source, string key, string language, IDictionary<string, object> args);
 
         Task<string> NestAsync(string source, string language, IDictionary<string, object> args, TranslateAsyncDelegate translateAsync);
-        
-        List<IFormatter> Formatters { get; }
     }
 }

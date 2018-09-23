@@ -1,308 +1,298 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using I18Next.Net.Backends;
 using I18Next.Net.Plugins;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Options;
 
 namespace I18Next.Net.Extensions.Builder
 {
     public class I18NextBuilder
     {
-        private readonly List<Action<I18NextNet>> _configureCallbacks = new List<Action<I18NextNet>>();
-
-        private readonly I18NextOptions _options = new I18NextOptions();
-
-        public IServiceCollection Services { get; }
-
         public I18NextBuilder(IServiceCollection services)
         {
             Services = services;
-        }
-        
-        public I18NextNet Build()
-        {
-            _options.Backend = _options.Backend ?? new JsonFileBackend();
-            _options.Logger = _options.Logger ?? new TraceLogger();
-            _options.LanguageDetector = _options.LanguageDetector ?? new DefaultLanguageDetector(_options.DefaultLanguage);
-            _options.PluralResolver = _options.PluralResolver ?? new DefaultPluralResolver();
-            _options.Interpolator = _options.Interpolator ?? new DefaultInterpolator();
-            _options.Translator = _options.Translator ?? new DefaultTranslator(_options.Backend, _options.Logger, _options.PluralResolver, _options.Interpolator);
-
-            var i18Next = new I18NextNet(_options.Backend, _options.Translator)
-            {
-                Language = _options.DefaultLanguage,
-                DefaultNamespace = _options.DefaultNamespace,
-                Logger = _options.Logger,
-                LanguageDetector = _options.LanguageDetector
-            };
-
-            foreach (var postProcessor in _options.PostProcessors)
-                i18Next.PostProcessors.Add(postProcessor);
-
-            foreach (var formatter in _options.Formatters)
-                _options.Interpolator.Formatters.Add(formatter);
-
-            foreach (var callback in _configureCallbacks)
-                callback?.Invoke(i18Next);
-
-            return i18Next;
+            Services.AddOptions<I18NextOptions>();
         }
 
-        public I18NextBuilder ConfigureOptions(Action<I18NextOptions> configure)
+        public IServiceCollection Services { get; }
+
+        public I18NextBuilder AddBackend(ITranslationBackend backend)
         {
-            configure(_options);
+            Services.AddSingleton(backend);
 
             return this;
         }
 
-        public I18NextBuilder Configure(Action<I18NextNet> configure)
+        public I18NextBuilder AddBackend<T>()
+            where T : class, ITranslationBackend
         {
-            _configureCallbacks.Add(configure);
+            Services.AddSingleton<ITranslationBackend, T>();
 
             return this;
         }
 
-        public I18NextBuilder UseBackend(ITranslationBackend backend)
+        public I18NextBuilder AddBackend<T>(Func<IServiceProvider, T> factory)
+            where T : class, ITranslationBackend
         {
-            _options.Backend = backend;
+            Services.AddSingleton<ITranslationBackend, T>(factory);
 
             return this;
         }
 
-        public I18NextBuilder UseBackend<T>()
-            where T : ITranslationBackend
+        public I18NextBuilder AddFormatter(IFormatter formatter)
         {
-            _options.Backend = Activator.CreateInstance<T>();
+            Services.AddSingleton(formatter);
 
             return this;
         }
 
-        public I18NextBuilder UseBackend<T>(Action<T> configure)
-            where T : ITranslationBackend
+        public I18NextBuilder AddFormatter<T>()
+            where T : class, IFormatter
         {
-            var instance = Activator.CreateInstance<T>();
-
-            configure?.Invoke(instance);
-
-            _options.Backend = instance;
+            Services.AddSingleton<IFormatter, T>();
 
             return this;
         }
 
-        public I18NextBuilder UseDefaultLanguage(string language)
+        public I18NextBuilder AddFormatter<T>(Func<IServiceProvider, T> factory)
+            where T : class, IFormatter
         {
-            _options.DefaultLanguage = language;
+            Services.AddSingleton<IFormatter, T>(factory);
 
             return this;
         }
 
-        public I18NextBuilder UseDefaultNamespace(string @namespace)
+        public I18NextBuilder AddInterpolator(IInterpolator interpolator)
         {
-            _options.DefaultNamespace = @namespace;
+            Services.AddSingleton(interpolator);
 
             return this;
         }
 
-        public I18NextBuilder UseInterpolator(IInterpolator interpolator)
+        public I18NextBuilder AddInterpolator<T>()
+            where T : class, IInterpolator
         {
-            _options.Interpolator = interpolator;
+            Services.AddSingleton<IInterpolator, T>();
 
             return this;
         }
 
-        public I18NextBuilder UseInterpolator<T>()
-            where T : IInterpolator
+        public I18NextBuilder AddInterpolator<T>(Func<IServiceProvider, T> factory)
+            where T : class, IInterpolator
         {
-            _options.Interpolator = Activator.CreateInstance<T>();
+            Services.AddSingleton<IInterpolator, T>(factory);
 
             return this;
         }
 
-        public I18NextBuilder UseInterpolator<T>(Action<T> configure)
-            where T : IInterpolator
+        public I18NextBuilder AddLanguageDetector(ILanguageDetector languageDetector)
         {
-            var instance = Activator.CreateInstance<T>();
-
-            configure?.Invoke(instance);
-
-            _options.Interpolator = instance;
+            Services.AddSingleton(languageDetector);
 
             return this;
         }
 
-        public I18NextBuilder UseLanguageDetector<T>()
-            where T : ILanguageDetector
+        public I18NextBuilder AddLanguageDetector<T>()
+            where T : class, ILanguageDetector
         {
-            _options.LanguageDetector = Activator.CreateInstance<T>();
+            Services.AddSingleton<ILanguageDetector, T>();
 
             return this;
         }
 
-        public I18NextBuilder UseLanguageDetector<T>(Action<T> configure)
-            where T : ILanguageDetector
+        public I18NextBuilder AddLanguageDetector<T>(Func<IServiceProvider, T> factory)
+            where T : class, ILanguageDetector
         {
-            var instance = Activator.CreateInstance<T>();
-
-            configure?.Invoke(instance);
-
-            _options.LanguageDetector = instance;
+            Services.AddSingleton<ILanguageDetector, T>(factory);
 
             return this;
         }
 
-        public I18NextBuilder UseLanguageDetector(ILanguageDetector languageDetector)
+        public I18NextBuilder AddLogger(ILogger backend)
         {
-            _options.LanguageDetector = languageDetector;
+            Services.AddSingleton(backend);
 
             return this;
         }
 
-        public I18NextBuilder UseLanguageDetector(ILogger logger)
+        public I18NextBuilder AddLogger<T>()
+            where T : class, ILogger
         {
-            _options.Logger = logger;
+            Services.AddSingleton<ILogger, T>();
 
             return this;
         }
 
-        public I18NextBuilder UseLogger<T>()
-            where T : ILogger
+        public I18NextBuilder AddLogger<T>(Func<IServiceProvider, T> factory)
+            where T : class, ILogger
         {
-            _options.Logger = Activator.CreateInstance<T>();
+            Services.AddSingleton<ILogger, T>(factory);
 
             return this;
         }
 
-        public I18NextBuilder UseLogger(ILogger logger)
+        public I18NextBuilder AddPluralResolver(IPluralResolver pluralResolver)
         {
-            _options.Logger = logger;
+            Services.AddSingleton(pluralResolver);
 
             return this;
         }
 
-        public I18NextBuilder UseLogger<T>(Action<T> configure)
-            where T : ILogger
+        public I18NextBuilder AddPluralResolver<T>()
+            where T : class, IPluralResolver
         {
-            var instance = Activator.CreateInstance<T>();
-
-            configure?.Invoke(instance);
-
-            _options.Logger = instance;
+            Services.AddSingleton<IPluralResolver, T>();
 
             return this;
         }
 
-        public I18NextBuilder UsePluralResolver(IPluralResolver backend)
+        public I18NextBuilder AddPluralResolver<T>(Func<IServiceProvider, T> factory)
+            where T : class, IPluralResolver
         {
-            _options.PluralResolver = backend;
-
-            return this;
-        }
-
-        public I18NextBuilder UsePluralResolver<T>()
-            where T : IPluralResolver
-        {
-            _options.PluralResolver = Activator.CreateInstance<T>();
-
-            return this;
-        }
-
-        public I18NextBuilder UsePluralResolver<T>(Action<T> configure)
-            where T : IPluralResolver
-        {
-            var instance = Activator.CreateInstance<T>();
-
-            configure?.Invoke(instance);
-
-            _options.PluralResolver = instance;
+            Services.AddSingleton<IPluralResolver, T>(factory);
 
             return this;
         }
 
         public I18NextBuilder AddPostProcessor(IPostProcessor postProcessor)
         {
-            if (!_options.PostProcessors.Contains(postProcessor))
-                _options.PostProcessors.Add(postProcessor);
+            Services.AddSingleton(postProcessor);
 
             return this;
         }
 
         public I18NextBuilder AddPostProcessor<T>()
-            where T : IPostProcessor
+            where T : class, IPostProcessor
         {
-            var postProcessor = Activator.CreateInstance<T>();
-
-            _options.PostProcessors.Add(postProcessor);
+            Services.AddSingleton<IPostProcessor, T>();
 
             return this;
         }
 
-        public I18NextBuilder AddPostProcessor<T>(Action<T> configure)
-            where T : IPostProcessor
+        public I18NextBuilder AddPostProcessor<T>(Func<IServiceProvider, T> factory)
+            where T : class, IPostProcessor
         {
-            var postProcessor = Activator.CreateInstance<T>();
-
-            configure?.Invoke(postProcessor);
-
-            _options.PostProcessors.Add(postProcessor);
+            Services.AddSingleton<IPostProcessor, T>(factory);
 
             return this;
         }
 
-        public I18NextBuilder AddFormatter(IFormatter postProcessor)
+        public I18NextBuilder AddTranslator<T>()
+            where T : class, ITranslator
         {
-            if (!_options.Formatters.Contains(postProcessor))
-                _options.Formatters.Add(postProcessor);
+            Services.AddSingleton<ITranslator, T>();
 
             return this;
         }
 
-        public I18NextBuilder AddFormatter<T>()
-            where T : IFormatter
+        public I18NextBuilder AddTranslator(ITranslator translator)
         {
-            var postProcessor = Activator.CreateInstance<T>();
-
-            _options.Formatters.Add(postProcessor);
+            Services.AddSingleton(translator);
 
             return this;
         }
 
-        public I18NextBuilder AddFormatter<T>(Action<T> configure)
-            where T : IFormatter
+        public I18NextBuilder AddTranslator<T>(Func<IServiceProvider, T> factory)
+            where T : class, ITranslator
         {
-            var postProcessor = Activator.CreateInstance<T>();
-
-            configure?.Invoke(postProcessor);
-
-            _options.Formatters.Add(postProcessor);
+            Services.AddSingleton<ITranslator, T>(factory);
 
             return this;
         }
 
-        public I18NextBuilder UseTranslator<T>()
-            where T : ITranslator
+        public void Build()
         {
-            _options.Translator = Activator.CreateInstance<T>();
+            AddSingletonIfNotPresent<ILogger, DefaultExtensionsLogger>();
+            AddSingletonIfNotPresent<IPluralResolver, DefaultPluralResolver>();
+            AddSingletonIfNotPresent<ILanguageDetector, DefaultLanguageDetector>(DefaultLanguageDetectorFactory);
+            AddSingletonIfNotPresent<ITranslationBackend, JsonFileBackend>();
+            AddSingletonIfNotPresent<ITranslator, DefaultTranslator>(DefaultTranslatorFactory);
+            AddSingletonIfNotPresent<IInterpolator, DefaultInterpolator>(DefaultInterpolatorFactory);
+
+            Services.AddSingleton<II18NextFactory, I18NextFactory>();
+            Services.AddSingleton(c => c.GetRequiredService<II18NextFactory>().CreateInstance());
+
+            Services.AddSingleton<IStringLocalizerFactory, I18NextStringLocalizerFactory>();
+            Services.AddTransient(typeof(IStringLocalizer<>), typeof(StringLocalizer<>));
+        }
+
+        public I18NextBuilder Configure(Action<I18NextOptions> configure)
+        {
+            Services.Configure<I18NextOptions>(options => configure?.Invoke(options));
 
             return this;
         }
 
-        public I18NextBuilder UseTranslator(ITranslator logger)
+        public I18NextBuilder UseDefaultLanguage(string language)
         {
-            _options.Translator = logger;
+            if (string.IsNullOrEmpty(language))
+                throw new ArgumentException("Language cannot be null or empty.", nameof(language));
+
+            Services.Configure<I18NextOptions>(options => options.DefaultLanguage = language);
 
             return this;
         }
 
-        public I18NextBuilder UseTranslator<T>(Action<T> configure)
-            where T : ITranslator
+        public I18NextBuilder UseDefaultNamespace(string @namespace)
         {
-            var instance = Activator.CreateInstance<T>();
+            if (string.IsNullOrEmpty(@namespace))
+                throw new ArgumentException("Namespace cannot be null or empty.", nameof(@namespace));
 
-            configure?.Invoke(instance);
-
-            _options.Translator = instance;
+            Services.Configure<I18NextOptions>(options => options.DefaultNamespace = @namespace);
 
             return this;
+        }
+
+        private void AddSingletonIfNotPresent<TService, TImplementation>()
+            where TImplementation : class, TService
+            where TService : class
+        {
+            if (Services.All(s => s.ServiceType != typeof(TService)))
+                Services.AddSingleton<TService, TImplementation>();
+        }
+
+        private void AddSingletonIfNotPresent<TService, TImplementation>(Func<IServiceProvider, TImplementation> factory)
+            where TImplementation : class, TService
+            where TService : class
+        {
+            if (Services.All(s => s.ServiceType != typeof(TService)))
+                Services.AddSingleton<TService, TImplementation>(factory);
+        }
+
+        private DefaultInterpolator DefaultInterpolatorFactory(IServiceProvider c)
+        {
+            var formatters = c.GetRequiredService<IEnumerable<IFormatter>>();
+
+            var instance = new DefaultInterpolator();
+
+            instance.Formatters.AddRange(formatters);
+
+            return instance;
+        }
+
+        private DefaultLanguageDetector DefaultLanguageDetectorFactory(IServiceProvider c)
+        {
+            var options = c.GetRequiredService<IOptions<I18NextOptions>>();
+
+            return new DefaultLanguageDetector(options.Value.DefaultLanguage);
+        }
+
+        private DefaultTranslator DefaultTranslatorFactory(IServiceProvider c)
+        {
+            var backend = c.GetRequiredService<ITranslationBackend>();
+            var logger = c.GetRequiredService<ILogger>();
+            var pluralResolver = c.GetRequiredService<IPluralResolver>();
+            var interpolator = c.GetRequiredService<IInterpolator>();
+            var postProcessors = c.GetRequiredService<IEnumerable<IPostProcessor>>();
+
+            var instance = new DefaultTranslator(backend, logger, pluralResolver, interpolator);
+
+            instance.PostProcessors.AddRange(postProcessors);
+
+            return instance;
         }
     }
 }

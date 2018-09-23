@@ -13,13 +13,13 @@ namespace I18Next.Net.AspNetCore
 
             if (builder.Services.All(x => x.ServiceType != viewLocalizerType))
                 builder.AddViewLocalization();
-            
+
             var factoryType = typeof(IHtmlLocalizerFactory);
 
             var factory = builder.Services.FirstOrDefault(x => x.ServiceType == factoryType);
-            if(factory != null)
+            if (factory != null)
                 builder.Services.Remove(factory);
-            
+
             builder.Services.TryAdd(ServiceDescriptor.Singleton<IHtmlLocalizerFactory, I18NextHtmlLocalizerFactory>());
 
             return builder;

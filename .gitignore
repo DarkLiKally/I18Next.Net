@@ -619,19 +619,36 @@ sysinfo.txt
 
 # End of https://www.gitignore.io/api/cake,node,unity,intellij,aspnetcore,sublimetext,visualstudio,visualstudiocode
 
+# Common IntelliJ Platform excludes
 
+# User specific
+**/.idea/**/workspace.xml
+**/.idea/**/tasks.xml
+**/.idea/shelf/*
+**/.idea/dictionaries
 
+# Sensitive or high-churn files
+**/.idea/**/dataSources/
+**/.idea/**/dataSources.ids
+**/.idea/**/dataSources.xml
+**/.idea/**/dataSources.local.xml
+**/.idea/**/sqlDataSources.xml
+**/.idea/**/dynamic.xml
 
-# Rasterkatalog
+# Rider
+# Rider auto-generates .iml files, and contentModel.xml
+**/.idea/**/*.iml
+**/.idea/**/contentModel.xml
+**/.idea/**/modules.xml
 
-.idea/**/httpRequests
-.idea/**/.name
-.idea/**/codeStyles/*
-.idea/**/contentModel.xml
-.idea/**/indexLayout.xml
-.idea/**/modules.xml
-.idea/**/other.xml
-.idea/**/vcs.xml
-.idea/**/riderModule.iml
+*.suo
+*.user
+.vs/
+[Bb]in/
+[Oo]bj/
+_UpgradeReport_Files/
+[Pp]ackages/
 
-# End Rasterkatalog
+Thumbs.db
+Desktop.ini
+.DS_Store
