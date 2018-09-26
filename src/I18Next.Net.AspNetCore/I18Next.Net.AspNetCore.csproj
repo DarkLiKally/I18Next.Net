@@ -6,7 +6,7 @@
         <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
         <RepositoryUrl>https://github.com/DarkLiKally/I18Next.Net</RepositoryUrl>
         <PackageProjectUrl>https://github.com/DarkLiKally/I18Next.Net</PackageProjectUrl>
-        <Version>0.5.1</Version>
+        <Version>0.6.0</Version>
         <Authors>DarkLiKally</Authors>
         <RepositoryType>git</RepositoryType>
     </PropertyGroup>

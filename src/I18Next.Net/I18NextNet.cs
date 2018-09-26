@@ -31,8 +31,6 @@ namespace I18Next.Net
 
         public ILogger Logger { get; set; }
 
-        public List<IPostProcessor> PostProcessors => Translator.PostProcessors;
-
         public ITranslator Translator { get; }
 
         public ITranslationBackend Backend { get; }

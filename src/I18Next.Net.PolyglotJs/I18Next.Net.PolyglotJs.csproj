@@ -8,7 +8,7 @@
     <PackageProjectUrl>https://github.com/DarkLiKally/I18Next.Net</PackageProjectUrl>
     <RepositoryUrl>https://github.com/DarkLiKally/I18Next.Net</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <Version>0.5.1</Version>
+    <Version>0.6.0</Version>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\I18Next.Net\I18Next.Net.csproj" />
