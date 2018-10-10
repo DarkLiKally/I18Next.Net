@@ -4,6 +4,7 @@ using System.Linq;
 using I18Next.Net.Backends;
 using I18Next.Net.Plugins;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
 
@@ -205,18 +206,19 @@ namespace I18Next.Net.Extensions.Builder
 
         public void Build()
         {
-            AddSingletonIfNotPresent<ILogger, DefaultExtensionsLogger>();
+            AddSingletonIfNotPresent(DefaultLoggerFactory);
             AddSingletonIfNotPresent<IPluralResolver, DefaultPluralResolver>();
-            AddSingletonIfNotPresent<ILanguageDetector, DefaultLanguageDetector>(DefaultLanguageDetectorFactory);
+            AddSingletonIfNotPresent<ILanguageDetector>(DefaultLanguageDetectorFactory);
             AddSingletonIfNotPresent<ITranslationBackend, JsonFileBackend>();
-            AddSingletonIfNotPresent<ITranslator, DefaultTranslator>(DefaultTranslatorFactory);
-            AddSingletonIfNotPresent<IInterpolator, DefaultInterpolator>(DefaultInterpolatorFactory);
+            AddSingletonIfNotPresent<ITranslator>(DefaultTranslatorFactory);
+            AddSingletonIfNotPresent<IInterpolator>(DefaultInterpolatorFactory);
 
             Services.AddSingleton<II18NextFactory, I18NextFactory>();
             Services.AddSingleton(c => c.GetRequiredService<II18NextFactory>().CreateInstance());
 
             Services.AddSingleton<IStringLocalizerFactory, I18NextStringLocalizerFactory>();
             Services.AddTransient(typeof(IStringLocalizer<>), typeof(StringLocalizer<>));
+            Services.TryAddTransient(typeof(IStringLocalizer), c => c.GetRequiredService<IStringLocalizerFactory>().Create(null));
         }
 
         public I18NextBuilder Configure(Action<I18NextOptions> configure)
@@ -254,12 +256,11 @@ namespace I18Next.Net.Extensions.Builder
                 Services.AddSingleton<TService, TImplementation>();
         }
 
-        private void AddSingletonIfNotPresent<TService, TImplementation>(Func<IServiceProvider, TImplementation> factory)
-            where TImplementation : class, TService
+        private void AddSingletonIfNotPresent<TService>(Func<IServiceProvider, TService> factory)
             where TService : class
         {
             if (Services.All(s => s.ServiceType != typeof(TService)))
-                Services.AddSingleton<TService, TImplementation>(factory);
+                Services.AddSingleton(factory);
         }
 
         private DefaultInterpolator DefaultInterpolatorFactory(IServiceProvider c)
@@ -278,6 +279,16 @@ namespace I18Next.Net.Extensions.Builder
             var options = c.GetRequiredService<IOptions<I18NextOptions>>();
 
             return new DefaultLanguageDetector(options.Value.DefaultLanguage);
+        }
+
+        private ILogger DefaultLoggerFactory(IServiceProvider c)
+        {
+            var msLogger = c.GetService<Microsoft.Extensions.Logging.ILogger>();
+
+            if (msLogger != null)
+                return new DefaultExtensionsLogger(msLogger);
+
+            return new TraceLogger();
         }
 
         private DefaultTranslator DefaultTranslatorFactory(IServiceProvider c)

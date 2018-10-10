@@ -19,7 +19,7 @@ namespace I18Next.Net.Backends
             treeKey = BackendUtilities.GetLanguagePart(language) + "_" + @namespace;
 
             if (!_namespaces.TryGetValue(treeKey, out tree))
-                return null;
+                return Task.FromResult(default(ITranslationTree));
 
             return Task.FromResult(tree as ITranslationTree);
         }

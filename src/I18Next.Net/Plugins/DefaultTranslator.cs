@@ -26,6 +26,22 @@ namespace I18Next.Net.Plugins
             _interpolator = interpolator;
         }
 
+        public DefaultTranslator(ITranslationBackend backend)
+        {
+            _backend = backend;
+            _logger = new TraceLogger();
+            _pluralResolver = new DefaultPluralResolver();
+            _interpolator = new DefaultInterpolator();
+        }
+
+        public DefaultTranslator(ITranslationBackend backend, IInterpolator interpolator)
+        {
+            _backend = backend;
+            _logger = new TraceLogger();
+            _pluralResolver = new DefaultPluralResolver();
+            _interpolator = interpolator;
+        }
+
         public bool AllowInterpolation { get; set; } = true;
 
         public bool AllowNesting { get; set; } = true;
