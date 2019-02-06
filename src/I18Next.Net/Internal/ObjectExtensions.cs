@@ -10,12 +10,15 @@ namespace I18Next.Net.Internal
     {
         private static readonly ConcurrentDictionary<Type, PropertyInfo[]> ReflectionCache = new ConcurrentDictionary<Type, PropertyInfo[]>();
 
-        public static Dictionary<string, object> ObjectToDictionary(object value)
+        public static IDictionary<string, object> ObjectToDictionary(object value)
         {
             var dictionary = new Dictionary<string, object>();
 
             if (value == null)
                 return dictionary;
+
+            if (value is IDictionary<string, object>)
+                return value as IDictionary<string, object>;
 
             foreach (var property in GetProperties(value))
                 dictionary.Add(property.Name, property.GetValue(value));
@@ -23,7 +26,7 @@ namespace I18Next.Net.Internal
             return dictionary;
         }
 
-        public static Dictionary<string, object> ToDictionary(this object value)
+        public static IDictionary<string, object> ToDictionary(this object value)
         {
             return ObjectToDictionary(value);
         }
