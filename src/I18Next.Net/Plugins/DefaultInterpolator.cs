@@ -135,7 +135,7 @@ namespace I18Next.Net.Plugins
 
                 var subKey = keyParts[i];
 
-                if (lastObject is Dictionary<string, object> dict)
+                if (lastObject is IDictionary<string, object> dict)
                 {
                     if (!dict.TryGetValue(subKey, out lastObject))
                         return null;
