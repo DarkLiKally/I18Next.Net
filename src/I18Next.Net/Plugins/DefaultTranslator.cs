@@ -52,7 +52,7 @@ namespace I18Next.Net.Plugins
 
         public List<IPostProcessor> PostProcessors { get; } = new List<IPostProcessor>();
 
-        public virtual async Task<string> TranslateAsync(string language, string defaultNamespace, string key, IDictionary<string, object> args)
+        public virtual async Task<string> TranslateAsync(string language, string defaultNamespace, string key, IDictionary<string, object> args, IList<string> fallbackLanguages)
         {
             if (string.IsNullOrWhiteSpace(language))
                 throw new ArgumentNullException(nameof(language));
@@ -76,12 +76,12 @@ namespace I18Next.Net.Plugins
             if (language.ToLower() == "cimode")
                 return $"{actualNamespace}:{key}";
 
-            var result = await ResolveTranslationAsync(language, actualNamespace, key, args);
+            var result = await ResolveTranslationAsync(language, actualNamespace, key, args, fallbackLanguages);
 
             if (result == null)
                 return key;
 
-            return await ExtendTranslationAsync(result, actualNamespace, key, language, args);
+            return await ExtendTranslationAsync(result, actualNamespace, key, language, args, fallbackLanguages);
         }
 
         private static bool CheckForSpecialArg(IDictionary<string, object> args, string key, params Type[] allowedTypes)
@@ -105,7 +105,7 @@ namespace I18Next.Net.Plugins
             return false;
         }
 
-        private async Task<string> ExtendTranslationAsync(string result, string ns, string key, string language, IDictionary<string, object> args)
+        private async Task<string> ExtendTranslationAsync(string result, string ns, string key, string language, IDictionary<string, object> args, IList<string> fallbackLanguages)
         {
             IDictionary<string, object> replaceArgs;
 
@@ -118,7 +118,7 @@ namespace I18Next.Net.Plugins
                 result = await _interpolator.InterpolateAsync(result, key, language, replaceArgs);
 
             if (AllowNesting && (!(args?.ContainsKey("nest") ?? false) || args["nest"] is bool nest && nest) && _interpolator.CanNest(result))
-                result = await _interpolator.NestAsync(result, language, replaceArgs, (lang2, key2, args2) => TranslateAsync(lang2, ns, key2, args2));
+                result = await _interpolator.NestAsync(result, language, replaceArgs, (lang2, key2, args2) => TranslateAsync(lang2, ns, key2, args2, fallbackLanguages));
 
             if (AllowPostprocessing && PostProcessors.Count > 0)
                 result = HandlePostProcessing(result, key, args);
@@ -163,12 +163,29 @@ namespace I18Next.Net.Plugins
             return result;
         }
 
-        private async Task<string> ResolveTranslationAsync(string language, string ns, string key, IDictionary<string, object> args)
+        private async Task<string> ResolveTranslationAsync(string language, string ns, string key, IDictionary<string, object> args, IList<string> fallbackLanguages)
         {
             var translationTree = await ResolveTranslationTreeAsync(language, ns);
 
-            if (translationTree == null)
+            async Task<string> ResolveTranslationFromFallbackLanguages()
+            {
+                if (fallbackLanguages?.Count > 0)
+                {
+                    foreach (string fallbackLanguage in fallbackLanguages)
+                    {
+                        var fallbackResult = await ResolveTranslationAsync(fallbackLanguage, ns, key, args, null);
+                        if (fallbackResult != null)
+                        {
+                            return fallbackResult;
+                        }
+                    }
+                }
                 return null;
+            }
+
+
+            if (translationTree == null)
+                return await ResolveTranslationFromFallbackLanguages();
 
             var needsPluralHandling = CheckForSpecialArg(args, "count", typeof(int), typeof(long)) && _pluralResolver.NeedsPlural(language);
             var needsContextHandling = CheckForSpecialArg(args, "context", typeof(string));
@@ -180,7 +197,7 @@ namespace I18Next.Net.Plugins
 
             if (needsPluralHandling)
             {
-                var count = (int) Convert.ChangeType(args["count"], typeof(int));
+                var count = (int)Convert.ChangeType(args["count"], typeof(int));
                 pluralSuffix = _pluralResolver.GetPluralSuffix(language, count);
 
                 // Fallback for plural if context was not found
@@ -191,7 +208,7 @@ namespace I18Next.Net.Plugins
             // Get key for context if needed
             if (needsContextHandling)
             {
-                var context = (string) args["context"];
+                var context = (string)args["context"];
                 finalKey = $"{finalKey}{ContextSeparator}{context}";
                 possibleKeys.Push(finalKey);
             }
@@ -213,6 +230,9 @@ namespace I18Next.Net.Plugins
                 if (result != null)
                     break;
             }
+
+            if (result == null)
+                result = await ResolveTranslationFromFallbackLanguages();
 
             return result;
         }

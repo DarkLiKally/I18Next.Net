@@ -37,6 +37,8 @@ namespace I18Next.Net
 
         public string DefaultNamespace { get; set; }
 
+        public IList<string> FallbackLanguages { get; private set; } = new string[] { };
+
         public bool DetectLanguageOnEachTranslation { get; set; }
 
         public string Language
@@ -91,12 +93,17 @@ namespace I18Next.Net
 
             var argsDict = args.ToDictionary();
 
-            return await Translator.TranslateAsync(language, defaultNamespace, key, argsDict);
+            return await Translator.TranslateAsync(language, defaultNamespace, key, argsDict, FallbackLanguages);
         }
 
         public void UseDetectedLanguage()
         {
             Language = LanguageDetector.GetLanguage();
+        }
+
+        public void SetFallbackLanguage(params string[] languages)
+        {
+            FallbackLanguages = languages;
         }
 
         private void OnLanguageChanged(LanguageChangedEventArgs e)

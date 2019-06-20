@@ -24,7 +24,10 @@ namespace Example.ConsoleApp.NetFramework
             Console.WriteLine("German translation:");
             i18next.Language = "de";
             Console.WriteLine(i18next.T("exampleKey"));
-            
+
+            i18next.SetFallbackLanguage("en");
+            Console.WriteLine(i18next.T("exampleKey2")); // should output "My English text." because of fallback language
+
             Console.ReadKey();
         }
 
@@ -33,6 +36,7 @@ namespace Example.ConsoleApp.NetFramework
             var backend = new InMemoryBackend();
             
             backend.AddTranslation("en", "translation", "exampleKey", "My English text.");
+            backend.AddTranslation("en", "translation", "exampleKey2", "My English fallback.");
             backend.AddTranslation("de", "translation", "exampleKey", "Mein deutscher text.");
 
             _backend = backend;
