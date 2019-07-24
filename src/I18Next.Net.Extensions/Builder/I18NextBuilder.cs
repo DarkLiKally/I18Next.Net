@@ -238,6 +238,18 @@ namespace I18Next.Net.Extensions.Builder
             return this;
         }
 
+        public I18NextBuilder UseFallbackLanguage(params string[] languages)
+        {
+            if (languages.Length == 0)
+                throw new ArgumentException("Please supply at least one fallback language", nameof(languages));
+            if (languages.Any(string.IsNullOrEmpty))
+                throw new ArgumentException("None of fallback languages can be null or empty.", nameof(languages));
+
+            Services.Configure<I18NextOptions>(options => options.FallbackLanguages = languages);
+
+            return this;
+        }
+
         public I18NextBuilder UseDefaultNamespace(string @namespace)
         {
             if (string.IsNullOrEmpty(@namespace))

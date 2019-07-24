@@ -29,6 +29,7 @@ namespace Example.ConsoleApp.NetCore
             var backend = new InMemoryBackend();
             
             backend.AddTranslation("en", "translation", "exampleKey", "My English text.");
+            backend.AddTranslation("en", "translation", "exampleKey2", "My English fallback.");
             backend.AddTranslation("de", "translation", "exampleKey", "Mein deutscher text.");
 
             _backend = backend;
@@ -60,7 +61,7 @@ namespace Example.ConsoleApp.NetCore
             var services = new ServiceCollection();
 
             // Register I18Next.Net
-            services.AddI18NextLocalization(builder => builder.AddBackend(_backend));
+            services.AddI18NextLocalization(builder => builder.AddBackend(_backend).UseFallbackLanguage("en"));
             
             using(var serviceProvider = services.BuildServiceProvider())
             using (var scope = serviceProvider.CreateScope())
@@ -106,7 +107,8 @@ namespace Example.ConsoleApp.NetCore
                 Console.WriteLine("German translation:");
                 i18next.Language = "de";
                 Console.WriteLine(localizerGeneric["exampleKey"]);
-                
+                Console.WriteLine(localizerGeneric["exampleKey2"]);
+
                 Console.WriteLine();
             }
         }
