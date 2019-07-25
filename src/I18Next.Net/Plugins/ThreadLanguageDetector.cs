@@ -18,7 +18,12 @@ namespace I18Next.Net.Plugins
 
         public string GetLanguage()
         {
-            return Thread.CurrentThread.CurrentCulture.IetfLanguageTag;
+            var languageTag = Thread.CurrentThread.CurrentCulture.IetfLanguageTag;
+            if (string.IsNullOrEmpty(languageTag))
+            {
+                return FallbackLanguage;
+            }
+            return languageTag;
         }
     }
 }
