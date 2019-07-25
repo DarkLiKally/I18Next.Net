@@ -33,7 +33,7 @@ namespace I18Next.Net.Extensions
                 Logger = _logger,
                 DetectLanguageOnEachTranslation = _options.Value.DetectLanguageOnEachTranslation,
             };
-            instance.SetFallbackLanguage(_options.Value.FallbackLanguages.ToArray());
+            instance.SetFallbackLanguages(_options.Value.FallbackLanguages.ToArray());
 
             return instance;
         }

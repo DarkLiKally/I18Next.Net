@@ -15,18 +15,18 @@ namespace Example.ConsoleApp.NetFramework
             
             var translator = new DefaultTranslator(_backend);
             
-            var i18next = new I18NextNet(_backend, translator);
+            var i18Next = new I18NextNet(_backend, translator);
 
             Console.WriteLine("English translation:");
-            i18next.Language = "en";
-            Console.WriteLine(i18next.T("exampleKey"));
+            i18Next.Language = "en";
+            Console.WriteLine(i18Next.T("exampleKey"));
             
             Console.WriteLine("German translation:");
-            i18next.Language = "de";
-            Console.WriteLine(i18next.T("exampleKey"));
+            i18Next.Language = "de";
+            Console.WriteLine(i18Next.T("exampleKey"));
 
-            i18next.SetFallbackLanguage("en");
-            Console.WriteLine(i18next.T("exampleKey2")); // should output "My English text." because of fallback language
+            i18Next.SetFallbackLanguages("en");
+            Console.WriteLine(i18Next.T("exampleKey2")); // should output "My English text." because of fallback language
 
             Console.ReadKey();
         }

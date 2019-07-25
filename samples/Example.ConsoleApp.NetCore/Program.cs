@@ -1,5 +1,4 @@
-﻿using System;
-using I18Next.Net;
+﻿using I18Next.Net;
 using I18Next.Net.Backends;
 using I18Next.Net.Extensions;
 using I18Next.Net.Plugins;
@@ -41,15 +40,15 @@ namespace Example.ConsoleApp.NetCore
 
             var translator = new DefaultTranslator(_backend);
             
-            var i18next = new I18NextNet(_backend, translator);
+            var i18Next = new I18NextNet(_backend, translator);
 
             Console.WriteLine("English translation:");
-            i18next.Language = "en";
-            Console.WriteLine(i18next.T("exampleKey"));
+            i18Next.Language = "en";
+            Console.WriteLine(i18Next.T("exampleKey"));
             
             Console.WriteLine("German translation:");
-            i18next.Language = "de";
-            Console.WriteLine(i18next.T("exampleKey"));
+            i18Next.Language = "de";
+            Console.WriteLine(i18Next.T("exampleKey"));
             
             Console.WriteLine();
         }
@@ -70,15 +69,15 @@ namespace Example.ConsoleApp.NetCore
 
                 Console.WriteLine("The first example uses the II18Next interface for direct access to I18Next");
                 
-                var i18next = scopeProvider.GetService<II18Next>();
+                var i18Next = scopeProvider.GetService<II18Next>();
 
                 Console.WriteLine("English translation:");
-                i18next.Language = "en";
-                Console.WriteLine(i18next.T("exampleKey"));
+                i18Next.Language = "en";
+                Console.WriteLine(i18Next.T("exampleKey"));
             
                 Console.WriteLine("German translation:");
-                i18next.Language = "de";
-                Console.WriteLine(i18next.T("exampleKey"));
+                i18Next.Language = "de";
+                Console.WriteLine(i18Next.T("exampleKey"));
                 
                 
                 Console.WriteLine();
@@ -87,11 +86,11 @@ namespace Example.ConsoleApp.NetCore
                 var localizer = scopeProvider.GetService<IStringLocalizer>();
 
                 Console.WriteLine("English translation:");
-                i18next.Language = "en";
+                i18Next.Language = "en";
                 Console.WriteLine(localizer["exampleKey"]);
             
                 Console.WriteLine("German translation:");
-                i18next.Language = "de";
+                i18Next.Language = "de";
                 Console.WriteLine(localizer["exampleKey"]);
                 
                 
@@ -101,11 +100,11 @@ namespace Example.ConsoleApp.NetCore
                 var localizerGeneric = scopeProvider.GetService<IStringLocalizer<Program>>();
 
                 Console.WriteLine("English translation:");
-                i18next.Language = "en";
+                i18Next.Language = "en";
                 Console.WriteLine(localizerGeneric["exampleKey"]);
             
                 Console.WriteLine("German translation:");
-                i18next.Language = "de";
+                i18Next.Language = "de";
                 Console.WriteLine(localizerGeneric["exampleKey"]);
                 Console.WriteLine(localizerGeneric["exampleKey2"]);
 

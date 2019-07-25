@@ -1,4 +1,3 @@
-using System;
 using I18Next.Net.Backends;
 using I18Next.Net.Plugins;
 using NUnit.Framework;
@@ -9,7 +8,7 @@ namespace I18Next.Net.Tests
     public class I18NextFixture
     {
         private InMemoryBackend _backend;
-        private I18NextNet _i18next;
+        private I18NextNet _i18Next;
 
         [SetUp]
         public void Setup()
@@ -17,7 +16,7 @@ namespace I18Next.Net.Tests
             SetupBackend();
 
             var translator = new DefaultTranslator(_backend);
-            _i18next = new I18NextNet(_backend, translator);
+            _i18Next = new I18NextNet(_backend, translator);
 
         }
         private void SetupBackend()
@@ -34,38 +33,38 @@ namespace I18Next.Net.Tests
         [Test]
         public void English()
         {
-            _i18next.Language = "en";
-            Assert.AreEqual("My English text.", _i18next.T("exampleKey"));
+            _i18Next.Language = "en";
+            Assert.AreEqual("My English text.", _i18Next.T("exampleKey"));
         }
 
         [Test]
         public void German()
         {
-            _i18next.Language = "de";
-            Assert.AreEqual("Mein deutscher text.", _i18next.T("exampleKey"));
+            _i18Next.Language = "de";
+            Assert.AreEqual("Mein deutscher text.", _i18Next.T("exampleKey"));
         }
 
         [Test]
         public void NoFallbackLanguage_MissingTranslation_ReturnsKey()
         {
-            _i18next.Language = "de";
-            Assert.AreEqual("exampleKey2", _i18next.T("exampleKey2"));
+            _i18Next.Language = "de";
+            Assert.AreEqual("exampleKey2", _i18Next.T("exampleKey2"));
         }
 
         [Test]
         public void FallbackLanguageIsSet_MissingTranslation_ReturnsFallback()
         {
-            _i18next.Language = "de";
-            _i18next.SetFallbackLanguage("en");
-            Assert.AreEqual("My English fallback.", _i18next.T("exampleKey2"));
+            _i18Next.Language = "de";
+            _i18Next.SetFallbackLanguages("en");
+            Assert.AreEqual("My English fallback.", _i18Next.T("exampleKey2"));
         }
 
         [Test]
         public void MissingLanguage_ReturnsFallback()
         {
-            _i18next.Language = "jp";
-            _i18next.SetFallbackLanguage("en");
-            Assert.AreEqual("My English fallback.", _i18next.T("exampleKey2"));
+            _i18Next.Language = "jp";
+            _i18Next.SetFallbackLanguages("en");
+            Assert.AreEqual("My English fallback.", _i18Next.T("exampleKey2"));
         }
     }
 }

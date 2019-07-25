@@ -20,7 +20,9 @@ namespace I18Next.Net.Formatters
 
             var cultureInfo = CultureInfo.GetCultureInfo(language);
 
-            return string.Format(cultureInfo, "{0:" + format + "}", value);
+            var formatString = $"{{0:{format}}}";
+            
+            return string.Format(cultureInfo, formatString, value);
         }
     }
 }

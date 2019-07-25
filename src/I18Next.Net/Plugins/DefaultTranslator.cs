@@ -50,16 +50,18 @@ namespace I18Next.Net.Plugins
 
         public string ContextSeparator { get; set; } = "_";
 
+        public event EventHandler<MissingKeyEventArgs> MissingKey;
+
         public List<IPostProcessor> PostProcessors { get; } = new List<IPostProcessor>();
 
-        public virtual async Task<string> TranslateAsync(string language, string defaultNamespace, string key, IDictionary<string, object> args, IList<string> fallbackLanguages)
+        public virtual async Task<string> TranslateAsync(string language, string key, IDictionary<string, object> args, TranslationOptions options)
         {
             if (string.IsNullOrWhiteSpace(language))
                 throw new ArgumentNullException(nameof(language));
-            if (string.IsNullOrWhiteSpace(defaultNamespace))
-                throw new ArgumentNullException(nameof(defaultNamespace));
             if (string.IsNullOrWhiteSpace(key))
                 throw new ArgumentNullException(nameof(key));
+            if (options == null)
+                throw new ArgumentNullException(nameof(options));
 
             string actualNamespace;
 
@@ -70,18 +72,18 @@ namespace I18Next.Net.Plugins
             }
             else
             {
-                actualNamespace = defaultNamespace;
+                actualNamespace = options.DefaultNamespace;
             }
 
             if (language.ToLower() == "cimode")
                 return $"{actualNamespace}:{key}";
 
-            var result = await ResolveTranslationAsync(language, actualNamespace, key, args, fallbackLanguages);
+            var result = await ResolveTranslationAsync(language, actualNamespace, key, args, options);
 
             if (result == null)
                 return key;
 
-            return await ExtendTranslationAsync(result, actualNamespace, key, language, args, fallbackLanguages);
+            return await ExtendTranslationAsync(result, key, language, args, options);
         }
 
         private static bool CheckForSpecialArg(IDictionary<string, object> args, string key, params Type[] allowedTypes)
@@ -105,7 +107,8 @@ namespace I18Next.Net.Plugins
             return false;
         }
 
-        private async Task<string> ExtendTranslationAsync(string result, string ns, string key, string language, IDictionary<string, object> args, IList<string> fallbackLanguages)
+        private async Task<string> ExtendTranslationAsync(string result, string key, string language, IDictionary<string, object> args,
+            TranslationOptions options)
         {
             IDictionary<string, object> replaceArgs;
 
@@ -118,7 +121,8 @@ namespace I18Next.Net.Plugins
                 result = await _interpolator.InterpolateAsync(result, key, language, replaceArgs);
 
             if (AllowNesting && (!(args?.ContainsKey("nest") ?? false) || args["nest"] is bool nest && nest) && _interpolator.CanNest(result))
-                result = await _interpolator.NestAsync(result, language, replaceArgs, (lang2, key2, args2) => TranslateAsync(lang2, ns, key2, args2, fallbackLanguages));
+                result = await _interpolator.NestAsync(result, language, replaceArgs,
+                    (lang2, key2, args2) => TranslateAsync(lang2, key2, args2, options));
 
             if (AllowPostprocessing && PostProcessors.Count > 0)
                 result = HandlePostProcessing(result, key, args);
@@ -163,76 +167,106 @@ namespace I18Next.Net.Plugins
             return result;
         }
 
-        private async Task<string> ResolveTranslationAsync(string language, string ns, string key, IDictionary<string, object> args, IList<string> fallbackLanguages)
+        private async Task<string> GetValueForFallbackAsync(string[] fallbackLanguages, string ns, string key, IDictionary<string, object> args)
         {
-            var translationTree = await ResolveTranslationTreeAsync(language, ns);
-
-            async Task<string> ResolveTranslationFromFallbackLanguages()
+            foreach (var fallbackLanguage in fallbackLanguages)
             {
-                if (fallbackLanguages?.Count > 0)
-                {
-                    foreach (string fallbackLanguage in fallbackLanguages)
-                    {
-                        var fallbackResult = await ResolveTranslationAsync(fallbackLanguage, ns, key, args, null);
-                        if (fallbackResult != null)
-                        {
-                            return fallbackResult;
-                        }
-                    }
-                }
-                return null;
+                var translationTree = await ResolveTranslationTreeAsync(fallbackLanguage, ns);
+
+                var result = translationTree.GetValue(key, args);
+
+                if (result != null)
+                    return result;
             }
 
+            return null;
+        }
 
-            if (translationTree == null)
-                return await ResolveTranslationFromFallbackLanguages();
-
+        private async Task<string> ResolveTranslationAsync(string language, string ns, string key, IDictionary<string, object> args,
+            TranslationOptions options)
+        {
             var needsPluralHandling = CheckForSpecialArg(args, "count", typeof(int), typeof(long)) && _pluralResolver.NeedsPlural(language);
             var needsContextHandling = CheckForSpecialArg(args, "context", typeof(string));
 
             var finalKey = key;
-            var possibleKeys = new Stack<string>();
-            possibleKeys.Push(finalKey);
+            var possibleKeys = new List<string>();
+            possibleKeys.Add(finalKey);
             var pluralSuffix = string.Empty;
 
             if (needsPluralHandling)
             {
-                var count = (int)Convert.ChangeType(args["count"], typeof(int));
+                var count = (int) Convert.ChangeType(args["count"], typeof(int));
                 pluralSuffix = _pluralResolver.GetPluralSuffix(language, count);
 
                 // Fallback for plural if context was not found
                 if (needsContextHandling)
-                    possibleKeys.Push($"{finalKey}{pluralSuffix}");
+                    possibleKeys.Add($"{finalKey}{pluralSuffix}");
             }
 
             // Get key for context if needed
             if (needsContextHandling)
             {
-                var context = (string)args["context"];
+                var context = (string) args["context"];
                 finalKey = $"{finalKey}{ContextSeparator}{context}";
-                possibleKeys.Push(finalKey);
+                possibleKeys.Add(finalKey);
             }
 
             // Get key for plural if needed
             if (needsPluralHandling)
             {
                 finalKey = $"{finalKey}{pluralSuffix}";
-                possibleKeys.Push(finalKey);
+                possibleKeys.Add(finalKey);
             }
 
+            // Try to resolve the translation from the backend
+            var result = await ResolveTranslationFromBackendAsync(language, ns, args, possibleKeys);
+
+            if(result == null && MissingKey != null)
+                OnMissingKey(language, ns, key, possibleKeys);
+
+            // Try to resolve the translation from the backend for all fallback langauges
+            if (result == null && options.FallbackLanguages != null && options.FallbackLanguages.Length > 0)
+                result = await ResolveFallbackTranslationAsync(ns, args, options.FallbackLanguages, possibleKeys);
+            
+            return result;
+        }
+
+        private async Task<string> ResolveTranslationFromBackendAsync(string language, string ns, IDictionary<string, object> args,
+            List<string> possibleKeys)
+        {
+            var translationTree = await ResolveTranslationTreeAsync(language, ns);
+
+            if (translationTree == null)
+                return null;
+
             string result = null;
+
             // Iterate over the possible keys starting with most specific pluralkey (-> contextkey only) -> singularkey only
-            while (possibleKeys.Count > 0)
+            for (var i = possibleKeys.Count - 1; i >= 0; i--)
             {
-                var currentKey = possibleKeys.Pop();
+                var currentKey = possibleKeys[i];
                 result = translationTree.GetValue(currentKey, args);
 
                 if (result != null)
                     break;
             }
 
-            if (result == null)
-                result = await ResolveTranslationFromFallbackLanguages();
+            return result;
+        }
+
+        private async Task<string> ResolveFallbackTranslationAsync(string ns, IDictionary<string, object> args, string[] fallbackLanguages,
+            IReadOnlyList<string> possibleKeys)
+        {
+            string result = null;
+
+            for (var i = possibleKeys.Count - 1; i >= 0; i--)
+            {
+                var currentKey = possibleKeys[i];
+                result = await GetValueForFallbackAsync(fallbackLanguages, ns, currentKey, args);
+
+                if (result != null)
+                    break;
+            }
 
             return result;
         }
@@ -249,6 +283,16 @@ namespace I18Next.Net.Plugins
             _treeCache.TryAdd(cacheKey, tree);
 
             return tree;
+        }
+
+        private void OnMissingKey(string language, string @namespace, string key, List<string> possibleKeys)
+        {
+            if (MissingKey == null)
+                return;
+
+            var args = new MissingKeyEventArgs(language, @namespace, key, possibleKeys.ToArray());
+
+            MissingKey.Invoke(this, args);
         }
     }
 }

@@ -18,6 +18,7 @@ namespace I18Next.Net.Tests.Plugins
         public void SetUp()
         {
             _translator = new DefaultTranslator(_backend, null, _pluralResolver, _interpolator);
+            _options = new TranslationOptions() { DefaultNamespace = "test" };
         }
 
         [TearDown]
@@ -34,6 +35,7 @@ namespace I18Next.Net.Tests.Plugins
         private IInterpolator _interpolator;
         private DefaultTranslator _translator;
         private ITranslationTree _translationTree;
+        private TranslationOptions _options;
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
@@ -66,7 +68,7 @@ namespace I18Next.Net.Tests.Plugins
             _translator.PostProcessors.Add(postProcessor);
 
             var args = new { postProcess = "testProcess" };
-            var result = await _translator.TranslateAsync("en-US", "test", "test", args.ToDictionary(), null);
+            var result = await _translator.TranslateAsync("en-US", "test", args.ToDictionary(), _options);
 
             result.Should().Be("post-processed");
 
@@ -86,7 +88,7 @@ namespace I18Next.Net.Tests.Plugins
             _translationTree.GetValue("test", null).Returns("translated");
             _translator.AllowInterpolation = false;
 
-            var result = await _translator.TranslateAsync("en-US", "test", "test", null, null);
+            var result = await _translator.TranslateAsync("en-US", "test", null, _options);
 
             result.Should().Be("translated");
 
@@ -106,7 +108,7 @@ namespace I18Next.Net.Tests.Plugins
             _translator.AllowInterpolation = true;
 
             var args = new { interpolate = false };
-            var result = await _translator.TranslateAsync("en-US", "test", "test", args.ToDictionary(), null);
+            var result = await _translator.TranslateAsync("en-US", "test", args.ToDictionary(), _options);
 
             result.Should().Be("translated");
 
@@ -125,7 +127,7 @@ namespace I18Next.Net.Tests.Plugins
             _translationTree.GetValue("test", null).Returns("translated");
             _translator.AllowNesting = false;
 
-            var result = await _translator.TranslateAsync("en-US", "test", "test", null, null);
+            var result = await _translator.TranslateAsync("en-US", "test", null, _options);
 
             result.Should().Be("translated");
 
@@ -145,7 +147,7 @@ namespace I18Next.Net.Tests.Plugins
             _translator.AllowNesting = true;
 
             var args = new { nest = false };
-            var result = await _translator.TranslateAsync("en-US", "test", "test", args.ToDictionary(), null);
+            var result = await _translator.TranslateAsync("en-US", "test", args.ToDictionary(), _options);
 
             result.Should().Be("translated");
 
@@ -168,7 +170,7 @@ namespace I18Next.Net.Tests.Plugins
             _translator.PostProcessors.Add(postProcessor);
             _translator.AllowPostprocessing = false;
 
-            var result = await _translator.TranslateAsync("en-US", "test", "test", null, null);
+            var result = await _translator.TranslateAsync("en-US", "test", null, _options);
 
             result.Should().Be("translated");
 
@@ -193,7 +195,7 @@ namespace I18Next.Net.Tests.Plugins
             _translator.AllowPostprocessing = true;
 
             var args = new { applyPostProcessor = false };
-            var result = await _translator.TranslateAsync("en-US", "test", "test", args.ToDictionary(), null);
+            var result = await _translator.TranslateAsync("en-US", "test", args.ToDictionary(), _options);
 
             result.Should().Be("translated");
 
@@ -222,7 +224,7 @@ namespace I18Next.Net.Tests.Plugins
             _translator.PostProcessors.Add(postProcessor2);
 
             var args = new { postProcess = "testProcess1" };
-            var result = await _translator.TranslateAsync("en-US", "test", "test", args.ToDictionary(), null);
+            var result = await _translator.TranslateAsync("en-US", "test", args.ToDictionary(), _options);
 
             result.Should().Be("post-processed1");
 
@@ -252,7 +254,7 @@ namespace I18Next.Net.Tests.Plugins
             _translator.PostProcessors.Add(postProcessor2);
 
             var args = new { postProcess = "testProcess" };
-            var result = await _translator.TranslateAsync("en-US", "test", "test", args.ToDictionary(), null);
+            var result = await _translator.TranslateAsync("en-US", "test", args.ToDictionary(), _options);
 
             result.Should().Be("post-processed2");
 
@@ -284,8 +286,8 @@ namespace I18Next.Net.Tests.Plugins
             _translator.PostProcessors.Add(postProcessor2);
             _translator.PostProcessors.Add(postProcessor3);
 
-            var args = new { postProcess = new [] { "testProcess1", "testProcess3" } };
-            var result = await _translator.TranslateAsync("en-US", "test", "test", args.ToDictionary(), null);
+            var args = new { postProcess = new[] { "testProcess1", "testProcess3" } };
+            var result = await _translator.TranslateAsync("en-US", "test", args.ToDictionary(), _options);
 
             result.Should().Be("post-processed3");
 
@@ -308,7 +310,7 @@ namespace I18Next.Net.Tests.Plugins
 
             var replaceArgs = new { value = "test" };
             var args = new { replace = replaceArgs };
-            var result = await _translator.TranslateAsync("en-US", "test", "test", args.ToDictionary(), null);
+            var result = await _translator.TranslateAsync("en-US", "test", args.ToDictionary(), _options);
 
             result.Should().Be("translated");
 
@@ -328,8 +330,8 @@ namespace I18Next.Net.Tests.Plugins
         {
             _translationTree.GetValue("test", null).Returns("translated");
 
-            var result1 = await _translator.TranslateAsync("en-US", "test", "test", null, null);
-            var result2 = await _translator.TranslateAsync("en-US", "test", "test", null, null);
+            var result1 = await _translator.TranslateAsync("en-US", "test", null, _options);
+            var result2 = await _translator.TranslateAsync("en-US", "test", null, _options);
 
             result1.Should().Be("translated");
             result2.Should().Be("translated");
@@ -347,8 +349,9 @@ namespace I18Next.Net.Tests.Plugins
         public async Task TranslateAsync_UsingCiMode_ShouldReturnNamespaceAndKey()
         {
             _translationTree.GetValue("test", null).Returns("translated");
+            _options.DefaultNamespace = "testns";
 
-            var result = await _translator.TranslateAsync("cimode", "testns", "testkey", null, null);
+            var result = await _translator.TranslateAsync("cimode", "testkey", null, _options);
 
             result.Should().Be("testns:testkey");
 
@@ -367,7 +370,7 @@ namespace I18Next.Net.Tests.Plugins
             _translationTree.GetValue("test_male", Arg.Any<IDictionary<string, object>>()).Returns("translated");
 
             var args = new { context = "male" };
-            var result = await _translator.TranslateAsync("en-US", "test", "test", args.ToDictionary(), null);
+            var result = await _translator.TranslateAsync("en-US", "test", args.ToDictionary(), _options);
 
             result.Should().Be("translated");
 
@@ -387,7 +390,7 @@ namespace I18Next.Net.Tests.Plugins
             _translationTree.GetValue("test", Arg.Any<IDictionary<string, object>>()).Returns("translated");
 
             var args = new { context = "male" };
-            var result = await _translator.TranslateAsync("en-US", "test", "test", args.ToDictionary(), null);
+            var result = await _translator.TranslateAsync("en-US", "test", args.ToDictionary(), _options);
 
             result.Should().Be("translated");
 
@@ -407,7 +410,7 @@ namespace I18Next.Net.Tests.Plugins
             _translationTree.GetValue("test_2", Arg.Any<IDictionary<string, object>>()).Returns("translated");
 
             var args = new { count = 2 };
-            var result = await _translator.TranslateAsync("en-US", "test", "test", args.ToDictionary(), null);
+            var result = await _translator.TranslateAsync("en-US", "test", args.ToDictionary(), _options);
 
             result.Should().Be("translated");
 
@@ -426,7 +429,7 @@ namespace I18Next.Net.Tests.Plugins
             _translationTree.GetValue("test_male_2", Arg.Any<IDictionary<string, object>>()).Returns("translated");
 
             var args = new { count = 2, context = "male" };
-            var result = await _translator.TranslateAsync("en-US", "test", "test", args.ToDictionary(), null);
+            var result = await _translator.TranslateAsync("en-US", "test", args.ToDictionary(), _options);
 
             result.Should().Be("translated");
 
@@ -448,7 +451,7 @@ namespace I18Next.Net.Tests.Plugins
             _translationTree.GetValue("test_male_2", Arg.Any<IDictionary<string, object>>()).Returns((string) null);
 
             var args = new { count = 2, context = "male" };
-            var result = await _translator.TranslateAsync("en-US", "test", "test", args.ToDictionary(), null);
+            var result = await _translator.TranslateAsync("en-US", "test", args.ToDictionary(), _options);
 
             result.Should().Be("translated");
 
@@ -473,7 +476,7 @@ namespace I18Next.Net.Tests.Plugins
             _translationTree.GetValue("test_male_2", Arg.Any<IDictionary<string, object>>()).Returns((string) null);
 
             var args = new { count = 2, context = "male" };
-            var result = await _translator.TranslateAsync("en-US", "test", "test", args.ToDictionary(), null);
+            var result = await _translator.TranslateAsync("en-US", "test", args.ToDictionary(), _options);
 
             result.Should().Be("translated");
 
@@ -498,7 +501,7 @@ namespace I18Next.Net.Tests.Plugins
             _translationTree.GetValue("test_male_2", Arg.Any<IDictionary<string, object>>()).Returns((string) null);
 
             var args = new { count = 2, context = "male" };
-            var result = await _translator.TranslateAsync("en-US", "test", "test", args.ToDictionary(), null);
+            var result = await _translator.TranslateAsync("en-US", "test", args.ToDictionary(), _options);
 
             result.Should().Be("translated");
 
@@ -521,7 +524,7 @@ namespace I18Next.Net.Tests.Plugins
             _translationTree.GetValue("test", Arg.Any<IDictionary<string, object>>()).Returns("translated");
 
             var args = new { count = 2 };
-            var result = await _translator.TranslateAsync("en-US", "test", "test", args.ToDictionary(), null);
+            var result = await _translator.TranslateAsync("en-US", "test", args.ToDictionary(), _options);
 
             result.Should().Be("translated");
 
@@ -540,7 +543,7 @@ namespace I18Next.Net.Tests.Plugins
         {
             _translationTree.GetValue("test", null).Returns("translated");
 
-            var result = await _translator.TranslateAsync("en-US", "test", "test", null, null);
+            var result = await _translator.TranslateAsync("en-US", "test", null, _options);
 
             result.Should().Be("translated");
 
@@ -557,8 +560,9 @@ namespace I18Next.Net.Tests.Plugins
         public async Task TranslateAsync_WithOtherThanDefaultNsAndSimpleString_ShouldTranslateUsingTheSpecifiedNamespace()
         {
             _translationTree.GetValue("test", null).Returns("translated");
+            _options.DefaultNamespace = "other";
 
-            var result = await _translator.TranslateAsync("en-US", "other", "test:test", null, null);
+            var result = await _translator.TranslateAsync("en-US", "test:test", null, _options);
 
             result.Should().Be("translated");
 

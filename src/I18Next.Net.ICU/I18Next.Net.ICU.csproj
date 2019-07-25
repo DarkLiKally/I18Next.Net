@@ -8,7 +8,7 @@
     <RepositoryUrl>https://github.com/DarkLiKally/I18Next.Net</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <Product>I18Next.Net</Product>
-    <Version>0.6.1</Version>
+    <Version>0.7.0</Version>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="MessageFormat" Version="3.0.1" />

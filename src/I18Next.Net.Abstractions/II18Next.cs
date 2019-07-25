@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Threading.Tasks;
 using I18Next.Net.Backends;
+using I18Next.Net.Plugins;
 
 namespace I18Next.Net
 {
     public interface II18Next
     {
         ITranslationBackend Backend { get; }
+        
+        ITranslator Translator { get; }
 
         string DefaultNamespace { get; set; }
 
