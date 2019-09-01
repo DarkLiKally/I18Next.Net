@@ -10,6 +10,12 @@
     <Product>I18Next.Net</Product>
     <Version>0.7.0</Version>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DocumentationFile>bin\Debug\I18Next.Net.ICU.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DocumentationFile>bin\Release\I18Next.Net.ICU.xml</DocumentationFile>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="MessageFormat" Version="3.0.1" />
   </ItemGroup>

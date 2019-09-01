@@ -2,7 +2,9 @@
 
 namespace I18Next.Net.Plugins
 {
-    /// <summary>ILogger interface for common scenarios.</summary>
+    /// <summary>
+    ///     ILogger interface for common scenarios.
+    /// </summary>
     public interface ILogger
     {
         /// <summary>Formats and writes a critical log message.</summary>
@@ -88,7 +90,7 @@ namespace I18Next.Net.Plugins
         /// </param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogTrace(0, exception, "Error while processing request from {Address}", address)</example>
-        void LogTrace(string message, params object[] args);
+        void LogVerbose(string message, params object[] args);
 
         /// <summary>Formats and writes a trace log message.</summary>
         /// <param name="exception">The exception to log.</param>
@@ -98,7 +100,7 @@ namespace I18Next.Net.Plugins
         /// </param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogTrace(0, exception, "Error while processing request from {Address}", address)</example>
-        void LogTrace(Exception exception, string message, params object[] args);
+        void LogVerbose(Exception exception, string message, params object[] args);
 
         /// <summary>Formats and writes a warning log message.</summary>
         /// <param name="message">

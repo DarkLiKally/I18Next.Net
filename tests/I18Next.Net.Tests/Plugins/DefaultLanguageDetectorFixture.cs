@@ -12,7 +12,7 @@ namespace I18Next.Net.Tests.Plugins
         {
             var detector = new DefaultLanguageDetector("de-DE");
             detector.GetLanguage().Should().Be("de-DE");
-            
+
             detector = new DefaultLanguageDetector("en-US");
             detector.GetLanguage().Should().Be("en-US");
 

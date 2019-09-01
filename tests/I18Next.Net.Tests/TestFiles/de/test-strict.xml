@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<root>
+    <Translation key="Value1">Translated value 1</Translation>
+    <Translation key="Value2">Translated value 2</Translation>
+    <Translation key="Value3">  Translated value 3   </Translation>
+    <Translation key="Value4">Translated value 4</Translation>
+    <Translation key="Value5">Translated value 5</Translation>
+    <Translation key="Value6">Translated value 6</Translation>
+    <Section name="SectionA">
+        <Translation key="Value1">Translated value 1</Translation>
+        <Translation key="Value2">Translated value 2</Translation>
+        <Translation key="Value3">  Translated value 3   </Translation>
+        <Translation key="Value4">Translated value 4</Translation>
+        <Translation key="Value5">Translated value 5</Translation>
+        <Translation key="Value6">Translated value 6</Translation>
+    </Section>
+    <Section name="SectionB">
+        <Translation key="Value1">Translated value 1</Translation>
+        <Translation key="Value2">Translated value 2</Translation>
+        <Translation key="Value3">  Translated value 3   </Translation>
+        <Translation key="Value4">Translated value 4</Translation>
+        <Translation key="Value5">Translated value 5</Translation>
+        <Translation key="Value6">Translated value 6</Translation>
+        <Section name="SubSectionA">
+            <Translation key="Value1">Translated value 1</Translation>
+            <Translation key="Value2">Translated value 2</Translation>
+            <Translation key="Value3">  Translated value 3   </Translation>
+            <Translation key="Value4">Translated value 4</Translation>
+            <Translation key="Value5">Translated value 5</Translation>
+            <Translation key="Value6">Translated value 6</Translation>
+        </Section>
+        <Section name="SubSectionB">
+            <Translation key="Value1">Translated value 1</Translation>
+            <Translation key="Value2">Translated value 2</Translation>
+            <Translation key="Value3">  Translated value 3   </Translation>
+            <Translation key="Value4">Translated value 4</Translation>
+            <Translation key="Value5">Translated value 5</Translation>
+            <Translation key="Value6">Translated value 6</Translation>
+        </Section>
+    </Section>
+</root>

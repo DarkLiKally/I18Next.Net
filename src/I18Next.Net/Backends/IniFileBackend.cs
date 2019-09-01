@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using I18Next.Net.Internal;
 using I18Next.Net.TranslationTrees;
 
 namespace I18Next.Net.Backends

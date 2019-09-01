@@ -5,7 +5,7 @@ using ILogger = I18Next.Net.Plugins.ILogger;
 namespace I18Next.Net.Extensions
 {
     /// <summary>
-    /// Logger implementation which forwards the logging method calls to a Microsoft.Extensions.Logging.ILogger.
+    ///     Logger implementation which forwards the logging method calls to a Microsoft.Extensions.Logging.ILogger.
     /// </summary>
     public class DefaultExtensionsLogger : ILogger
     {
@@ -66,13 +66,13 @@ namespace I18Next.Net.Extensions
         }
 
         /// <inheritdoc />
-        public void LogTrace(string message, params object[] args)
+        public void LogVerbose(string message, params object[] args)
         {
             _logger.LogTrace(message, args);
         }
 
         /// <inheritdoc />
-        public void LogTrace(Exception exception, string message, params object[] args)
+        public void LogVerbose(Exception exception, string message, params object[] args)
         {
             _logger.LogTrace(exception, message, args);
         }

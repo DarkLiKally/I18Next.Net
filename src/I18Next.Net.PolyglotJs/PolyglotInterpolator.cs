@@ -82,8 +82,10 @@ namespace I18Next.Net.PolyglotJs
             lock (LanguageToTypeMap)
             {
                 foreach (var mapping in PluralTypesToLanguage)
+                {
                     foreach (var lang in mapping.Value)
                         LanguageToTypeMap.Add(lang, PluralTypes[mapping.Key]);
+                }
             }
         }
 
@@ -184,8 +186,10 @@ namespace I18Next.Net.PolyglotJs
                     format = args[expression + "_format"].ToString();
 
                 foreach (var formatter in Formatters)
+                {
                     if (formatter.CanFormat(value, format, language))
                         resultValue = formatter.Format(value, format, language);
+                }
 
                 if (resultValue == null)
                     resultValue = value.ToString();

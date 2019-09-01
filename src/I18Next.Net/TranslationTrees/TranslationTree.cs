@@ -65,10 +65,12 @@ namespace I18Next.Net.TranslationTrees
         private void MapTranslationGroup(IDictionary<string, string> result, TranslationGroup group)
         {
             foreach (var node in group.Children)
+            {
                 if (node is TranslationGroup subGroup)
                     MapTranslationGroup(result, subGroup);
                 else if (node is Translation translation)
                     result.Add(translation.Name, translation.Value);
+            }
         }
     }
 }

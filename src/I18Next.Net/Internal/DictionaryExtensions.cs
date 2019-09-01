@@ -10,8 +10,10 @@ namespace I18Next.Net.Internal
             var newMap = new Dictionary<TKey, TValue>();
 
             foreach (var src in new List<IDictionary<TKey, TValue>> { me }.Concat(others))
+            {
                 foreach (var p in src)
                     newMap[p.Key] = p.Value;
+            }
 
             return newMap;
         }

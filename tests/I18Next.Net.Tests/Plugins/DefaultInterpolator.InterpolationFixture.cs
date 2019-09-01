@@ -54,15 +54,6 @@ namespace I18Next.Net.Tests.Plugins
         }
 
         [Test]
-        public async Task InterpolateAsync_PlaceholderAndNestedMissingValue_ShouldReplaceThePlaceholderWithAnEmptyString()
-        {
-            var args = new { };
-            var result = await _interpolator.InterpolateAsync("Hello {{person.informations.name}}!", "testkey", "en-US", args.ToDictionary());
-
-            result.Should().Be("Hello !");
-        }
-
-        [Test]
         public async Task InterpolateAsync_PlaceholderAndMissingValueWithMissingValueHandler_ShouldCallTheMissingValueHandler()
         {
             _interpolator.MissingValueHandler = (s, match) => "<missing>";
@@ -82,6 +73,15 @@ namespace I18Next.Net.Tests.Plugins
             var result = await _interpolator.InterpolateAsync("Hello {{person.name}}!", "testkey", "en-US", args.ToDictionary());
 
             result.Should().Be("Hello John Doe!");
+        }
+
+        [Test]
+        public async Task InterpolateAsync_PlaceholderAndNestedMissingValue_ShouldReplaceThePlaceholderWithAnEmptyString()
+        {
+            var args = new { };
+            var result = await _interpolator.InterpolateAsync("Hello {{person.informations.name}}!", "testkey", "en-US", args.ToDictionary());
+
+            result.Should().Be("Hello !");
         }
 
         [Test]

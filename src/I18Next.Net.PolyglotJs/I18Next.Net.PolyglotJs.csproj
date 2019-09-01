@@ -10,6 +10,12 @@
     <RepositoryType>git</RepositoryType>
     <Version>0.7.0</Version>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DocumentationFile>bin\Debug\I18Next.Net.PolyglotJs.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DocumentationFile>bin\Release\I18Next.Net.PolyglotJs.xml</DocumentationFile>
+  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\I18Next.Net\I18Next.Net.csproj" />
   </ItemGroup>

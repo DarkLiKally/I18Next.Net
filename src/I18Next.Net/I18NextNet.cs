@@ -8,11 +8,11 @@ namespace I18Next.Net
 {
     public class I18NextNet : II18Next
     {
-        private string _language;
-        private string[] _fallbackLanguages;
-
-        private TranslationOptions _options;
         private string _defaultNamespace;
+        private string[] _fallbackLanguages;
+        private string _language;
+
+        private readonly TranslationOptions _options;
 
         public I18NextNet(ITranslationBackend backend, ITranslator translator)
             : this(backend, translator, null)
@@ -32,32 +32,18 @@ namespace I18Next.Net
             LanguageDetector = languageDetector ?? new DefaultLanguageDetector("en-US");
         }
 
-        private TranslationOptions CreateTranslationOptions(string defaultNamespace = null)
+        public string[] FallbackLanguages
         {
-            var options = new TranslationOptions
+            get => _fallbackLanguages;
+            set
             {
-                FallbackLanguages = _fallbackLanguages
-            };
+                _fallbackLanguages = value ?? throw new ArgumentNullException(nameof(value));
 
-            if (defaultNamespace == null && _defaultNamespace != null)
-                options.DefaultNamespace = _defaultNamespace;
-            else if (defaultNamespace != null)
-                options.DefaultNamespace = defaultNamespace;
-
-            return options;
+                UpdateTranslationOptions();
+            }
         }
-
-        private void UpdateTranslationOptions()
-        {
-            _options.DefaultNamespace = DefaultNamespace;
-            _options.FallbackLanguages = _fallbackLanguages;
-        }
-
-        public ILanguageDetector LanguageDetector { get; set; }
 
         public ILogger Logger { get; set; }
-
-        public ITranslator Translator { get; }
 
         public ITranslationBackend Backend { get; }
 
@@ -70,17 +56,6 @@ namespace I18Next.Net
                     throw new ArgumentNullException(nameof(value));
 
                 _defaultNamespace = value;
-
-                UpdateTranslationOptions();
-            }
-        }
-
-        public string[] FallbackLanguages
-        {
-            get => _fallbackLanguages;
-            set
-            {
-                _fallbackLanguages = value ?? throw new ArgumentNullException(nameof(value));
 
                 UpdateTranslationOptions();
             }
@@ -107,6 +82,8 @@ namespace I18Next.Net
         }
 
         public event EventHandler<LanguageChangedEventArgs> LanguageChanged;
+
+        public ILanguageDetector LanguageDetector { get; set; }
 
         public string T(string key, object args = null)
         {
@@ -140,15 +117,7 @@ namespace I18Next.Net
             return Ta(language, key, args, options);
         }
 
-        private async Task<string> Ta(string language, string key, object args, TranslationOptions options)
-        {
-            if (DetectLanguageOnEachTranslation)
-                UseDetectedLanguage();
-
-            var argsDict = args.ToDictionary();
-
-            return await Translator.TranslateAsync(language, key, argsDict, options);
-        }
+        public ITranslator Translator { get; }
 
         public void UseDetectedLanguage()
         {
@@ -160,9 +129,40 @@ namespace I18Next.Net
             FallbackLanguages = languages;
         }
 
+        private TranslationOptions CreateTranslationOptions(string defaultNamespace = null)
+        {
+            var options = new TranslationOptions
+            {
+                FallbackLanguages = _fallbackLanguages
+            };
+
+            if (defaultNamespace == null && _defaultNamespace != null)
+                options.DefaultNamespace = _defaultNamespace;
+            else if (defaultNamespace != null)
+                options.DefaultNamespace = defaultNamespace;
+
+            return options;
+        }
+
         private void OnLanguageChanged(LanguageChangedEventArgs e)
         {
             LanguageChanged?.Invoke(this, e);
+        }
+
+        private async Task<string> Ta(string language, string key, object args, TranslationOptions options)
+        {
+            if (DetectLanguageOnEachTranslation)
+                UseDetectedLanguage();
+
+            var argsDict = args.ToDictionary();
+
+            return await Translator.TranslateAsync(language, key, argsDict, options);
+        }
+
+        private void UpdateTranslationOptions()
+        {
+            _options.DefaultNamespace = DefaultNamespace;
+            _options.FallbackLanguages = _fallbackLanguages;
         }
     }
 }

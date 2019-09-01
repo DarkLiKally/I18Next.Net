@@ -6,8 +6,6 @@ namespace I18Next.Net
     {
         private string _defaultNamespace;
 
-        public string[] FallbackLanguages { get; set; }
-
         public string DefaultNamespace
         {
             get => _defaultNamespace;
@@ -19,5 +17,7 @@ namespace I18Next.Net
                 _defaultNamespace = value;
             }
         }
+
+        public string[] FallbackLanguages { get; set; }
     }
 }

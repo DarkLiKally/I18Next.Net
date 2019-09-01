@@ -13,4 +13,12 @@
         <RootNamespace>I18Next.Net</RootNamespace>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <DocumentationFile>bin\Debug\I18Next.Net.Abstractions.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DocumentationFile>bin\Release\I18Next.Net.Abstractions.xml</DocumentationFile>
+    </PropertyGroup>
+
 </Project>

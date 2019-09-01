@@ -57,6 +57,7 @@ namespace I18Next.Net.TranslationTrees
             var nodes = new List<TranslationTreeNode>();
 
             foreach (var node in parentNode)
+            {
                 if (node.Value is Dictionary<string, object> childGroup)
                 {
                     var group = BuildNode(node.Key, childGroup);
@@ -70,6 +71,7 @@ namespace I18Next.Net.TranslationTrees
 
                     nodes.Add(entry);
                 }
+            }
 
             return new TranslationGroup(name, nodes.ToArray());
         }

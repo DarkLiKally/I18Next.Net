@@ -108,11 +108,13 @@ namespace I18Next.Net.Plugins
                 foreach (var set in PluralizationSets)
                 {
                     foreach (var language in set.Languages)
+                    {
                         Rules.TryAdd(language, new PluralizationRule
                         {
                             Numbers = set.Numbers,
                             Filter = PluralizationFilters[set.Fc]
                         });
+                    }
                 }
             }
         }

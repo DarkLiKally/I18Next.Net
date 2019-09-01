@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Company>DarkLiKally</Company>
+        <Authors>DarkLiKally</Authors>
+        <PackageProjectUrl>https://github.com/DarkLiKally/I18Next.Net</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/DarkLiKally/I18Next.Net</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <Product>I18Next.Net</Product>
+        <Version>0.7.0</Version>
+        <TargetFramework>netstandard2.0</TargetFramework>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <DocumentationFile>bin\Debug\I18Next.Net.Gettext.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DocumentationFile>bin\Release\I18Next.Net.Gettext.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\I18Next.Net.Abstractions\I18Next.Net.Abstractions.csproj" />
+      <ProjectReference Include="..\I18Next.Net\I18Next.Net.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="NGettext" Version="0.6.4" />
+    </ItemGroup>
+
+</Project>

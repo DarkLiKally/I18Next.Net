@@ -50,6 +50,8 @@ namespace I18Next.Net.Plugins
 
         public string ContextSeparator { get; set; } = "_";
 
+        public List<IMissingKeyHandler> MissingKeyHandlers { get; } = new List<IMissingKeyHandler>();
+
         public event EventHandler<MissingKeyEventArgs> MissingKey;
 
         public List<IPostProcessor> PostProcessors { get; } = new List<IPostProcessor>();
@@ -149,24 +151,6 @@ namespace I18Next.Net.Plugins
             return null;
         }
 
-        private string HandlePostProcessing(string result, string key, IDictionary<string, object> args)
-        {
-            var postProcessorKeys = GetPostProcessorKeys(args);
-
-            if (postProcessorKeys != null)
-                foreach (var postProcessorKey in postProcessorKeys)
-                {
-                    if (string.IsNullOrWhiteSpace(postProcessorKey))
-                        continue;
-
-                    foreach (var postProcessor in PostProcessors)
-                        if (postProcessor.Keyword == postProcessorKey)
-                            result = postProcessor.Process(key, result, args);
-                }
-
-            return result;
-        }
-
         private async Task<string> GetValueForFallbackAsync(string[] fallbackLanguages, string ns, string key, IDictionary<string, object> args)
         {
             foreach (var fallbackLanguage in fallbackLanguages)
@@ -180,6 +164,56 @@ namespace I18Next.Net.Plugins
             }
 
             return null;
+        }
+
+        private string HandlePostProcessing(string result, string key, IDictionary<string, object> args)
+        {
+            var postProcessorKeys = GetPostProcessorKeys(args);
+
+            if (postProcessorKeys != null)
+                foreach (var postProcessorKey in postProcessorKeys)
+                {
+                    if (string.IsNullOrWhiteSpace(postProcessorKey))
+                        continue;
+
+                    foreach (var postProcessor in PostProcessors)
+                    {
+                        if (postProcessor.Keyword == postProcessorKey)
+                            result = postProcessor.Process(key, result, args);
+                    }
+                }
+
+            return result;
+        }
+
+        private void OnMissingKey(string language, string @namespace, string key, List<string> possibleKeys)
+        {
+            if (MissingKey == null && MissingKeyHandlers.Count == 0)
+                return;
+
+            var args = new MissingKeyEventArgs(language, @namespace, key, possibleKeys.ToArray());
+
+            MissingKey?.Invoke(this, args);
+
+            foreach (var missingKeyHandler in MissingKeyHandlers)
+                missingKeyHandler.HandleMissingKeyAsync(this, args);
+        }
+
+        private async Task<string> ResolveFallbackTranslationAsync(string ns, IDictionary<string, object> args, string[] fallbackLanguages,
+            IReadOnlyList<string> possibleKeys)
+        {
+            string result = null;
+
+            for (var i = possibleKeys.Count - 1; i >= 0; i--)
+            {
+                var currentKey = possibleKeys[i];
+                result = await GetValueForFallbackAsync(fallbackLanguages, ns, currentKey, args);
+
+                if (result != null)
+                    break;
+            }
+
+            return result;
         }
 
         private async Task<string> ResolveTranslationAsync(string language, string ns, string key, IDictionary<string, object> args,
@@ -221,13 +255,13 @@ namespace I18Next.Net.Plugins
             // Try to resolve the translation from the backend
             var result = await ResolveTranslationFromBackendAsync(language, ns, args, possibleKeys);
 
-            if(result == null && MissingKey != null)
+            if (result == null)
                 OnMissingKey(language, ns, key, possibleKeys);
 
             // Try to resolve the translation from the backend for all fallback langauges
             if (result == null && options.FallbackLanguages != null && options.FallbackLanguages.Length > 0)
                 result = await ResolveFallbackTranslationAsync(ns, args, options.FallbackLanguages, possibleKeys);
-            
+
             return result;
         }
 
@@ -254,23 +288,6 @@ namespace I18Next.Net.Plugins
             return result;
         }
 
-        private async Task<string> ResolveFallbackTranslationAsync(string ns, IDictionary<string, object> args, string[] fallbackLanguages,
-            IReadOnlyList<string> possibleKeys)
-        {
-            string result = null;
-
-            for (var i = possibleKeys.Count - 1; i >= 0; i--)
-            {
-                var currentKey = possibleKeys[i];
-                result = await GetValueForFallbackAsync(fallbackLanguages, ns, currentKey, args);
-
-                if (result != null)
-                    break;
-            }
-
-            return result;
-        }
-
         private async Task<ITranslationTree> ResolveTranslationTreeAsync(string language, string ns)
         {
             var cacheKey = $"{language}.{ns}";
@@ -283,16 +300,6 @@ namespace I18Next.Net.Plugins
             _treeCache.TryAdd(cacheKey, tree);
 
             return tree;
-        }
-
-        private void OnMissingKey(string language, string @namespace, string key, List<string> possibleKeys)
-        {
-            if (MissingKey == null)
-                return;
-
-            var args = new MissingKeyEventArgs(language, @namespace, key, possibleKeys.ToArray());
-
-            MissingKey.Invoke(this, args);
         }
     }
 }

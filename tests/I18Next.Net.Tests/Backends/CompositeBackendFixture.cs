@@ -10,6 +10,13 @@ namespace I18Next.Net.Tests.Backends
     [TestFixture]
     public class CompositeBackendFixture
     {
+        [TearDown]
+        public void TearDown()
+        {
+            _backendA.ClearReceivedCalls();
+            _backendB.ClearReceivedCalls();
+        }
+
         private ITranslationBackend _backendB;
         private ITranslationBackend _backendA;
         private CompositeBackend _backend;
@@ -26,13 +33,6 @@ namespace I18Next.Net.Tests.Backends
             _backendB.LoadNamespaceAsync("en", "backA").Returns((ITranslationTree) null);
         }
 
-        [TearDown]
-        public void TearDown()
-        {
-            _backendA.ClearReceivedCalls();
-            _backendB.ClearReceivedCalls();
-        }
-
         [Test]
         public async Task LoadNamespaceAsync_WithBackendANamespace_ShouldCallBackendA()
         {
@@ -45,7 +45,7 @@ namespace I18Next.Net.Tests.Backends
             await _backendB.DidNotReceive().LoadNamespaceAsync("en", "backA");
             await _backendB.DidNotReceive().LoadNamespaceAsync("en", "backB");
         }
-        
+
         [Test]
         public async Task LoadNamespaceAsync_WithBackendBNamespace_ShouldCallBackendB()
         {

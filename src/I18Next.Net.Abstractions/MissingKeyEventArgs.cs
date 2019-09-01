@@ -12,11 +12,11 @@ namespace I18Next.Net
             PossibleKeys = possibleKeys;
         }
 
+        public string Key { get; }
+
         public string Language { get; }
 
         public string Namespace { get; }
-
-        public string Key { get; }
 
         public string[] PossibleKeys { get; }
     }

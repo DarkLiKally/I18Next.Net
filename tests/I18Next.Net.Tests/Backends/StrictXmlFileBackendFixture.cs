@@ -7,22 +7,22 @@ using NUnit.Framework;
 namespace I18Next.Net.Tests.Backends
 {
     [TestFixture]
-    public class IniFileBackendFixture
+    public class StrictXmlFileBackendFixture
     {
+        private StrictXmlFileBackend _backend;
+        private ITranslationTree _tree;
+
         [OneTimeSetUp]
         public async Task OneTimeSetUp()
         {
-            _backend = new IniFileBackend("TestFiles");
-            _tree = await _backend.LoadNamespaceAsync("en-US", "test");
+            _backend = new StrictXmlFileBackend("TestFiles");
+            _tree = await _backend.LoadNamespaceAsync("en-US", "test-strict");
         }
-
-        private IniFileBackend _backend;
-        private ITranslationTree _tree;
 
         [Test]
         public async Task LoadNamespaceAsync_ExtractLanguagePart_ShouldProvideTranslationsForOnlyTheLanguagePart()
         {
-            var tree = await _backend.LoadNamespaceAsync("de-DE", "test");
+            var tree = await _backend.LoadNamespaceAsync("de-DE", "test-strict");
 
             tree.Should().NotBeNull();
 

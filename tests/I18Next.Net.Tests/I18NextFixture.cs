@@ -7,9 +7,6 @@ namespace I18Next.Net.Tests
     [TestFixture]
     public class I18NextFixture
     {
-        private InMemoryBackend _backend;
-        private I18NextNet _i18Next;
-
         [SetUp]
         public void Setup()
         {
@@ -17,8 +14,11 @@ namespace I18Next.Net.Tests
 
             var translator = new DefaultTranslator(_backend);
             _i18Next = new I18NextNet(_backend, translator);
-
         }
+
+        private InMemoryBackend _backend;
+        private I18NextNet _i18Next;
+
         private void SetupBackend()
         {
             var backend = new InMemoryBackend();
@@ -38,20 +38,6 @@ namespace I18Next.Net.Tests
         }
 
         [Test]
-        public void German()
-        {
-            _i18Next.Language = "de";
-            Assert.AreEqual("Mein deutscher text.", _i18Next.T("exampleKey"));
-        }
-
-        [Test]
-        public void NoFallbackLanguage_MissingTranslation_ReturnsKey()
-        {
-            _i18Next.Language = "de";
-            Assert.AreEqual("exampleKey2", _i18Next.T("exampleKey2"));
-        }
-
-        [Test]
         public void FallbackLanguageIsSet_MissingTranslation_ReturnsFallback()
         {
             _i18Next.Language = "de";
@@ -60,11 +46,25 @@ namespace I18Next.Net.Tests
         }
 
         [Test]
+        public void German()
+        {
+            _i18Next.Language = "de";
+            Assert.AreEqual("Mein deutscher text.", _i18Next.T("exampleKey"));
+        }
+
+        [Test]
         public void MissingLanguage_ReturnsFallback()
         {
             _i18Next.Language = "jp";
             _i18Next.SetFallbackLanguages("en");
             Assert.AreEqual("My English fallback.", _i18Next.T("exampleKey2"));
+        }
+
+        [Test]
+        public void NoFallbackLanguage_MissingTranslation_ReturnsKey()
+        {
+            _i18Next.Language = "de";
+            Assert.AreEqual("exampleKey2", _i18Next.T("exampleKey2"));
         }
     }
 }

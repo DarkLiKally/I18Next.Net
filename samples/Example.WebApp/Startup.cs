@@ -1,4 +1,5 @@
-﻿using I18Next.Net.AspNetCore;
+﻿using System;
+using I18Next.Net.AspNetCore;
 using I18Next.Net.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;

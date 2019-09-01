@@ -6,28 +6,28 @@ using I18Next.Net.TranslationTrees;
 
 namespace I18Next.Net.Backends
 {
-    public class XmlFileBackend : ITranslationBackend
+    public class StrictXmlFileBackend : ITranslationBackend
     {
         private readonly string _basePath;
         private readonly ITranslationTreeBuilderFactory _treeBuilderFactory;
 
-        public XmlFileBackend(string basePath)
+        public StrictXmlFileBackend(string basePath)
             : this(basePath, new GenericTranslationTreeBuilderFactory<HierarchicalTranslationTreeBuilder>())
         {
         }
 
-        public XmlFileBackend(string basePath, ITranslationTreeBuilderFactory treeBuilderFactory)
+        public StrictXmlFileBackend(string basePath, ITranslationTreeBuilderFactory treeBuilderFactory)
         {
             _basePath = basePath;
             _treeBuilderFactory = treeBuilderFactory;
         }
 
-        public XmlFileBackend(ITranslationTreeBuilderFactory treeBuilderFactory)
+        public StrictXmlFileBackend(ITranslationTreeBuilderFactory treeBuilderFactory)
             : this("locales", treeBuilderFactory)
         {
         }
 
-        public XmlFileBackend()
+        public StrictXmlFileBackend()
             : this("locales")
         {
         }
@@ -76,12 +76,34 @@ namespace I18Next.Net.Backends
 
             foreach (var childNode in node.Elements())
             {
-                var key = path + childNode.Name;
+                switch (childNode.Name.LocalName)
+                {
+                    case "Section":
+                        if (childNode.HasElements)
+                        {
+                            var sectionAttribute = childNode.Attribute("name");
 
-                if (childNode.HasElements)
-                    PopulateTreeBuilder(key, childNode, builder);
-                else
-                    builder.AddTranslation(key, childNode.Value);
+                            if (sectionAttribute != null)
+                            {
+                                var sectionKey = path + sectionAttribute.Value;
+
+                                PopulateTreeBuilder(sectionKey, childNode, builder);
+                            }
+                        }
+
+                        break;
+                    case "Translation":
+                        var attribute = childNode.Attribute("key");
+
+                        if (attribute != null)
+                        {
+                            var translationKey = path + attribute.Value;
+
+                            builder.AddTranslation(translationKey, childNode.Value);
+                        }
+
+                        break;
+                }
             }
         }
     }

@@ -1,6 +1,6 @@
 using System.Linq;
 using I18Next.Net.Backends;
-using I18Next.Net.Extensions.Builder;
+using I18Next.Net.Extensions.Configuration;
 using I18Next.Net.Plugins;
 using Microsoft.Extensions.Options;
 
@@ -31,7 +31,7 @@ namespace I18Next.Net.Extensions
                 Language = _options.Value.DefaultLanguage,
                 DefaultNamespace = _options.Value.DefaultNamespace,
                 Logger = _logger,
-                DetectLanguageOnEachTranslation = _options.Value.DetectLanguageOnEachTranslation,
+                DetectLanguageOnEachTranslation = _options.Value.DetectLanguageOnEachTranslation
             };
             instance.SetFallbackLanguages(_options.Value.FallbackLanguages.ToArray());
 

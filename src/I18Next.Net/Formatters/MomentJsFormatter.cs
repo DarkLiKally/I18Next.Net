@@ -197,6 +197,7 @@ namespace I18Next.Net.Formatters
                         case "wo": return AddOrdinal(week);
                         default:   return week.ToString();
                     }
+
                 case "W":
                 case "Wo":
                 case "WW":

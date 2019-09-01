@@ -7,8 +7,8 @@ namespace I18Next.Net.Extensions
 {
     public class I18NextStringLocalizer : IStringLocalizer
     {
-        private readonly II18Next _instance;
         private readonly string _defaultNamespace;
+        private readonly II18Next _instance;
 
         private string _language;
 
