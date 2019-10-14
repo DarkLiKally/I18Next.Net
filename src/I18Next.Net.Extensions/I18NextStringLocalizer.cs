@@ -30,7 +30,8 @@ namespace I18Next.Net.Extensions
         {
             var language = _language ?? _instance.Language;
 
-            var result = _instance.Backend.LoadNamespaceAsync(language, _instance.DefaultNamespace).Result;
+            var result = _instance.Backend.LoadNamespaceAsync(language, _instance.DefaultNamespace)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
 
             return result.GetAllValues().Select(t => new LocalizedString(t.Key, t.Value));
         }
