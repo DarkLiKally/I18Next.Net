@@ -87,17 +87,17 @@ namespace I18Next.Net
 
         public string T(string key, object args = null)
         {
-            return Ta(_language, key, args).Result;
+            return Ta(_language, key, args).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         public string T(string language, string key, object args = null)
         {
-            return Ta(language, key, args).Result;
+            return Ta(language, key, args).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         public string T(string language, string defaultNamespace, string key, object args = null)
         {
-            return Ta(language, defaultNamespace, key, args).Result;
+            return Ta(language, defaultNamespace, key, args).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         public Task<string> Ta(string key, object args = null)
