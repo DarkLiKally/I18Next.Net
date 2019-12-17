@@ -8,7 +8,7 @@
         <RepositoryUrl>https://github.com/DarkLiKally/I18Next.Net</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <Product>I18Next.Net</Product>
-        <Version>0.7.0</Version>
+        <Version>0.7.1</Version>
         <TargetFramework>netstandard2.0</TargetFramework>
     </PropertyGroup>
 

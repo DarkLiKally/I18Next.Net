@@ -8,7 +8,7 @@
     <PackageProjectUrl>https://github.com/DarkLiKally/I18Next.Net</PackageProjectUrl>
     <RepositoryUrl>https://github.com/DarkLiKally/I18Next.Net</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <Version>0.7.0</Version>
+    <Version>0.7.1</Version>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DocumentationFile>bin\Debug\I18Next.Net.PolyglotJs.xml</DocumentationFile>
