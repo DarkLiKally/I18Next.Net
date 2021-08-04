@@ -4,6 +4,13 @@ using System.Collections.Generic;
 
 namespace I18Next.Net.Plugins
 {
+    public enum JsonFormat
+    {
+        Version1 = 1,
+        Version2 = 2,
+        Version3 = 3
+    }
+
     public class DefaultPluralResolver : IPluralResolver
     {
         private static readonly Dictionary<int, Func<int, int>> PluralizationFilters = new Dictionary<int, Func<int, int>>
@@ -121,7 +128,7 @@ namespace I18Next.Net.Plugins
 
         public string PluralSeparator { get; set; } = "_";
 
-        public bool UseLegacyMode { get; set; }
+        public JsonFormat JsonFormatVersion { get; set; } = JsonFormat.Version3;
 
         public bool UseSimplePluralSuffixIfPossible { get; set; } = true;
 
@@ -150,25 +157,36 @@ namespace I18Next.Net.Plugins
                 suffix = suffixNumber.ToString();
             }
 
-            if (UseLegacyMode)
+            switch (JsonFormatVersion)
             {
-                if (suffixNumber == 1)
-                    return string.Empty;
+                case JsonFormat.Version1:
+                    if (suffixNumber == 1)
+                        return string.Empty;
 
-                if (suffixNumber > 2)
-                    return $"_plural_{suffixNumber.ToString()}";
+                    if (suffixNumber > 2)
+                        return $"_plural_{suffixNumber.ToString()}";
 
-                return $"_{suffix}";
+                    return $"_{suffix}";
+
+                case JsonFormat.Version2:
+                    if (rule.Numbers.Length == 1 || suffix == null)
+                        return string.Empty;
+
+                    return $"{PluralSeparator}{suffix}";    
+
+                default:
+                    if (UseSimplePluralSuffixIfPossible && rule.Numbers.Length == 2 && rule.Numbers[0] == 1)
+                        return suffix == null ? string.Empty : $"{PluralSeparator}{suffix}";
+                    else
+                        return $"{PluralSeparator}{numberIndex}";
             }
-
-            if (suffix == null)
-                return string.Empty;
-
-            return $"{PluralSeparator}{suffix}";
         }
 
         public bool NeedsPlural(string language)
         {
+            if (JsonFormatVersion == JsonFormat.Version3)
+                return true;
+
             var rule = GetRule(language);
 
             return rule != null && rule.Numbers.Length > 1;

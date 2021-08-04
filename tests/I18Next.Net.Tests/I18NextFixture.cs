@@ -25,6 +25,7 @@ namespace I18Next.Net.Tests
 
             backend.AddTranslation("en", "translation", "exampleKey", "My English text.");
             backend.AddTranslation("en", "translation", "exampleKey2", "My English fallback.");
+            backend.AddTranslation("en", "translation", "exampleKey2_plural", "My English plural fallback {{count}}.");
             backend.AddTranslation("de", "translation", "exampleKey", "Mein deutscher text.");
 
             _backend = backend;
@@ -58,6 +59,14 @@ namespace I18Next.Net.Tests
             _i18Next.Language = "jp";
             _i18Next.SetFallbackLanguages("en");
             Assert.AreEqual("My English fallback.", _i18Next.T("exampleKey2"));
+        }
+
+        [Test]
+        public void Pluralization_MissingLanguage_ReturnsFallback()
+        {
+            _i18Next.Language = "ja";
+            _i18Next.SetFallbackLanguages("en");
+            Assert.AreEqual("My English plural fallback 2.", _i18Next.T("exampleKey2", new { count = 2 }));
         }
 
         [Test]

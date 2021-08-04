@@ -51,7 +51,11 @@ namespace I18Next.Net.Tests.Plugins
             _pluralResolver.GetPluralSuffix("en-US", 3).Returns("_3");
             _pluralResolver.GetPluralSuffix("en-US", 4).Returns("_4");
             _pluralResolver.GetPluralSuffix("en-US", 5).Returns("_5");
+            _pluralResolver.GetPluralSuffix("ja-JP", 0).Returns("_0");
+            _pluralResolver.GetPluralSuffix("ja-JP", 1).Returns("_0");
+            _pluralResolver.GetPluralSuffix("ja-JP", 2).Returns("_0");
             _pluralResolver.NeedsPlural("en-US").Returns(true);
+            _pluralResolver.NeedsPlural("ja-JP").Returns(true);
             _backend.LoadNamespaceAsync("en-US", "test").Returns(_translationTree);
             _interpolator.InterpolateAsync(null, null, null, null).ReturnsForAnyArgs(c => c.ArgAt<string>(0));
             _interpolator.NestAsync(null, null, null, null).ReturnsForAnyArgs(c => c.ArgAt<string>(0));
@@ -534,6 +538,34 @@ namespace I18Next.Net.Tests.Plugins
             await _interpolator.ReceivedWithAnyArgs(1).InterpolateAsync(null, null, null, null);
             _interpolator.Received(1).CanNest("translated");
             await _interpolator.ReceivedWithAnyArgs(0).NestAsync(null, null, null, null);
+            _pluralResolver.Received(1).GetPluralSuffix("en-US", 2);
+            _pluralResolver.Received(1).NeedsPlural("en-US");
+        }
+
+        [Test]
+        public async Task TranslateAsync_WithCountButNoTranslation_ShouldUseFallbackPluralRules()
+        {
+            var jpTranslationTree = Substitute.For<ITranslationTree>();
+            _backend.LoadNamespaceAsync("ja-JP", "test").Returns(jpTranslationTree);
+            jpTranslationTree.GetValue(null, null).ReturnsForAnyArgs((string) null);
+            _translationTree.GetValue("test_2", Arg.Any<IDictionary<string, object>>()).Returns("translated");
+
+            _options.FallbackLanguages = new[] { "en-US" };
+            var args = new { count = 2 };
+            var result = await _translator.TranslateAsync("ja-JP", "test", args.ToDictionary(), _options);
+
+            result.Should().Be("translated");
+
+            await _backend.Received(1).LoadNamespaceAsync("ja-JP", "test");
+            await _backend.Received(1).LoadNamespaceAsync("en-US", "test");
+            jpTranslationTree.Received(1).GetValue("test_0", Arg.Any<IDictionary<string, object>>());
+            jpTranslationTree.DidNotReceive().GetValue("test_2", Arg.Any<IDictionary<string, object>>());
+            _translationTree.Received(1).GetValue("test_2", Arg.Any<IDictionary<string, object>>());
+            _translationTree.DidNotReceive().GetValue("test_0", Arg.Any<IDictionary<string, object>>());
+            await _interpolator.ReceivedWithAnyArgs(1).InterpolateAsync(null, null, null, null);
+            _interpolator.Received(1).CanNest("translated");
+            await _interpolator.ReceivedWithAnyArgs(0).NestAsync(null, null, null, null);
+            _pluralResolver.Received(1).GetPluralSuffix("ja-JP", 2);
             _pluralResolver.Received(1).GetPluralSuffix("en-US", 2);
             _pluralResolver.Received(1).NeedsPlural("en-US");
         }
