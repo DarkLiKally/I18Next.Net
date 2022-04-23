@@ -1,23 +1,22 @@
 ﻿using System.Globalization;
 using I18Next.Net.Plugins;
 
-namespace I18Next.Net.Formatters
+namespace I18Next.Net.Formatters;
+
+public class LowercaseFormatter : IFormatter
 {
-    public class LowercaseFormatter : IFormatter
+    public bool CanFormat(object value, string format, string language)
     {
-        public bool CanFormat(object value, string format, string language)
-        {
-            return format.ToLowerInvariant() == "lowercase";
-        }
+        return format.ToLowerInvariant() == "lowercase";
+    }
 
-        public string Format(object value, string format, string language)
-        {
-            if (value == null)
-                return null;
+    public string Format(object value, string format, string language)
+    {
+        if (value == null)
+            return null;
 
-            var cultureInfo = CultureInfo.GetCultureInfo(language);
+        var cultureInfo = CultureInfo.GetCultureInfo(language);
 
-            return value.ToString().ToLower(cultureInfo);
-        }
+        return value.ToString().ToLower(cultureInfo);
     }
 }

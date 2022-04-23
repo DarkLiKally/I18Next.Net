@@ -4,39 +4,38 @@ using System.Linq;
 using FluentAssertions.Execution;
 using NSubstitute.Core.Arguments;
 
-namespace I18Next.Net.Tests
+namespace I18Next.Net.Tests;
+
+public static class Verify
 {
-    public static class Verify
+    public static T That<T>(Action<T> action)
     {
-        public static T That<T>(Action<T> action)
+        return ArgumentMatcher.Enqueue(new Matcher<T>(action));
+    }
+
+    private class Matcher<T> : IArgumentMatcher<T>
+    {
+        private readonly Action<T> _assertion;
+
+        public Matcher(Action<T> assertion)
         {
-            return ArgumentMatcher.Enqueue(new Matcher<T>(action));
+            _assertion = assertion;
         }
 
-        private class Matcher<T> : IArgumentMatcher<T>
+        public bool IsSatisfiedBy(T argument)
         {
-            private readonly Action<T> _assertion;
-
-            public Matcher(Action<T> assertion)
+            using (var scope = new AssertionScope())
             {
-                _assertion = assertion;
-            }
+                _assertion(argument);
 
-            public bool IsSatisfiedBy(T argument)
-            {
-                using (var scope = new AssertionScope())
-                {
-                    _assertion(argument);
+                var failures = scope.Discard();
 
-                    var failures = scope.Discard();
+                foreach (var x in failures)
+                    Trace.WriteLine(x);
 
-                    foreach (var x in failures)
-                        Trace.WriteLine(x);
+                var hasFailures = failures.Any();
 
-                    var hasFailures = failures.Any();
-
-                    return hasFailures == false;
-                }
+                return hasFailures == false;
             }
         }
     }

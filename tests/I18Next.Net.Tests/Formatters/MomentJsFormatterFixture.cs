@@ -4,23 +4,23 @@ using FluentAssertions;
 using I18Next.Net.Formatters;
 using NUnit.Framework;
 
-namespace I18Next.Net.Tests.Formatters
+namespace I18Next.Net.Tests.Formatters;
+
+[TestFixture]
+public class MomentJsFormatterFixture
 {
-    [TestFixture]
-    public class MomentJsFormatterFixture
+    private MomentJsFormatter _formatter;
+
+    [OneTimeSetUp]
+    public void OneTimeSetUp()
     {
-        private MomentJsFormatter _formatter;
+        _formatter = new MomentJsFormatter();
+    }
 
-        [OneTimeSetUp]
-        public void OneTimeSetUp()
+    public static IEnumerable FormatTestData
+    {
+        get
         {
-            _formatter = new MomentJsFormatter();
-        }
-
-        public static IEnumerable FormatTestData
-        {
-            get
-            {
                 // @formatter:off
                 yield return new TestCaseData("en-US", new DateTime(636524626794846031), "M Mo MM MMM MMMM", "1 1st 01 Jan January");
                 yield return new TestCaseData("en-US", new DateTime(636611368294846031), "M Mo MM MMM MMMM", "5 5th 05 May May");
@@ -106,36 +106,35 @@ namespace I18Next.Net.Tests.Formatters
                 yield return new TestCaseData("en-US", new DateTime(636740968794846031), "MM/DD/YYYY LLLL [hh:mm:ss] hh:mm A L", "10/02/2018 Tuesday, October 2, 2018 5:07:59 PM hh:mm:ss 05:07 PM 10/2/2018");
                 yield return new TestCaseData("en-US", new DateTime(636740968794846031), "\\LLL LLLL [mm:ss] hh:mm [L]", "LLL Tuesday, October 2, 2018 5:07:59 PM mm:ss 05:07 L");
                 yield return new TestCaseData("en-US", new DateTime(636524626794846031), "[HH:mm:ss] LLLL \\HH:\\mm:\\ss", "HH:mm:ss Thursday, January 25, 2018 7:37:59 AM HH:mm:ss");
-                // @formatter:on
-            }
+            // @formatter:on
         }
+    }
 
-        [Test]
-        public void CanFormat_SomeInvalidValues_ShouldReturnFalse()
-        {
-            _formatter.CanFormat("Test", "dd.MM.yyyy", "de-DE").Should().BeFalse();
-            _formatter.CanFormat(123, "dd.MM.yyyy", "de-DE").Should().BeFalse();
-            _formatter.CanFormat(123.45, "dd.MM.yyyy", "de-DE").Should().BeFalse();
-            _formatter.CanFormat(123L, "dd.MM.yyyy", "de-DE").Should().BeFalse();
-            _formatter.CanFormat(123.45m, "dd.MM.yyyy", "de-DE").Should().BeFalse();
-            _formatter.CanFormat(false, "dd.MM.yyyy", "de-DE").Should().BeFalse();
-            _formatter.CanFormat('a', "dd.MM.yyyy", "de-DE").Should().BeFalse();
-            _formatter.CanFormat(new object(), "dd.MM.yyyy", "de-DE").Should().BeFalse();
-        }
+    [Test]
+    public void CanFormat_SomeInvalidValues_ShouldReturnFalse()
+    {
+        _formatter.CanFormat("Test", "dd.MM.yyyy", "de-DE").Should().BeFalse();
+        _formatter.CanFormat(123, "dd.MM.yyyy", "de-DE").Should().BeFalse();
+        _formatter.CanFormat(123.45, "dd.MM.yyyy", "de-DE").Should().BeFalse();
+        _formatter.CanFormat(123L, "dd.MM.yyyy", "de-DE").Should().BeFalse();
+        _formatter.CanFormat(123.45m, "dd.MM.yyyy", "de-DE").Should().BeFalse();
+        _formatter.CanFormat(false, "dd.MM.yyyy", "de-DE").Should().BeFalse();
+        _formatter.CanFormat('a', "dd.MM.yyyy", "de-DE").Should().BeFalse();
+        _formatter.CanFormat(new object(), "dd.MM.yyyy", "de-DE").Should().BeFalse();
+    }
 
-        [Test]
-        public void CanFormat_ValidValues_ShouldReturnTrue()
-        {
-            _formatter.CanFormat(DateTime.Now, "dd.MM.yyyy", "de-DE").Should().BeTrue();
-            _formatter.CanFormat(DateTimeOffset.Now, "dd.MM.yyyy", "de-DE").Should().BeTrue();
-        }
+    [Test]
+    public void CanFormat_ValidValues_ShouldReturnTrue()
+    {
+        _formatter.CanFormat(DateTime.Now, "dd.MM.yyyy", "de-DE").Should().BeTrue();
+        _formatter.CanFormat(DateTimeOffset.Now, "dd.MM.yyyy", "de-DE").Should().BeTrue();
+    }
 
-        [Test]
-        [TestCaseSource(nameof(FormatTestData))]
-        public void Format(string language, DateTime value, string format, string expected)
-        {
-            _formatter.Format(value, format, language).Should().Be(expected);
-            _formatter.Format(new DateTimeOffset(value), format, language).Should().Be(expected);
-        }
+    [Test]
+    [TestCaseSource(nameof(FormatTestData))]
+    public void Format(string language, DateTime value, string format, string expected)
+    {
+        _formatter.Format(value, format, language).Should().Be(expected);
+        _formatter.Format(new DateTimeOffset(value), format, language).Should().Be(expected);
     }
 }

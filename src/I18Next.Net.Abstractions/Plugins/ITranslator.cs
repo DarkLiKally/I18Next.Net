@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace I18Next.Net.Plugins
+namespace I18Next.Net.Plugins;
+
+public interface ITranslator
 {
-    public interface ITranslator
-    {
-        List<IPostProcessor> PostProcessors { get; }
+    List<IPostProcessor> PostProcessors { get; }
 
-        event EventHandler<MissingKeyEventArgs> MissingKey;
+    event EventHandler<MissingKeyEventArgs> MissingKey;
 
-        Task<string> TranslateAsync(string language, string key, IDictionary<string, object> args, TranslationOptions options);
-    }
+    Task<string> TranslateAsync(string language, string key, IDictionary<string, object> args, TranslationOptions options);
 }

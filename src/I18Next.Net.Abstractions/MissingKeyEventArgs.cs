@@ -1,23 +1,22 @@
 using System;
 
-namespace I18Next.Net
+namespace I18Next.Net;
+
+public class MissingKeyEventArgs : EventArgs
 {
-    public class MissingKeyEventArgs : EventArgs
+    public MissingKeyEventArgs(string language, string ns, string key, string[] possibleKeys)
     {
-        public MissingKeyEventArgs(string language, string ns, string key, string[] possibleKeys)
-        {
-            Language = language;
-            Namespace = ns;
-            Key = key;
-            PossibleKeys = possibleKeys;
-        }
-
-        public string Key { get; }
-
-        public string Language { get; }
-
-        public string Namespace { get; }
-
-        public string[] PossibleKeys { get; }
+        Language = language;
+        Namespace = ns;
+        Key = key;
+        PossibleKeys = possibleKeys;
     }
+
+    public string Key { get; }
+
+    public string Language { get; }
+
+    public string Namespace { get; }
+
+    public string[] PossibleKeys { get; }
 }

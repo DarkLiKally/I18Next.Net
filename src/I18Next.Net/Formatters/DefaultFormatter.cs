@@ -1,28 +1,27 @@
 ﻿using System.Globalization;
 using I18Next.Net.Plugins;
 
-namespace I18Next.Net.Formatters
+namespace I18Next.Net.Formatters;
+
+public class DefaultFormatter : IFormatter
 {
-    public class DefaultFormatter : IFormatter
+    public bool CanFormat(object value, string format, string language)
     {
-        public bool CanFormat(object value, string format, string language)
-        {
-            return true;
-        }
+        return true;
+    }
 
-        public string Format(object value, string format, string language)
-        {
-            if (value == null)
-                return null;
+    public string Format(object value, string format, string language)
+    {
+        if (value == null)
+            return null;
 
-            if (format == null)
-                return value.ToString();
+        if (format == null)
+            return value.ToString();
 
-            var cultureInfo = CultureInfo.GetCultureInfo(language);
+        var cultureInfo = CultureInfo.GetCultureInfo(language);
 
-            var formatString = $"{{0:{format}}}";
+        var formatString = $"{{0:{format}}}";
 
-            return string.Format(cultureInfo, formatString, value);
-        }
+        return string.Format(cultureInfo, formatString, value);
     }
 }

@@ -1,6 +1,5 @@
-﻿namespace I18Next.Net.Tests.Plugins
+﻿namespace I18Next.Net.Tests.Plugins;
+
+public class HtmlInterpolatorFixture
 {
-    public class HtmlInterpolatorFixture
-    {
-    }
 }

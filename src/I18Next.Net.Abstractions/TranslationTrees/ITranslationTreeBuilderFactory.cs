@@ -1,7 +1,6 @@
-﻿namespace I18Next.Net.TranslationTrees
+﻿namespace I18Next.Net.TranslationTrees;
+
+public interface ITranslationTreeBuilderFactory
 {
-    public interface ITranslationTreeBuilderFactory
-    {
-        ITranslationTreeBuilder Create();
-    }
+    ITranslationTreeBuilder Create();
 }

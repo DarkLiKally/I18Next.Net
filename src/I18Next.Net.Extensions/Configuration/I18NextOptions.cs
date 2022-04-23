@@ -1,15 +1,14 @@
 using System.Collections.Generic;
 
-namespace I18Next.Net.Extensions.Configuration
+namespace I18Next.Net.Extensions.Configuration;
+
+public class I18NextOptions
 {
-    public class I18NextOptions
-    {
-        public string DefaultLanguage { get; set; } = "en-US";
+    public string DefaultLanguage { get; set; } = "en-US";
 
-        public string DefaultNamespace { get; set; } = "translation";
+    public string DefaultNamespace { get; set; } = "translation";
 
-        public bool DetectLanguageOnEachTranslation { get; set; }
+    public bool DetectLanguageOnEachTranslation { get; set; }
 
-        public IList<string> FallbackLanguages { get; set; } = new List<string>();
-    }
+    public IList<string> FallbackLanguages { get; set; } = new List<string>();
 }

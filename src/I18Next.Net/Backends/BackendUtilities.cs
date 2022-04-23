@@ -1,24 +1,23 @@
-﻿namespace I18Next.Net.Backends
+﻿namespace I18Next.Net.Backends;
+
+/// <summary>
+///     Provides some utility methods for easier implementation of backends.
+/// </summary>
+public static class BackendUtilities
 {
     /// <summary>
-    ///     Provides some utility methods for easier implementation of backends.
+    ///     Extracts the language only part of a language string of the form "de-DE". For the provided sample the result would
+    ///     be "de".
     /// </summary>
-    public static class BackendUtilities
+    /// <param name="language">The language input string.</param>
+    /// <returns>The language part of the input string.</returns>
+    public static string GetLanguagePart(string language)
     {
-        /// <summary>
-        ///     Extracts the language only part of a language string of the form "de-DE". For the provided sample the result would
-        ///     be "de".
-        /// </summary>
-        /// <param name="language">The language input string.</param>
-        /// <returns>The language part of the input string.</returns>
-        public static string GetLanguagePart(string language)
-        {
-            var index = language.IndexOf('-');
+        var index = language.IndexOf('-');
 
-            if (index == -1)
-                return language;
+        if (index == -1)
+            return language;
 
-            return language.Substring(0, index);
-        }
+        return language.Substring(0, index);
     }
 }

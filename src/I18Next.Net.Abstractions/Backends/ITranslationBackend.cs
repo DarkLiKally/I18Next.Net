@@ -1,10 +1,9 @@
 ﻿using System.Threading.Tasks;
 using I18Next.Net.TranslationTrees;
 
-namespace I18Next.Net.Backends
+namespace I18Next.Net.Backends;
+
+public interface ITranslationBackend
 {
-    public interface ITranslationBackend
-    {
-        Task<ITranslationTree> LoadNamespaceAsync(string language, string @namespace);
-    }
+    Task<ITranslationTree> LoadNamespaceAsync(string language, string @namespace);
 }

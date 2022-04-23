@@ -1,6 +1,5 @@
-﻿namespace I18Next.Net.Tests.Backends
+﻿namespace I18Next.Net.Tests.Backends;
+
+public class SimpleIniParserFixture
 {
-    public class SimpleIniParserFixture
-    {
-    }
 }

@@ -1,11 +1,10 @@
-﻿namespace I18Next.Net.TranslationTrees
+﻿namespace I18Next.Net.TranslationTrees;
+
+public class GenericTranslationTreeBuilderFactory<T> : ITranslationTreeBuilderFactory
+    where T : ITranslationTreeBuilder, new()
 {
-    public class GenericTranslationTreeBuilderFactory<T> : ITranslationTreeBuilderFactory
-        where T : ITranslationTreeBuilder, new()
+    public ITranslationTreeBuilder Create()
     {
-        public ITranslationTreeBuilder Create()
-        {
-            return new T();
-        }
+        return new T();
     }
 }

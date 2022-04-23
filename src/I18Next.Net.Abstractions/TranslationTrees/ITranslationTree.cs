@@ -1,13 +1,12 @@
 ﻿using System.Collections.Generic;
 
-namespace I18Next.Net.TranslationTrees
+namespace I18Next.Net.TranslationTrees;
+
+public interface ITranslationTree
 {
-    public interface ITranslationTree
-    {
-        string Namespace { get; set; }
+    string Namespace { get; set; }
 
-        IDictionary<string, string> GetAllValues();
+    IDictionary<string, string> GetAllValues();
 
-        string GetValue(string key, IDictionary<string, object> args);
-    }
+    string GetValue(string key, IDictionary<string, object> args);
 }

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Company>DarkLiKally</Company>
     <Authors>DarkLiKally</Authors>
@@ -8,7 +8,8 @@
     <RepositoryUrl>https://github.com/DarkLiKally/I18Next.Net</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <Product>I18Next.Net</Product>
-    <Version>0.7.1</Version>
+    <Version>1.0.0</Version>
+      <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DocumentationFile>bin\Debug\I18Next.Net.ICU.xml</DocumentationFile>

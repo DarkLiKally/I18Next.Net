@@ -1,7 +1,6 @@
-namespace I18Next.Net
+namespace I18Next.Net;
+
+public interface II18NextFactory
 {
-    public interface II18NextFactory
-    {
-        II18Next CreateInstance();
-    }
+    II18Next CreateInstance();
 }

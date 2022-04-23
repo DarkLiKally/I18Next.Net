@@ -8,8 +8,9 @@
         <RepositoryUrl>https://github.com/DarkLiKally/I18Next.Net</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <Product>I18Next.Net</Product>
-        <Version>0.7.1</Version>
-        <TargetFramework>netstandard2.0</TargetFramework>
+        <Version>1.0.0</Version>
+        <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
+        <LangVersion>latest</LangVersion>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -26,7 +27,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="NGettext" Version="0.6.4" />
+      <PackageReference Include="NGettext" Version="0.6.7" />
     </ItemGroup>
 
 </Project>

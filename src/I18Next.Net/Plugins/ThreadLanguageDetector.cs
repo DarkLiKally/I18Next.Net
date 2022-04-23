@@ -1,29 +1,28 @@
 using System.Threading;
 
-namespace I18Next.Net.Plugins
+namespace I18Next.Net.Plugins;
+
+public class ThreadLanguageDetector : ILanguageDetector
 {
-    public class ThreadLanguageDetector : ILanguageDetector
+    public ThreadLanguageDetector()
     {
-        public ThreadLanguageDetector()
-        {
-            FallbackLanguage = "en-US";
-        }
+        FallbackLanguage = "en-US";
+    }
 
-        public ThreadLanguageDetector(string fallbackLanguage)
-        {
-            FallbackLanguage = fallbackLanguage;
-        }
+    public ThreadLanguageDetector(string fallbackLanguage)
+    {
+        FallbackLanguage = fallbackLanguage;
+    }
 
-        public string FallbackLanguage { get; set; }
+    public string FallbackLanguage { get; set; }
 
-        public string GetLanguage()
-        {
-            var languageTag = Thread.CurrentThread.CurrentCulture.IetfLanguageTag;
+    public string GetLanguage()
+    {
+        var languageTag = Thread.CurrentThread.CurrentCulture.IetfLanguageTag;
 
-            if (string.IsNullOrEmpty(languageTag))
-                return FallbackLanguage;
+        if (string.IsNullOrEmpty(languageTag))
+            return FallbackLanguage;
 
-            return languageTag;
-        }
+        return languageTag;
     }
 }

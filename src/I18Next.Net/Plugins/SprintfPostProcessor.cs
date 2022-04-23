@@ -3,35 +3,34 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace I18Next.Net.Plugins
+namespace I18Next.Net.Plugins;
+
+public class SprintfPostProcessor : IPostProcessor
 {
-    public class SprintfPostProcessor : IPostProcessor
+    public string Keyword => "sprintf";
+
+    public string Process(string key, string value, IDictionary<string, object> args)
     {
-        public string Keyword => "sprintf";
+        if (args == null)
+            return value;
 
-        public string Process(string key, string value, IDictionary<string, object> args)
-        {
-            if (args == null)
-                return value;
+        if (!args.ContainsKey("sprintf"))
+            return value;
 
-            if (!args.ContainsKey("sprintf"))
-                return value;
+        if (!args["sprintf"].GetType().IsArray)
+            return value;
 
-            if (!args["sprintf"].GetType().IsArray)
-                return value;
+        var enumerable = (IEnumerable) args["sprintf"];
 
-            var enumerable = (IEnumerable) args["sprintf"];
+        return SprintfFormatProxy(value, enumerable.Cast<object>().ToArray());
+    }
 
-            return SprintfFormatProxy(value, enumerable.Cast<object>().ToArray());
-        }
+    private static string SprintfFormatProxy(string input, params object[] args)
+    {
+        var i = 0;
 
-        private static string SprintfFormatProxy(string input, params object[] args)
-        {
-            var i = 0;
+        input = Regex.Replace(input, "%.", m => $"{{{(++i).ToString()}}}");
 
-            input = Regex.Replace(input, "%.", m => $"{{{(++i).ToString()}}}");
-
-            return string.Format(input, args);
-        }
+        return string.Format(input, args);
     }
 }

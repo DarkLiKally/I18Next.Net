@@ -1,7 +1,6 @@
-﻿namespace I18Next.Net.Plugins
+﻿namespace I18Next.Net.Plugins;
+
+public interface ILanguageDetector
 {
-    public interface ILanguageDetector
-    {
-        string GetLanguage();
-    }
+    string GetLanguage();
 }

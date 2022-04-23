@@ -2,87 +2,86 @@
 using System.Text.RegularExpressions;
 using I18Next.Net.Internal;
 
-namespace I18Next.Net.Plugins
+namespace I18Next.Net.Plugins;
+
+public class IntervalPostProcessor : IPostProcessor
 {
-    public class IntervalPostProcessor : IPostProcessor
+    public static readonly Regex IntervalRegex = new Regex(@"\((\S*)\).*{(.*)}");
+
+    public string IntervalSeparator { get; set; } = ";";
+
+    public bool UseFirstAsFallback { get; set; }
+
+    public string Keyword => "interval";
+
+    public string Process(string key, string value, IDictionary<string, object> args)
     {
-        public static readonly Regex IntervalRegex = new Regex(@"\((\S*)\).*{(.*)}");
+        var intervals = value.Split(IntervalSeparator);
 
-        public string IntervalSeparator { get; set; } = ";";
+        if (!((args?.ContainsKey("count") ?? false) && args["count"] is int count))
+            count = 0;
 
-        public bool UseFirstAsFallback { get; set; }
-
-        public string Keyword => "interval";
-
-        public string Process(string key, string value, IDictionary<string, object> args)
+        string found = null;
+        foreach (var entry in intervals)
         {
-            var intervals = value.Split(IntervalSeparator);
+            var match = IntervalRegex.Match(entry);
 
-            if (!((args?.ContainsKey("count") ?? false) && args["count"] is int count))
-                count = 0;
-
-            string found = null;
-            foreach (var entry in intervals)
+            if (match.Success && CheckIntervalMatch(match.Groups[1].Value, count))
             {
-                var match = IntervalRegex.Match(entry);
-
-                if (match.Success && CheckIntervalMatch(match.Groups[1].Value, count))
-                {
-                    found = match.Groups[2].Value;
-                    break;
-                }
+                found = match.Groups[2].Value;
+                break;
             }
-
-            return found ?? (UseFirstAsFallback ? GetFirstMatchValue(intervals[0]) : value);
         }
 
-        private bool CheckIntervalMatch(string value, int count)
+        return found ?? (UseFirstAsFallback ? GetFirstMatchValue(intervals[0]) : value);
+    }
+
+    private bool CheckIntervalMatch(string value, int count)
+    {
+        if (value.IndexOf('-') > -1)
         {
-            if (value.IndexOf('-') > -1)
+            var parts = value.Split('-');
+            int from, to;
+
+            // Negative infinity
+            if (parts[0] == "inf")
             {
-                var parts = value.Split('-');
-                int from, to;
-
-                // Negative infinity
-                if (parts[0] == "inf")
-                {
-                    if (!int.TryParse(parts[1], out to))
-                        return false;
-
-                    return count <= to;
-                }
-
-                // Positive ifinity
-                if (parts[1] == "inf")
-                {
-                    if (!int.TryParse(parts[0], out from))
-                        return false;
-
-                    return count >= from;
-                }
-
-                // Both values set finite
-                if (!int.TryParse(parts[0], out from) || !int.TryParse(parts[1], out to))
+                if (!int.TryParse(parts[1], out to))
                     return false;
 
-                return count >= from && count <= to;
+                return count <= to;
             }
 
-            if (int.TryParse(value, out var intervalNum))
+            // Positive ifinity
+            if (parts[1] == "inf")
+            {
+                if (!int.TryParse(parts[0], out from))
+                    return false;
 
-                return intervalNum == count;
+                return count >= from;
+            }
 
-            return false;
+            // Both values set finite
+            if (!int.TryParse(parts[0], out from) || !int.TryParse(parts[1], out to))
+                return false;
+
+            return count >= from && count <= to;
         }
 
-        private string GetFirstMatchValue(string interval)
-        {
-            var match = IntervalRegex.Match(interval);
+        if (int.TryParse(value, out var intervalNum))
 
-            if (!match.Success)
-                return interval;
+            return intervalNum == count;
 
-            return match.Groups[2].Value;
-        }
+        return false;
+    }
+
+    private string GetFirstMatchValue(string interval)
+    {
+        var match = IntervalRegex.Match(interval);
+
+        if (!match.Success)
+            return interval;
+
+        return match.Groups[2].Value;
     }
 }

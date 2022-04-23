@@ -1,6 +1,5 @@
-﻿namespace I18Next.Net.Tests.Formatters
+﻿namespace I18Next.Net.Tests.Formatters;
+
+public class DefaultFormatterFixture
 {
-    public class DefaultFormatterFixture
-    {
-    }
 }

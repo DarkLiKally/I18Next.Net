@@ -3,63 +3,62 @@ using System.Globalization;
 using System.Linq;
 using Microsoft.Extensions.Localization;
 
-namespace I18Next.Net.Extensions
+namespace I18Next.Net.Extensions;
+
+public class I18NextStringLocalizer : IStringLocalizer
 {
-    public class I18NextStringLocalizer : IStringLocalizer
+    private readonly string _defaultNamespace;
+    private readonly II18Next _instance;
+
+    private string _language;
+
+    public I18NextStringLocalizer(II18Next instance)
     {
-        private readonly string _defaultNamespace;
-        private readonly II18Next _instance;
+        _instance = instance;
 
-        private string _language;
+        _defaultNamespace = instance.DefaultNamespace;
+    }
 
-        public I18NextStringLocalizer(II18Next instance)
-        {
-            _instance = instance;
+    public I18NextStringLocalizer(I18NextNet instance, string defaultNamespace)
+    {
+        _instance = instance;
 
-            _defaultNamespace = instance.DefaultNamespace;
-        }
+        _defaultNamespace = defaultNamespace;
+    }
 
-        public I18NextStringLocalizer(I18NextNet instance, string defaultNamespace)
-        {
-            _instance = instance;
+    public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures)
+    {
+        var language = _language ?? _instance.Language;
 
-            _defaultNamespace = defaultNamespace;
-        }
+        var result = _instance.Backend.LoadNamespaceAsync(language, _instance.DefaultNamespace)
+            .ConfigureAwait(false).GetAwaiter().GetResult();
 
-        public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures)
-        {
-            var language = _language ?? _instance.Language;
+        return result.GetAllValues().Select(t => new LocalizedString(t.Key, t.Value));
+    }
 
-            var result = _instance.Backend.LoadNamespaceAsync(language, _instance.DefaultNamespace)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+    public LocalizedString this[string name] => Translate(name);
 
-            return result.GetAllValues().Select(t => new LocalizedString(t.Key, t.Value));
-        }
+    public LocalizedString this[string name, params object[] arguments] => Translate(name, arguments);
 
-        public LocalizedString this[string name] => Translate(name);
+    public IStringLocalizer WithCulture(CultureInfo culture)
+    {
+        _language = culture.IetfLanguageTag;
 
-        public LocalizedString this[string name, params object[] arguments] => Translate(name, arguments);
+        return this;
+    }
 
-        public IStringLocalizer WithCulture(CultureInfo culture)
-        {
-            _language = culture.IetfLanguageTag;
+    private LocalizedString Translate(string name, object[] arguments = null)
+    {
+        object args = null;
 
-            return this;
-        }
+        if (arguments != null && arguments.Length > 0)
+            args = arguments[0];
 
-        private LocalizedString Translate(string name, object[] arguments = null)
-        {
-            object args = null;
+        if (_instance.DetectLanguageOnEachTranslation)
+            _instance.UseDetectedLanguage();
 
-            if (arguments != null && arguments.Length > 0)
-                args = arguments[0];
+        var language = _language ?? _instance.Language;
 
-            if (_instance.DetectLanguageOnEachTranslation)
-                _instance.UseDetectedLanguage();
-
-            var language = _language ?? _instance.Language;
-
-            return new LocalizedString(name, _instance.T(language, _defaultNamespace, name, args));
-        }
+        return new LocalizedString(name, _instance.T(language, _defaultNamespace, name, args));
     }
 }

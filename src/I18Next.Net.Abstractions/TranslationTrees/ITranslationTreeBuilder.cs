@@ -1,11 +1,10 @@
-﻿namespace I18Next.Net.TranslationTrees
+﻿namespace I18Next.Net.TranslationTrees;
+
+public interface ITranslationTreeBuilder
 {
-    public interface ITranslationTreeBuilder
-    {
-        string Namespace { get; set; }
+    string Namespace { get; set; }
 
-        void AddTranslation(string key, string text);
+    void AddTranslation(string key, string text);
 
-        ITranslationTree Build();
-    }
+    ITranslationTree Build();
 }

@@ -5,10 +5,10 @@
         <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
         <RepositoryUrl>https://github.com/DarkLiKally/I18Next.Net</RepositoryUrl>
         <PackageProjectUrl>https://github.com/DarkLiKally/I18Next.Net</PackageProjectUrl>
-        <Version>0.7.1</Version>
+        <Version>1.0.0</Version>
         <Authors>DarkLiKally</Authors>
         <RepositoryType>git</RepositoryType>
-        <TargetFramework>netstandard2.0</TargetFramework>
+        <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
