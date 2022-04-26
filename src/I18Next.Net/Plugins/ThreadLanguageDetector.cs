@@ -16,9 +16,9 @@ public class ThreadLanguageDetector : ILanguageDetector
 
     public string FallbackLanguage { get; set; }
 
-    public string GetLanguage()
-    {
-        var languageTag = Thread.CurrentThread.CurrentCulture.IetfLanguageTag;
+        public string GetLanguage()
+        {
+            var languageTag = Thread.CurrentThread.CurrentCulture.Name;
 
         if (string.IsNullOrEmpty(languageTag))
             return FallbackLanguage;
