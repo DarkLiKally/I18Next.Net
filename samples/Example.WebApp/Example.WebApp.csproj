@@ -5,10 +5,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.App" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\..\src\I18Next.Net.AspNetCore\I18Next.Net.AspNetCore.csproj" />
       <ProjectReference Include="..\..\src\I18Next.Net.Extensions\I18Next.Net.Extensions.csproj" />
       <ProjectReference Include="..\..\src\I18Next.Net\I18Next.Net.csproj" />

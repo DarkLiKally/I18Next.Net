@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFrameworks>net5.0;net6.0;net48;netcoreapp3.1</TargetFrameworks>
+        <IsPackable>false</IsPackable>
+        <LangVersion>Latest</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="BenchmarkDotNet" Version="0.13.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\I18Next.Net\I18Next.Net.csproj" />
+    </ItemGroup>
+
+</Project>

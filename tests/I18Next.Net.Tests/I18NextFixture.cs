@@ -70,6 +70,14 @@ public class I18NextFixture
     }
 
     [Test]
+    public void MissingNamespace_ReturnsFallback()
+    {
+        _i18Next.Language = "en";
+        _i18Next.SetFallbackNamespaces("translation");
+        Assert.AreEqual("My English plural fallback 2.", _i18Next.T("translation2:exampleKey2", new { count = 2 }));
+    }
+
+    [Test]
     public void NoFallbackLanguage_MissingTranslation_ReturnsKey()
     {
         _i18Next.Language = "de";

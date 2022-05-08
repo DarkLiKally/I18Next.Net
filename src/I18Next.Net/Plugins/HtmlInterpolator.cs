@@ -4,7 +4,7 @@ namespace I18Next.Net.Plugins;
 
 public class HtmlInterpolator : DefaultInterpolator
 {
-    private static readonly Dictionary<string, string> TokenMap = new Dictionary<string, string>
+    private static readonly Dictionary<string, string> TokenMap = new()
     {
         { "&", "&amp;" },
         { "<", "&lt;" },

@@ -11,7 +11,7 @@ public class PolyglotInterpolator : IInterpolator
 {
     private static readonly Dictionary<string, Func<int, int>> LanguageToTypeMap;
 
-    private static readonly Dictionary<string, Func<int, int>> PluralTypes = new Dictionary<string, Func<int, int>>
+    private static readonly Dictionary<string, Func<int, int>> PluralTypes = new()
     {
         {
             "arabic", n =>
@@ -58,7 +58,7 @@ public class PolyglotInterpolator : IInterpolator
         { "icelandic", n => n % 10 != 1 || n % 100 == 11 ? 1 : 0 }
     };
 
-    private static readonly Dictionary<string, string[]> PluralTypesToLanguage = new Dictionary<string, string[]>
+    private static readonly Dictionary<string, string[]> PluralTypesToLanguage = new()
     {
         { "arabic", new[] { "ar" } },
         { "chinese", new[] { "id", "ja", "ko", "lo", "ms", "th", "tr", "zh" } },
@@ -70,7 +70,7 @@ public class PolyglotInterpolator : IInterpolator
         { "icelandic", new[] { "is" } }
     };
 
-    private static readonly Regex TokenRegex = new Regex(@"%\{(.*?)\}");
+    private static readonly Regex TokenRegex = new(@"%\{(.*?)\}");
 
     static PolyglotInterpolator()
     {
@@ -96,7 +96,7 @@ public class PolyglotInterpolator : IInterpolator
         return false;
     }
 
-    public List<IFormatter> Formatters { get; } = new List<IFormatter>();
+    public List<IFormatter> Formatters { get; } = new();
 
     /// <summary>
     ///     <para>

@@ -1,6 +1,7 @@
 using System.Linq;
 using I18Next.Net.Backends;
 using I18Next.Net.Extensions.Configuration;
+using I18Next.Net.Logging;
 using I18Next.Net.Plugins;
 using Microsoft.Extensions.Options;
 

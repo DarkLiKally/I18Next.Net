@@ -4,9 +4,9 @@ namespace I18Next.Net.TranslationTrees;
 
 public class HierarchicalTranslationTreeBuilder : ITranslationTreeBuilder
 {
-    private readonly Dictionary<string, Dictionary<string, object>> _groups = new Dictionary<string, Dictionary<string, object>>();
+    private readonly Dictionary<string, Dictionary<string, object>> _groups = new();
 
-    private readonly Dictionary<string, object> _root = new Dictionary<string, object>();
+    private readonly Dictionary<string, object> _root = new();
 
     public void AddTranslation(string key, string text)
     {

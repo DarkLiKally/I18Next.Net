@@ -9,7 +9,7 @@ namespace I18Next.Net.ICU;
 
 public class MessageFormatInterpolator : IInterpolator
 {
-    private readonly ConcurrentDictionary<string, MessageFormatter> _messageFormatters = new ConcurrentDictionary<string, MessageFormatter>();
+    private readonly ConcurrentDictionary<string, MessageFormatter> _messageFormatters = new();
     private readonly bool _useCache;
 
     public MessageFormatInterpolator()

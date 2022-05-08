@@ -6,7 +6,7 @@ namespace I18Next.Net.Plugins;
 
 public class IntervalPostProcessor : IPostProcessor
 {
-    public static readonly Regex IntervalRegex = new Regex(@"\((\S*)\).*{(.*)}");
+    public static readonly Regex IntervalRegex = new(@"\((\S*)\).*{(.*)}");
 
     public string IntervalSeparator { get; set; } = ";";
 

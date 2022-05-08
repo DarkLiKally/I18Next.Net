@@ -7,7 +7,7 @@ namespace I18Next.Net.Backends;
 
 public class InMemoryBackend : ITranslationBackend
 {
-    private readonly Dictionary<string, DictionaryTranslationTree> _namespaces = new Dictionary<string, DictionaryTranslationTree>();
+    private readonly Dictionary<string, DictionaryTranslationTree> _namespaces = new();
 
     public Task<ITranslationTree> LoadNamespaceAsync(string language, string @namespace)
     {

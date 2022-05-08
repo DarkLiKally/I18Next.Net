@@ -12,7 +12,7 @@ namespace I18Next.Net.Formatters;
 /// </summary>
 public class MomentJsFormatter : IFormatter
 {
-    private static readonly Dictionary<string, string> LocalTokenMap = new Dictionary<string, string>
+    private static readonly Dictionary<string, string> LocalTokenMap = new()
     {
         { "LT", "t" },
         { "LTS", "T" },
@@ -26,9 +26,9 @@ public class MomentJsFormatter : IFormatter
         { "llll", "f" }
     };
 
-    private static readonly Regex LocalTokenRegex = new Regex(@"(\[[^\[]*\])|(\\)?(LTS|LT|LL?L?L?|l{1,4}|\[)");
+    private static readonly Regex LocalTokenRegex = new(@"(\[[^\[]*\])|(\\)?(LTS|LT|LL?L?L?|l{1,4}|\[)");
 
-    private static readonly Dictionary<string, string> TokenMap = new Dictionary<string, string>
+    private static readonly Dictionary<string, string> TokenMap = new()
     {
         { "M", "M" },
         { "Mo", "-" },
@@ -93,7 +93,7 @@ public class MomentJsFormatter : IFormatter
     };
 
     private static readonly Regex TokenRegex =
-        new Regex(
+        new(
             @"(\[[^\[]*\])|(\\)?([Hh]mm(ss)?|Mo|MM?M?M?|Do|DDDo|DD?D?D?|ddd?d?|do?|w[o|w]?|W[o|W]?|Qo?|YYYYYY|YYYYY|YYYY|YY|gg(ggg?)?|GG(GGG?)?|e|E|a|A|hh?|HH?|kk?|mm?|ss?|S{1,9}|x|X|zz?|ZZ?|.)");
 
     public bool CanFormat(object value, string format, string language)

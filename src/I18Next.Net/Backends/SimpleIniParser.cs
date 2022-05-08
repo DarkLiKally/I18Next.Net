@@ -7,8 +7,7 @@ namespace I18Next.Net.Backends;
 
 public class SimpleIniParser
 {
-    private readonly Dictionary<string, Dictionary<string, string>> _entries =
-        new Dictionary<string, Dictionary<string, string>>(StringComparer.InvariantCultureIgnoreCase);
+    private readonly Dictionary<string, Dictionary<string, string>> _entries = new(StringComparer.InvariantCultureIgnoreCase);
 
     public SimpleIniParser(string iniContent)
     {

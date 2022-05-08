@@ -19,4 +19,6 @@ public class TranslationOptions
     }
 
     public string[] FallbackLanguages { get; set; }
+
+    public string[] FallbackNamespaces { get; set; }
 }

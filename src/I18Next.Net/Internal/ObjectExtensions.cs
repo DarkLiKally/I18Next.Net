@@ -8,7 +8,7 @@ namespace I18Next.Net.Internal;
 
 public static class ObjectExtensions
 {
-    private static readonly ConcurrentDictionary<Type, PropertyInfo[]> ReflectionCache = new ConcurrentDictionary<Type, PropertyInfo[]>();
+    private static readonly ConcurrentDictionary<Type, PropertyInfo[]> ReflectionCache = new();
 
     public static IDictionary<string, object> ObjectToDictionary(object value)
     {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using I18Next.Net.Backends;
 using I18Next.Net.Extensions.Configuration;
+using I18Next.Net.Logging;
 using I18Next.Net.Plugins;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -162,7 +163,7 @@ public class I18NextBuilder
     ///         It's not supported to combine multiple interpolator plugins.
     ///     </para>
     /// </remarks>
-    /// <param name="backend">The translation interpolator instance.</param>
+    /// <param name="interpolator">The translation interpolator instance.</param>
     /// <returns>The current I18Next builder instance.</returns>
     public I18NextBuilder AddInterpolator(IInterpolator interpolator)
     {
@@ -279,7 +280,7 @@ public class I18NextBuilder
     ///         logger will be used.
     ///     </para>
     /// </remarks>
-    /// <param name="languageDetector">The logger instance.</param>
+    /// <param name="backend">The logger instance.</param>
     /// <returns>The current I18Next builder instance.</returns>
     public I18NextBuilder AddLogger(ILogger backend)
     {
@@ -337,7 +338,7 @@ public class I18NextBuilder
     ///     </para>
     ///     <para>It is possible to use multiple missing key handlers.</para>
     /// </remarks>
-    /// <param name="languageDetector">The missing key handler instance.</param>
+    /// <param name="missingKeyHandler">The missing key handler instance.</param>
     /// <returns>The current I18Next builder instance.</returns>
     public I18NextBuilder AddMissingKeyHandler(IMissingKeyHandler missingKeyHandler)
     {
@@ -400,7 +401,7 @@ public class I18NextBuilder
     ///         registered plural resolver will be used.
     ///     </para>
     /// </remarks>
-    /// <param name="languageDetector">The plural resolver instance.</param>
+    /// <param name="pluralResolver">The plural resolver instance.</param>
     /// <returns>The current I18Next builder instance.</returns>
     public I18NextBuilder AddPluralResolver(IPluralResolver pluralResolver)
     {
@@ -466,7 +467,7 @@ public class I18NextBuilder
     ///     </para>
     ///     <para>It is possible to use multiple post processors.</para>
     /// </remarks>
-    /// <param name="languageDetector">The post processor instance.</param>
+    /// <param name="postProcessor">The post processor instance.</param>
     /// <returns>The current I18Next builder instance.</returns>
     public I18NextBuilder AddPostProcessor(IPostProcessor postProcessor)
     {
@@ -526,7 +527,6 @@ public class I18NextBuilder
     ///         It's not supported to combine multiple translator plugins.
     ///     </para>
     /// </remarks>
-    /// <param name="backend">The translator instance.</param>
     /// <returns>The current I18Next builder instance.</returns>
     public I18NextBuilder AddTranslator<T>()
         where T : class, ITranslator
@@ -546,7 +546,7 @@ public class I18NextBuilder
     ///         It's not supported to combine multiple translator plugins.
     ///     </para>
     /// </remarks>
-    /// <typeparam name="T">The translator plugin type.</typeparam>
+    /// <param name="translator">The translator plugin type.</param>
     /// <returns>The current I18Next builder instance.</returns>
     public I18NextBuilder AddTranslator(ITranslator translator)
     {

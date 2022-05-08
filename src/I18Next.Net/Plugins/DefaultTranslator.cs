@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using I18Next.Net.Backends;
 using I18Next.Net.Internal;
+using I18Next.Net.Logging;
 using I18Next.Net.TranslationTrees;
 
 namespace I18Next.Net.Plugins;
@@ -16,7 +16,7 @@ public class DefaultTranslator : ITranslator
     private readonly ILogger _logger;
     private readonly IPluralResolver _pluralResolver;
 
-    private readonly ConcurrentDictionary<string, ITranslationTree> _treeCache = new ConcurrentDictionary<string, ITranslationTree>();
+    private readonly ConcurrentDictionary<string, ITranslationTree> _treeCache = new();
 
     public DefaultTranslator(ITranslationBackend backend, ILogger logger, IPluralResolver pluralResolver, IInterpolator interpolator)
     {
@@ -50,11 +50,11 @@ public class DefaultTranslator : ITranslator
 
     public string ContextSeparator { get; set; } = "_";
 
-    public List<IMissingKeyHandler> MissingKeyHandlers { get; } = new List<IMissingKeyHandler>();
+    public List<IMissingKeyHandler> MissingKeyHandlers { get; } = new();
 
     public event EventHandler<MissingKeyEventArgs> MissingKey;
 
-    public List<IPostProcessor> PostProcessors { get; } = new List<IPostProcessor>();
+    public List<IPostProcessor> PostProcessors { get; } = new();
 
     public virtual async Task<string> TranslateAsync(string language, string key, IDictionary<string, object> args, TranslationOptions options)
     {
@@ -67,7 +67,7 @@ public class DefaultTranslator : ITranslator
 
         string actualNamespace;
 
-        if (key.Contains(':'))
+        if (key.IndexOf(':') > -1)
         {
             actualNamespace = key.Substring(0, key.IndexOf(':'));
             key = key.Substring(key.IndexOf(':') + 1);
@@ -173,6 +173,8 @@ public class DefaultTranslator : ITranslator
 
     private async Task OnMissingKey(string language, string @namespace, string key, List<string> possibleKeys)
     {
+        _logger.LogInformation("Missing translation for {namespace}:{key} in language {language}.", @namespace, key, language);
+        
         if (MissingKey == null && MissingKeyHandlers.Count == 0)
             return;
 
@@ -180,33 +182,24 @@ public class DefaultTranslator : ITranslator
 
         MissingKey?.Invoke(this, args);
 
-        foreach (var missingKeyHandler in MissingKeyHandlers)
-            await missingKeyHandler.HandleMissingKeyAsync(this, args);
+        if (MissingKeyHandlers.Count > 0)
+        {
+            _logger.LogDebug("Invoking missing key handlers for {namespace}:{key} in language {language}.", @namespace, key, language);
+
+            foreach (var missingKeyHandler in MissingKeyHandlers)
+                await missingKeyHandler.HandleMissingKeyAsync(this, args);
+        }
     }
 
-    private async Task<string> ResolveTranslationAsync(string language, string ns, string key, IDictionary<string, object> args, TranslationOptions options)
+    private async Task<string> ResolveTranslationNoFallbackAsync(string language, string ns, string key, IDictionary<string, object> args)
     {
         var translationTree = await ResolveTranslationTreeAsync(language, ns);
 
-        async Task<string> ResolveTranslationFromFallbackLanguages()
+        if (translationTree == null)
         {
-            if (options?.FallbackLanguages?.Length > 0)
-            {
-                foreach (string fallbackLanguage in options.FallbackLanguages)
-                {
-                    var fallbackResult = await ResolveTranslationAsync(fallbackLanguage, ns, key, args, null);
-                    if (fallbackResult != null)
-                    {
-                        return fallbackResult;
-                    }
-                }
-            }
+            _logger.LogDebug("Unable to resolve a translation tree for {ns} with language {language}", ns, language);
             return null;
         }
-
-
-        if (translationTree == null)
-            return await ResolveTranslationFromFallbackLanguages();
 
         var needsPluralHandling = CheckForSpecialArg(args, "count", typeof(int), typeof(long)) && _pluralResolver.NeedsPlural(language);
         var needsContextHandling = CheckForSpecialArg(args, "context", typeof(string));
@@ -218,6 +211,8 @@ public class DefaultTranslator : ITranslator
 
         if (needsPluralHandling)
         {
+            _logger.LogDebug("Translation {ns}:{key} needs plural handling.", ns, key);
+            
             var count = (int) Convert.ChangeType(args["count"], typeof(int));
             pluralSuffix = _pluralResolver.GetPluralSuffix(language, count);
 
@@ -229,6 +224,8 @@ public class DefaultTranslator : ITranslator
         // Get key for context if needed
         if (needsContextHandling)
         {
+            _logger.LogDebug("Translation {ns}:{key} needs context handling.", ns, key);
+
             var context = (string) args["context"];
             finalKey = $"{finalKey}{ContextSeparator}{context}";
             possibleKeys.Add(finalKey);
@@ -251,13 +248,51 @@ public class DefaultTranslator : ITranslator
 
             if (result != null)
                 break;
+            
+            _logger.LogDebug("Unable to resolve a translation for {currentKey} from the translation tree.", currentKey);
         }
-
-        if (result == null)
+        
+        if(result == null)
             await OnMissingKey(language, ns, key, possibleKeys);
 
-        if (result == null)
-            result = await ResolveTranslationFromFallbackLanguages();
+        _logger.LogInformation("The resolved translation for {ns}:{key} on language {language} was \"{result}\"", ns, key, language, result);
+        
+        return result;
+    }
+
+    private async Task<string> ResolveTranslationAsync(string language, string ns, string key, IDictionary<string, object> args, TranslationOptions options)
+    {
+        var result = await ResolveTranslationNoFallbackAsync(language, ns, key, args);
+
+        if (result == null && options?.FallbackNamespaces?.Length > 0)
+        {
+            foreach (var fallbackNamespace in options.FallbackNamespaces)
+            {
+                var fallbackResult = await ResolveTranslationNoFallbackAsync(language, fallbackNamespace, key, args);
+                if (fallbackResult != null)
+                    return fallbackResult;
+            }
+        }
+
+        if (result == null && options?.FallbackLanguages?.Length > 0)
+        {
+            foreach (var fallbackLanguage in options.FallbackLanguages)
+            {
+                var fallbackResult = await ResolveTranslationNoFallbackAsync(fallbackLanguage, ns, key, args);
+                if (fallbackResult != null)
+                    return fallbackResult;
+                
+                if (options.FallbackNamespaces?.Length > 0)
+                {
+                    foreach (var fallbackNamespace in options.FallbackNamespaces)
+                    {
+                        fallbackResult = await ResolveTranslationNoFallbackAsync(fallbackLanguage, fallbackNamespace, key, args);
+                        if (fallbackResult != null)
+                            return fallbackResult;
+                    }
+                }
+            }
+        }
 
         return result;
     }
@@ -265,6 +300,8 @@ public class DefaultTranslator : ITranslator
     private async Task<ITranslationTree> ResolveTranslationTreeAsync(string language, string ns)
     {
         var cacheKey = $"{language}.{ns}";
+        
+        _logger.LogDebug("Trying to resolve translation tree {cacheKey}", cacheKey);
 
         if (_treeCache.TryGetValue(cacheKey, out var tree))
             return tree;

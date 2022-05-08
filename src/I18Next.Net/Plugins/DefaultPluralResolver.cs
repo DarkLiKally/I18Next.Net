@@ -13,7 +13,7 @@ public enum JsonFormat
 
 public class DefaultPluralResolver : IPluralResolver
 {
-    private static readonly Dictionary<int, Func<int, int>> PluralizationFilters = new Dictionary<int, Func<int, int>>
+    private static readonly Dictionary<int, Func<int, int>> PluralizationFilters = new()
     {
             // @formatter:off
             { 1, n => n > 1 ? 1 : 0 },
@@ -42,7 +42,7 @@ public class DefaultPluralResolver : IPluralResolver
 
     private static readonly PluralizationSet[] PluralizationSets =
     {
-        new PluralizationSet
+        new()
         {
             Languages = new[]
             {
@@ -52,7 +52,7 @@ public class DefaultPluralResolver : IPluralResolver
             Numbers = new[] { 1, 2 },
             Fc = 1
         },
-        new PluralizationSet
+        new()
         {
             Languages = new[]
             {
@@ -65,7 +65,7 @@ public class DefaultPluralResolver : IPluralResolver
             Numbers = new[] { 1, 2 },
             Fc = 2
         },
-        new PluralizationSet
+        new()
         {
             Languages = new[]
             {
@@ -75,30 +75,30 @@ public class DefaultPluralResolver : IPluralResolver
             Numbers = new[] { 1 },
             Fc = 3
         },
-        new PluralizationSet
+        new()
         {
             Languages = new[] { "be", "bs", "dz", "hr", "ru", "sr", "uk" },
             Numbers = new[] { 1, 2, 5 },
             Fc = 4
         },
-        new PluralizationSet { Languages = new[] { "ar" }, Numbers = new[] { 0, 1, 2, 3, 11, 100 }, Fc = 5 },
-        new PluralizationSet { Languages = new[] { "cs", "sk" }, Numbers = new[] { 1, 2, 5 }, Fc = 6 },
-        new PluralizationSet { Languages = new[] { "csb", "pl" }, Numbers = new[] { 1, 2, 5 }, Fc = 7 },
-        new PluralizationSet { Languages = new[] { "cy" }, Numbers = new[] { 1, 2, 3, 8 }, Fc = 8 },
-        new PluralizationSet { Languages = new[] { "fr" }, Numbers = new[] { 1, 2 }, Fc = 9 },
-        new PluralizationSet { Languages = new[] { "ga" }, Numbers = new[] { 1, 2, 3, 7, 11 }, Fc = 10 },
-        new PluralizationSet { Languages = new[] { "gd" }, Numbers = new[] { 1, 2, 3, 20 }, Fc = 11 },
-        new PluralizationSet { Languages = new[] { "is" }, Numbers = new[] { 1, 2 }, Fc = 12 },
-        new PluralizationSet { Languages = new[] { "jv" }, Numbers = new[] { 0, 1 }, Fc = 13 },
-        new PluralizationSet { Languages = new[] { "kw" }, Numbers = new[] { 1, 2, 3, 4 }, Fc = 14 },
-        new PluralizationSet { Languages = new[] { "lt" }, Numbers = new[] { 1, 2, 10 }, Fc = 15 },
-        new PluralizationSet { Languages = new[] { "lv" }, Numbers = new[] { 1, 2, 0 }, Fc = 16 },
-        new PluralizationSet { Languages = new[] { "mk" }, Numbers = new[] { 1, 2 }, Fc = 17 },
-        new PluralizationSet { Languages = new[] { "mnk" }, Numbers = new[] { 0, 1, 2 }, Fc = 18 },
-        new PluralizationSet { Languages = new[] { "mt" }, Numbers = new[] { 1, 2, 11, 20 }, Fc = 19 },
-        new PluralizationSet { Languages = new[] { "or" }, Numbers = new[] { 2, 1 }, Fc = 2 },
-        new PluralizationSet { Languages = new[] { "ro" }, Numbers = new[] { 1, 2, 20 }, Fc = 20 },
-        new PluralizationSet { Languages = new[] { "sl" }, Numbers = new[] { 5, 1, 2, 3 }, Fc = 21 }
+        new() { Languages = new[] { "ar" }, Numbers = new[] { 0, 1, 2, 3, 11, 100 }, Fc = 5 },
+        new() { Languages = new[] { "cs", "sk" }, Numbers = new[] { 1, 2, 5 }, Fc = 6 },
+        new() { Languages = new[] { "csb", "pl" }, Numbers = new[] { 1, 2, 5 }, Fc = 7 },
+        new() { Languages = new[] { "cy" }, Numbers = new[] { 1, 2, 3, 8 }, Fc = 8 },
+        new() { Languages = new[] { "fr" }, Numbers = new[] { 1, 2 }, Fc = 9 },
+        new() { Languages = new[] { "ga" }, Numbers = new[] { 1, 2, 3, 7, 11 }, Fc = 10 },
+        new() { Languages = new[] { "gd" }, Numbers = new[] { 1, 2, 3, 20 }, Fc = 11 },
+        new() { Languages = new[] { "is" }, Numbers = new[] { 1, 2 }, Fc = 12 },
+        new() { Languages = new[] { "jv" }, Numbers = new[] { 0, 1 }, Fc = 13 },
+        new() { Languages = new[] { "kw" }, Numbers = new[] { 1, 2, 3, 4 }, Fc = 14 },
+        new() { Languages = new[] { "lt" }, Numbers = new[] { 1, 2, 10 }, Fc = 15 },
+        new() { Languages = new[] { "lv" }, Numbers = new[] { 1, 2, 0 }, Fc = 16 },
+        new() { Languages = new[] { "mk" }, Numbers = new[] { 1, 2 }, Fc = 17 },
+        new() { Languages = new[] { "mnk" }, Numbers = new[] { 0, 1, 2 }, Fc = 18 },
+        new() { Languages = new[] { "mt" }, Numbers = new[] { 1, 2, 11, 20 }, Fc = 19 },
+        new() { Languages = new[] { "or" }, Numbers = new[] { 2, 1 }, Fc = 2 },
+        new() { Languages = new[] { "ro" }, Numbers = new[] { 1, 2, 20 }, Fc = 20 },
+        new() { Languages = new[] { "sl" }, Numbers = new[] { 5, 1, 2, 3 }, Fc = 21 }
     };
 
     private static readonly ConcurrentDictionary<string, PluralizationRule> Rules;

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
+        <TargetFrameworks>netstandard2.0;netstandard2.1;net5.0;net6.0</TargetFrameworks>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
         <RepositoryUrl>https://github.com/DarkLiKally/I18Next.Net</RepositoryUrl>
@@ -9,6 +9,7 @@
         <Authors>DarkLiKally</Authors>
         <RepositoryType>git</RepositoryType>
         <LangVersion>latest</LangVersion>
+        <NoWarn>CS1591</NoWarn>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
         <DocumentationFile>bin\Debug\I18Next.Net.xml</DocumentationFile>
@@ -17,9 +18,9 @@
         <DocumentationFile>bin\Release\I18Next.Net.xml</DocumentationFile>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.1"/>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\I18Next.Net.Abstractions\I18Next.Net.Abstractions.csproj"/>
+        <ProjectReference Include="..\I18Next.Net.Abstractions\I18Next.Net.Abstractions.csproj" />
     </ItemGroup>
 </Project>

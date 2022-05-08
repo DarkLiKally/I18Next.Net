@@ -2,24 +2,18 @@
 using System.Threading.Tasks;
 using I18Next.Net.Backends;
 using I18Next.Net.Internal;
+using I18Next.Net.Logging;
 using I18Next.Net.Plugins;
 
 namespace I18Next.Net;
 
 public class I18NextNet : II18Next
 {
-    private string _defaultNamespace;
-    private string[] _fallbackLanguages;
     private string _language;
 
     private readonly TranslationOptions _options;
 
-    public I18NextNet(ITranslationBackend backend, ITranslator translator)
-        : this(backend, translator, null)
-    {
-    }
-
-    public I18NextNet(ITranslationBackend backend, ITranslator translator, ILanguageDetector languageDetector)
+    public I18NextNet(ITranslationBackend backend, ITranslator translator, ILanguageDetector languageDetector = null)
     {
         _options = CreateTranslationOptions();
 
@@ -27,20 +21,20 @@ public class I18NextNet : II18Next
         Translator = translator ?? throw new ArgumentNullException(nameof(translator));
 
         Language = "en-US";
-        DefaultNamespace = "translation";
         Logger = new TraceLogger();
         LanguageDetector = languageDetector ?? new DefaultLanguageDetector("en-US");
     }
 
     public string[] FallbackLanguages
     {
-        get => _fallbackLanguages;
-        set
-        {
-            _fallbackLanguages = value ?? throw new ArgumentNullException(nameof(value));
+        get => _options.FallbackLanguages;
+        set => _options.FallbackLanguages = value ?? throw new ArgumentNullException(nameof(value));
+    }
 
-            UpdateTranslationOptions();
-        }
+    public string[] FallbackNamespaces
+    {
+        get => _options.FallbackNamespaces;
+        set => _options.FallbackNamespaces = value;
     }
 
     public ILogger Logger { get; set; }
@@ -49,15 +43,13 @@ public class I18NextNet : II18Next
 
     public string DefaultNamespace
     {
-        get => _defaultNamespace;
+        get => _options.DefaultNamespace;
         set
         {
             if (string.IsNullOrWhiteSpace(value))
                 throw new ArgumentNullException(nameof(value));
 
-            _defaultNamespace = value;
-
-            UpdateTranslationOptions();
+            _options.DefaultNamespace = value;
         }
     }
 
@@ -129,19 +121,28 @@ public class I18NextNet : II18Next
         FallbackLanguages = languages;
     }
 
+    public void SetFallbackNamespaces(params string[] namespaces)
+    {
+        FallbackNamespaces = namespaces;
+    }
+
     private TranslationOptions CreateTranslationOptions(string defaultNamespace = null)
     {
-        var options = new TranslationOptions
+        if (_options != null)
         {
-            FallbackLanguages = _fallbackLanguages
+            return new TranslationOptions
+            {
+                FallbackLanguages = _options.FallbackLanguages,
+                FallbackNamespaces = _options.FallbackNamespaces,
+                DefaultNamespace = defaultNamespace ?? _options.DefaultNamespace
+            };
+        }
+        
+        return new TranslationOptions
+        {
+            FallbackLanguages = Array.Empty<string>(),
+            DefaultNamespace = defaultNamespace ?? "translation"
         };
-
-        if (defaultNamespace == null && _defaultNamespace != null)
-            options.DefaultNamespace = _defaultNamespace;
-        else if (defaultNamespace != null)
-            options.DefaultNamespace = defaultNamespace;
-
-        return options;
     }
 
     private void OnLanguageChanged(LanguageChangedEventArgs e)
@@ -157,11 +158,5 @@ public class I18NextNet : II18Next
         var argsDict = args.ToDictionary();
 
         return await Translator.TranslateAsync(language, key, argsDict, options);
-    }
-
-    private void UpdateTranslationOptions()
-    {
-        _options.DefaultNamespace = DefaultNamespace;
-        _options.FallbackLanguages = _fallbackLanguages;
     }
 }

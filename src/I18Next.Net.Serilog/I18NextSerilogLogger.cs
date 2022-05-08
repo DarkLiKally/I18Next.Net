@@ -1,13 +1,15 @@
 using System;
-using Serilog;
-using II18NextLogger = I18Next.Net.Plugins.ILogger;
+using I18Next.Net.Logging;
+using Serilog.Events;
+using II18NextLogger = I18Next.Net.Logging.ILogger;
+using ILogger = Serilog.ILogger;
 
 namespace I18Next.Net.Serilog;
 
 /// <summary>
 ///     I18Next logger plugin implementation using Serilog as a target for log messages.
 /// </summary>
-public class I18NextSerilogLogger : II18NextLogger
+public class I18NextSerilogLogger : Logging.ILogger
 {
     private readonly ILogger _logger;
 
@@ -16,7 +18,7 @@ public class I18NextSerilogLogger : II18NextLogger
     /// </summary>
     public I18NextSerilogLogger()
     {
-        _logger = Log.Logger;
+        _logger = global::Serilog.Log.Logger;
     }
 
     /// <summary>
@@ -28,75 +30,35 @@ public class I18NextSerilogLogger : II18NextLogger
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    /// <inheritdoc />
-    public void LogCritical(string message, params object[] args)
+    public bool IsEnabled(LogLevel logLevel)
     {
-        _logger.Fatal(message, args);
+        var level = ConvertLogLevel(logLevel);
+        return _logger.IsEnabled(level);
     }
 
-    /// <inheritdoc />
-    public void LogCritical(Exception exception, string message, params object[] args)
+    public void Log(LogLevel logLevel, Exception exception, string message, params object[] args)
     {
-        _logger.Fatal(exception, message, args);
+        var level = ConvertLogLevel(logLevel);
+        _logger.Write(level, exception, message, args);
     }
 
-    /// <inheritdoc />
-    public void LogDebug(string message, params object[] args)
+    public void Log(LogLevel logLevel, string message, params object[] args)
     {
-        _logger.Debug(message, args);
+        var level = ConvertLogLevel(logLevel);
+        _logger.Write(level, message, args);
     }
 
-    /// <inheritdoc />
-    public void LogDebug(Exception exception, string message, params object[] args)
+    private LogEventLevel ConvertLogLevel(LogLevel logLevel)
     {
-        _logger.Debug(exception, message, args);
-    }
-
-    /// <inheritdoc />
-    public void LogError(string message, params object[] args)
-    {
-        _logger.Error(message, args);
-    }
-
-    /// <inheritdoc />
-    public void LogError(Exception exception, string message, params object[] args)
-    {
-        _logger.Error(exception, message, args);
-    }
-
-    /// <inheritdoc />
-    public void LogInformation(string message, params object[] args)
-    {
-        _logger.Information(message, args);
-    }
-
-    /// <inheritdoc />
-    public void LogInformation(Exception exception, string message, params object[] args)
-    {
-        _logger.Information(exception, message, args);
-    }
-
-    /// <inheritdoc />
-    public void LogVerbose(string message, params object[] args)
-    {
-        _logger.Verbose(message, args);
-    }
-
-    /// <inheritdoc />
-    public void LogVerbose(Exception exception, string message, params object[] args)
-    {
-        _logger.Verbose(exception, message, args);
-    }
-
-    /// <inheritdoc />
-    public void LogWarning(string message, params object[] args)
-    {
-        _logger.Warning(message, args);
-    }
-
-    /// <inheritdoc />
-    public void LogWarning(Exception exception, string message, params object[] args)
-    {
-        _logger.Warning(exception, message, args);
+        switch (logLevel)
+        {
+            case LogLevel.Trace:       return LogEventLevel.Verbose;
+            case LogLevel.Debug:       return LogEventLevel.Debug;
+            case LogLevel.Information: return LogEventLevel.Information;
+            case LogLevel.Warning:     return LogEventLevel.Warning;
+            case LogLevel.Error:       return LogEventLevel.Error;
+            case LogLevel.Critical:    return LogEventLevel.Fatal;
+            default:                   return LogEventLevel.Fatal;
+        }
     }
 }

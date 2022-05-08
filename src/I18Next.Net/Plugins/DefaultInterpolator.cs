@@ -19,12 +19,12 @@ public class DefaultInterpolator : IInterpolator
     private const string UnescapedExpressionPrefix = @"-";
     private const string UnescapedExpressionSuffix = @"";
 
-    private static readonly Regex ExpressionRegex = new Regex($"{ExpressionPrefix}(.+?){ExpressionSuffix}");
+    private static readonly Regex ExpressionRegex = new($"{ExpressionPrefix}(.+?){ExpressionSuffix}");
 
     private static readonly Regex UnescapedExpressionRegex =
-        new Regex($"{ExpressionPrefix}{UnescapedExpressionPrefix}(.+?){UnescapedExpressionSuffix}{ExpressionSuffix}");
+        new($"{ExpressionPrefix}{UnescapedExpressionPrefix}(.+?){UnescapedExpressionSuffix}{ExpressionSuffix}");
 
-    private static readonly Regex NestingRegex = new Regex($"{NestingPrefix}(.+?){NestingSuffix}");
+    private static readonly Regex NestingRegex = new($"{NestingPrefix}(.+?){NestingSuffix}");
 
 
     private List<IFormatter> _formatters;
