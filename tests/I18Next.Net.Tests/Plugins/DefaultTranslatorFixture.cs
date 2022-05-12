@@ -71,12 +71,12 @@ public class DefaultTranslatorFixture
     public async Task TranslateAsync_CallMultiplePostProcessors_ShouldApplyPostProcessorsInOrder()
     {
         var postProcessor1 = Substitute.For<IPostProcessor>();
-        postProcessor1.Process("test", "translated", Arg.Any<IDictionary<string, object>>()).Returns("post-processed1");
+        postProcessor1.ProcessResult("test", "translated", Arg.Any<IDictionary<string, object>>(), "en-US", _translator).Returns("post-processed1");
         postProcessor1.Keyword.Returns("testProcess1");
         var postProcessor2 = Substitute.For<IPostProcessor>();
         postProcessor2.Keyword.Returns("testProcess2");
         var postProcessor3 = Substitute.For<IPostProcessor>();
-        postProcessor3.Process("test", "post-processed1", Arg.Any<IDictionary<string, object>>()).Returns("post-processed3");
+        postProcessor3.ProcessResult("test", "post-processed1", Arg.Any<IDictionary<string, object>>(), "en-US", _translator).Returns("post-processed3");
         postProcessor3.Keyword.Returns("testProcess3");
 
         _translationTree.GetValue("test", Arg.Any<IDictionary<string, object>>()).Returns("translated");
@@ -96,16 +96,16 @@ public class DefaultTranslatorFixture
         await _interpolator.ReceivedWithAnyArgs(0).NestAsync(null, null, null, null);
         _pluralResolver.ReceivedWithAnyArgs(0).GetPluralSuffix(null, 0);
         _pluralResolver.ReceivedWithAnyArgs(0).NeedsPlural(null);
-        postProcessor1.Received(1).Process("test", "translated", Arg.Any<IDictionary<string, object>>());
-        postProcessor2.ReceivedWithAnyArgs(0).Process(null, null, null);
-        postProcessor3.Received(1).Process("test", "post-processed1", Arg.Any<IDictionary<string, object>>());
+        postProcessor1.Received(1).ProcessResult("test", "translated", Arg.Any<IDictionary<string, object>>(), "en-US", _translator);
+        postProcessor2.ReceivedWithAnyArgs(0).ProcessResult(null, null, null, null, null);
+        postProcessor3.Received(1).ProcessResult("test", "post-processed1", Arg.Any<IDictionary<string, object>>(), "en-US", _translator);
     }
 
     [Test]
     public async Task TranslateAsync_CustomPostProcessor_ShouldApplyPostProcessing()
     {
         var postProcessor = Substitute.For<IPostProcessor>();
-        postProcessor.Process("test", "translated", Arg.Any<IDictionary<string, object>>()).Returns("post-processed");
+        postProcessor.ProcessResult("test", "translated", Arg.Any<IDictionary<string, object>>(), "en-US", _translator).Returns("post-processed");
         postProcessor.Keyword.Returns("testProcess");
 
         _translationTree.GetValue("test", Arg.Any<IDictionary<string, object>>()).Returns("translated");
@@ -123,7 +123,7 @@ public class DefaultTranslatorFixture
         await _interpolator.ReceivedWithAnyArgs(0).NestAsync(null, null, null, null);
         _pluralResolver.ReceivedWithAnyArgs(0).GetPluralSuffix(null, 0);
         _pluralResolver.ReceivedWithAnyArgs(0).NeedsPlural(null);
-        postProcessor.Received(1).Process("test", "translated", Arg.Any<IDictionary<string, object>>());
+        postProcessor.Received(1).ProcessResult("test", "translated", Arg.Any<IDictionary<string, object>>(), "en-US", _translator);
     }
 
     [Test]
@@ -208,7 +208,7 @@ public class DefaultTranslatorFixture
     public async Task TranslateAsync_DisablePostProcessing_ShouldTranslateWithoutPostProcessing()
     {
         var postProcessor = Substitute.For<IPostProcessor>();
-        postProcessor.Process("test", "translated", null).Returns("post-processed");
+        postProcessor.ProcessResult("test", "translated", null, "en-US", _translator).Returns("post-processed");
 
         _translationTree.GetValue("test", null).Returns("translated");
         _translator.PostProcessors.Add(postProcessor);
@@ -225,14 +225,14 @@ public class DefaultTranslatorFixture
         await _interpolator.ReceivedWithAnyArgs(0).NestAsync(null, null, null, null);
         _pluralResolver.ReceivedWithAnyArgs(0).GetPluralSuffix(null, 0);
         _pluralResolver.ReceivedWithAnyArgs(0).NeedsPlural(null);
-        postProcessor.Received(0).Process("test", "translated", null);
+        postProcessor.Received(0).ProcessResult("test", "translated", null, "en-US", _translator);
     }
 
     [Test]
     public async Task TranslateAsync_DisablePostProcessingInArgs_ShouldTranslateWithoutPostProcessing()
     {
         var postProcessor = Substitute.For<IPostProcessor>();
-        postProcessor.Process("test", "translated", null).Returns("post-processed");
+        postProcessor.ProcessResult("test", "translated", null, "en-US", _translator).Returns("post-processed");
 
         _translationTree.GetValue("test", Arg.Any<IDictionary<string, object>>()).Returns("translated");
         _translator.PostProcessors.Add(postProcessor);
@@ -250,17 +250,17 @@ public class DefaultTranslatorFixture
         await _interpolator.ReceivedWithAnyArgs(0).NestAsync(null, null, null, null);
         _pluralResolver.ReceivedWithAnyArgs(0).GetPluralSuffix(null, 0);
         _pluralResolver.ReceivedWithAnyArgs(0).NeedsPlural(null);
-        postProcessor.Received(0).Process("test", "translated", null);
+        postProcessor.Received(0).ProcessResult("test", "translated", null, "en-US", _translator);
     }
 
     [Test]
     public async Task TranslateAsync_MultipleCustomPostProcessorWithDifferentKeys_ShouldApplyOnlyTheSpecifiedPostProcessors()
     {
         var postProcessor1 = Substitute.For<IPostProcessor>();
-        postProcessor1.Process("test", "translated", Arg.Any<IDictionary<string, object>>()).Returns("post-processed1");
+        postProcessor1.ProcessResult("test", "translated", Arg.Any<IDictionary<string, object>>(), "en-US", _translator).Returns("post-processed1");
         postProcessor1.Keyword.Returns("testProcess1");
         var postProcessor2 = Substitute.For<IPostProcessor>();
-        postProcessor2.Process("test", "post-processed1", Arg.Any<IDictionary<string, object>>()).Returns("post-processed2");
+        postProcessor2.ProcessResult("test", "post-processed1", Arg.Any<IDictionary<string, object>>(), "en-US", _translator).Returns("post-processed2");
         postProcessor2.Keyword.Returns("testProcess2");
 
         _translationTree.GetValue("test", Arg.Any<IDictionary<string, object>>()).Returns("translated");
@@ -279,18 +279,18 @@ public class DefaultTranslatorFixture
         await _interpolator.ReceivedWithAnyArgs(0).NestAsync(null, null, null, null);
         _pluralResolver.ReceivedWithAnyArgs(0).GetPluralSuffix(null, 0);
         _pluralResolver.ReceivedWithAnyArgs(0).NeedsPlural(null);
-        postProcessor1.Received(1).Process("test", "translated", Arg.Any<IDictionary<string, object>>());
-        postProcessor2.ReceivedWithAnyArgs(0).Process(null, null, null);
+        postProcessor1.Received(1).ProcessResult("test", "translated", Arg.Any<IDictionary<string, object>>(), "en-US", _translator);
+        postProcessor2.ReceivedWithAnyArgs(0).ProcessResult(null, null, null, null, null);
     }
 
     [Test]
     public async Task TranslateAsync_MultipleCustomPostProcessorWithSameKey_ShouldApplyPostProcessorsInOrder()
     {
         var postProcessor1 = Substitute.For<IPostProcessor>();
-        postProcessor1.Process("test", "translated", Arg.Any<IDictionary<string, object>>()).Returns("post-processed1");
+        postProcessor1.ProcessResult("test", "translated", Arg.Any<IDictionary<string, object>>(), "en-US", _translator).Returns("post-processed1");
         postProcessor1.Keyword.Returns("testProcess");
         var postProcessor2 = Substitute.For<IPostProcessor>();
-        postProcessor2.Process("test", "post-processed1", Arg.Any<IDictionary<string, object>>()).Returns("post-processed2");
+        postProcessor2.ProcessResult("test", "post-processed1", Arg.Any<IDictionary<string, object>>(), "en-US", _translator).Returns("post-processed2");
         postProcessor2.Keyword.Returns("testProcess");
 
         _translationTree.GetValue("test", Arg.Any<IDictionary<string, object>>()).Returns("translated");
@@ -309,8 +309,8 @@ public class DefaultTranslatorFixture
         await _interpolator.ReceivedWithAnyArgs(0).NestAsync(null, null, null, null);
         _pluralResolver.ReceivedWithAnyArgs(0).GetPluralSuffix(null, 0);
         _pluralResolver.ReceivedWithAnyArgs(0).NeedsPlural(null);
-        postProcessor1.Received(1).Process("test", "translated", Arg.Any<IDictionary<string, object>>());
-        postProcessor2.Received(1).Process("test", "post-processed1", Arg.Any<IDictionary<string, object>>());
+        postProcessor1.Received(1).ProcessResult("test", "translated", Arg.Any<IDictionary<string, object>>(), "en-US", _translator);
+        postProcessor2.Received(1).ProcessResult("test", "post-processed1", Arg.Any<IDictionary<string, object>>(), "en-US", _translator);
     }
 
     [Test]
@@ -396,7 +396,7 @@ public class DefaultTranslatorFixture
     [Test]
     public async Task TranslateAsync_WithContextButNoTranslation_ShouldUseFallback()
     {
-        _translationTree.GetValue("test_male", Arg.Any<IDictionary<string, object>>()).Returns((string) null);
+        _translationTree.GetValue("test_male", Arg.Any<IDictionary<string, object>>()).Returns((string)null);
         _translationTree.GetValue("test", Arg.Any<IDictionary<string, object>>()).Returns("translated");
 
         var args = new { context = "male" };
@@ -517,8 +517,8 @@ public class DefaultTranslatorFixture
     {
         _translationTree.GetValue("test", Arg.Any<IDictionary<string, object>>()).Returns("wrong-translated");
         _translationTree.GetValue("test_2", Arg.Any<IDictionary<string, object>>()).Returns("translated");
-        _translationTree.GetValue("test_male", Arg.Any<IDictionary<string, object>>()).Returns((string) null);
-        _translationTree.GetValue("test_male_2", Arg.Any<IDictionary<string, object>>()).Returns((string) null);
+        _translationTree.GetValue("test_male", Arg.Any<IDictionary<string, object>>()).Returns((string)null);
+        _translationTree.GetValue("test_male_2", Arg.Any<IDictionary<string, object>>()).Returns((string)null);
 
         var args = new { count = 2, context = "male" };
         var result = await _translator.TranslateAsync("en-US", "test", args.ToDictionary(), _options);
@@ -541,9 +541,9 @@ public class DefaultTranslatorFixture
     public async Task TranslateAsync_WithCountAndContextButNoPluralAndContextTranslation_ShouldUseNormalFallback()
     {
         _translationTree.GetValue("test", Arg.Any<IDictionary<string, object>>()).Returns("translated");
-        _translationTree.GetValue("test_2", Arg.Any<IDictionary<string, object>>()).Returns((string) null);
-        _translationTree.GetValue("test_male", Arg.Any<IDictionary<string, object>>()).Returns((string) null);
-        _translationTree.GetValue("test_male_2", Arg.Any<IDictionary<string, object>>()).Returns((string) null);
+        _translationTree.GetValue("test_2", Arg.Any<IDictionary<string, object>>()).Returns((string)null);
+        _translationTree.GetValue("test_male", Arg.Any<IDictionary<string, object>>()).Returns((string)null);
+        _translationTree.GetValue("test_male_2", Arg.Any<IDictionary<string, object>>()).Returns((string)null);
 
         var args = new { count = 2, context = "male" };
         var result = await _translator.TranslateAsync("en-US", "test", args.ToDictionary(), _options);
@@ -568,7 +568,7 @@ public class DefaultTranslatorFixture
         _translationTree.GetValue("test", Arg.Any<IDictionary<string, object>>()).Returns("wrong-translated");
         _translationTree.GetValue("test_2", Arg.Any<IDictionary<string, object>>()).Returns("wrong-translated");
         _translationTree.GetValue("test_male", Arg.Any<IDictionary<string, object>>()).Returns("translated");
-        _translationTree.GetValue("test_male_2", Arg.Any<IDictionary<string, object>>()).Returns((string) null);
+        _translationTree.GetValue("test_male_2", Arg.Any<IDictionary<string, object>>()).Returns((string)null);
 
         var args = new { count = 2, context = "male" };
         var result = await _translator.TranslateAsync("en-US", "test", args.ToDictionary(), _options);
@@ -590,7 +590,7 @@ public class DefaultTranslatorFixture
     [Test]
     public async Task TranslateAsync_WithCountButNoTranslation_ShouldUseFallback()
     {
-        _translationTree.GetValue("test_2", Arg.Any<IDictionary<string, object>>()).Returns((string) null);
+        _translationTree.GetValue("test_2", Arg.Any<IDictionary<string, object>>()).Returns((string)null);
         _translationTree.GetValue("test", Arg.Any<IDictionary<string, object>>()).Returns("translated");
 
         var args = new { count = 2 };
@@ -613,7 +613,7 @@ public class DefaultTranslatorFixture
     {
         var jpTranslationTree = Substitute.For<ITranslationTree>();
         _backend.LoadNamespaceAsync("ja-JP", "test").Returns(jpTranslationTree);
-        jpTranslationTree.GetValue(null, null).ReturnsForAnyArgs((string) null);
+        jpTranslationTree.GetValue(null, null).ReturnsForAnyArgs((string)null);
         _translationTree.GetValue("test_2", Arg.Any<IDictionary<string, object>>()).Returns("translated");
 
         _options.FallbackLanguages = new[] { "en-US" };
@@ -657,7 +657,7 @@ public class DefaultTranslatorFixture
     [Test]
     public async Task TranslateAsync_WithMissingKey_ShouldRaiseMissingKeyEvent()
     {
-        _translationTree.GetValue("test", null).Returns((string) null);
+        _translationTree.GetValue("test", null).Returns((string)null);
 
         var missingKeyCalls = 0;
 
@@ -692,8 +692,8 @@ public class DefaultTranslatorFixture
             { "context", "ctx" }
         };
 
-        _translationTree.GetValue("test", arguments).Returns((string) null);
-        _translationTree.GetValue("test_ctx", arguments).Returns((string) null);
+        _translationTree.GetValue("test", arguments).Returns((string)null);
+        _translationTree.GetValue("test_ctx", arguments).Returns((string)null);
 
         var missingKeyCalls = 0;
 
@@ -729,10 +729,10 @@ public class DefaultTranslatorFixture
             { "count", 2 }
         };
 
-        _translationTree.GetValue("test", arguments).Returns((string) null);
-        _translationTree.GetValue("test_2", arguments).Returns((string) null);
-        _translationTree.GetValue("test_ctx", arguments).Returns((string) null);
-        _translationTree.GetValue("test_ctx_2", arguments).Returns((string) null);
+        _translationTree.GetValue("test", arguments).Returns((string)null);
+        _translationTree.GetValue("test_2", arguments).Returns((string)null);
+        _translationTree.GetValue("test_ctx", arguments).Returns((string)null);
+        _translationTree.GetValue("test_ctx_2", arguments).Returns((string)null);
 
         var missingKeyCalls = 0;
 
@@ -761,7 +761,7 @@ public class DefaultTranslatorFixture
     [Test]
     public async Task TranslateAsync_WithMissingKeyAndMultipleMissingKeyHandlers_ShouldCallMissingKeyHandlers()
     {
-        _translationTree.GetValue("test", null).Returns((string) null);
+        _translationTree.GetValue("test", null).Returns((string)null);
 
         var missingKeyHandlerA = Substitute.For<IMissingKeyHandler>();
         missingKeyHandlerA
@@ -796,7 +796,7 @@ public class DefaultTranslatorFixture
     [Test]
     public async Task TranslateAsync_WithMissingKeyAndOneMissingKeyHandler_ShouldCallMissingKeyHandler()
     {
-        _translationTree.GetValue("test", null).Returns((string) null);
+        _translationTree.GetValue("test", null).Returns((string)null);
 
         var missingKeyHandler = Substitute.For<IMissingKeyHandler>();
         missingKeyHandler
@@ -828,8 +828,8 @@ public class DefaultTranslatorFixture
             { "count", 2 }
         };
 
-        _translationTree.GetValue("test", arguments).Returns((string) null);
-        _translationTree.GetValue("test_2", arguments).Returns((string) null);
+        _translationTree.GetValue("test", arguments).Returns((string)null);
+        _translationTree.GetValue("test_2", arguments).Returns((string)null);
 
         var missingKeyCalls = 0;
 

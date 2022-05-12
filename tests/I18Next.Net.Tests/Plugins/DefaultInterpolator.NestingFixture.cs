@@ -2,7 +2,9 @@
 using System.Threading.Tasks;
 using FluentAssertions;
 using I18Next.Net.Internal;
+using I18Next.Net.Logging;
 using I18Next.Net.Plugins;
+using NSubstitute;
 using NUnit.Framework;
 
 namespace I18Next.Net.Tests.Plugins;
@@ -16,7 +18,8 @@ public class DefaultInterpolator_NestingFixture
     [OneTimeSetUp]
     public void OneTimeSetUp()
     {
-        _interpolator = new DefaultInterpolator();
+        var logger = Substitute.For<ILogger>();
+        _interpolator = new DefaultInterpolator(logger);
     }
 
     private Task<string> DummyTranslateAsync(string language, string key, IDictionary<string, object> args)

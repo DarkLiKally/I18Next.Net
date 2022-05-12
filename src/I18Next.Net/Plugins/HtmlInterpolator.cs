@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using I18Next.Net.Logging;
 
 namespace I18Next.Net.Plugins;
 
@@ -13,6 +14,11 @@ public class HtmlInterpolator : DefaultInterpolator
         { "'", "&#39;" },
         { "/", "&#x2F;" }
     };
+
+    public HtmlInterpolator(ILogger logger) : base(logger)
+    {
+        
+    }
 
     protected override string EscapeValue(string value)
     {

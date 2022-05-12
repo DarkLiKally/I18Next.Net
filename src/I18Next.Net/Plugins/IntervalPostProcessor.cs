@@ -14,7 +14,12 @@ public class IntervalPostProcessor : IPostProcessor
 
     public string Keyword => "interval";
 
-    public string Process(string key, string value, IDictionary<string, object> args)
+    public string ProcessTranslation(string key, string value, IDictionary<string, object> args, string language, ITranslator translator)
+    {
+        return value;
+    }
+
+    public string ProcessResult(string key, string value, IDictionary<string, object> args, string language, ITranslator translator)
     {
         var intervals = value.Split(IntervalSeparator);
 
@@ -33,6 +38,7 @@ public class IntervalPostProcessor : IPostProcessor
             }
         }
 
+        // TODO Fallback to default plural translation
         return found ?? (UseFirstAsFallback ? GetFirstMatchValue(intervals[0]) : value);
     }
 
@@ -52,7 +58,7 @@ public class IntervalPostProcessor : IPostProcessor
                 return count <= to;
             }
 
-            // Positive ifinity
+            // Positive infinity
             if (parts[1] == "inf")
             {
                 if (!int.TryParse(parts[0], out from))

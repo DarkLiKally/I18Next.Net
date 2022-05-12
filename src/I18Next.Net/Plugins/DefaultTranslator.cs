@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using I18Next.Net.Backends;
 using I18Next.Net.Internal;
@@ -31,7 +32,7 @@ public class DefaultTranslator : ITranslator
         _backend = backend;
         _logger = new TraceLogger();
         _pluralResolver = new DefaultPluralResolver();
-        _interpolator = new DefaultInterpolator();
+        _interpolator = new DefaultInterpolator(_logger);
     }
 
     public DefaultTranslator(ITranslationBackend backend, IInterpolator interpolator)
@@ -127,7 +128,7 @@ public class DefaultTranslator : ITranslator
                 (lang2, key2, args2) => TranslateAsync(lang2, key2, args2, options));
 
         if (AllowPostprocessing && PostProcessors.Count > 0)
-            result = HandlePostProcessing(result, key, args);
+            result = HandlePostProcessing(result, language, key, args);
 
         return result;
     }
@@ -140,8 +141,13 @@ public class DefaultTranslator : ITranslator
         if (!args.ContainsKey("postProcess"))
             return null;
 
-        if (args["postProcess"] is string postProcessor)
-            return new[] { postProcessor };
+        if (args["postProcess"] is string postProcessorStr)
+        {
+            if (postProcessorStr.IndexOf(',') > -1)
+                return postProcessorStr.Split(",", StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).ToArray();
+            
+            return new[] { postProcessorStr };
+        }
 
         var localArgs = args["postProcess"];
         var postProcessType = localArgs.GetType();
@@ -151,7 +157,7 @@ public class DefaultTranslator : ITranslator
         return null;
     }
 
-    private string HandlePostProcessing(string result, string key, IDictionary<string, object> args)
+    private string HandlePostProcessing(string result, string language, string key, IDictionary<string, object> args)
     {
         var postProcessorKeys = GetPostProcessorKeys(args);
 
@@ -164,7 +170,7 @@ public class DefaultTranslator : ITranslator
                 foreach (var postProcessor in PostProcessors)
                 {
                     if (postProcessor.Keyword == postProcessorKey)
-                        result = postProcessor.Process(key, result, args);
+                        result = postProcessor.ProcessResult(key, result, args, language, this);
                 }
             }
 

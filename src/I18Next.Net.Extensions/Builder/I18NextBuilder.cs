@@ -689,7 +689,8 @@ public class I18NextBuilder
     {
         var formatters = c.GetRequiredService<IEnumerable<IFormatter>>();
 
-        var instance = new DefaultInterpolator();
+        var logger = c.GetRequiredService<ILogger>();
+        var instance = new DefaultInterpolator(logger);
 
         instance.Formatters.AddRange(formatters);
 

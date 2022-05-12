@@ -4,12 +4,15 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using I18Next.Net.Formatters;
 using I18Next.Net.Internal;
+using I18Next.Net.Logging;
 using Newtonsoft.Json.Linq;
 
 namespace I18Next.Net.Plugins;
 
 public class DefaultInterpolator : IInterpolator
 {
+    private readonly ILogger _logger;
+    private const string ExpressionPrefixPlain = @"{{";
     private const string ExpressionPrefix = @"\{\{";
     private const string ExpressionSuffix = @"\}\}";
     private const string NestingPrefix = @"\$t\(";
@@ -29,7 +32,7 @@ public class DefaultInterpolator : IInterpolator
 
     private List<IFormatter> _formatters;
 
-    public IFormatter DefaultFormatter { get; set; } = new DefaultFormatter();
+    public IFormatter DefaultFormatter { get; set; }
 
     public bool EscapeValues { get; set; } = true;
 
@@ -41,6 +44,12 @@ public class DefaultInterpolator : IInterpolator
 
     public bool UseFastNestingMatch { get; set; } = true;
 
+    public DefaultInterpolator(ILogger logger)
+    {
+        _logger = logger;
+        DefaultFormatter = new DefaultFormatter(_logger);
+    }
+
     public virtual bool CanNest(string source)
     {
         return UseFastNestingMatch ? source.Contains(NestingPrefixPlain) : NestingRegex.IsMatch(source);
@@ -50,6 +59,9 @@ public class DefaultInterpolator : IInterpolator
 
     public virtual Task<string> InterpolateAsync(string source, string key, string language, IDictionary<string, object> args)
     {
+        if (!source.Contains(ExpressionPrefixPlain))
+            return Task.FromResult(source);
+
         var unescapeMatches = UnescapedExpressionRegex.Matches(source);
         var matches = ExpressionRegex.Matches(source);
 
@@ -81,7 +93,10 @@ public class DefaultInterpolator : IInterpolator
         return Task.FromResult(result);
     }
 
-    public virtual async Task<string> NestAsync(string source, string language, IDictionary<string, object> args,
+    public virtual async Task<string> NestAsync(
+        string source,
+        string language,
+        IDictionary<string, object> args,
         TranslateAsyncDelegate translateAsync)
     {
         var matches = NestingRegex.Matches(source);
@@ -172,8 +187,12 @@ public class DefaultInterpolator : IInterpolator
         return Format(value, format, language);
     }
 
-    protected virtual async Task<string> HandleNestingRegexMatchAsync(string source, string language, IDictionary<string, object> args,
-        TranslateAsyncDelegate translateAsync, Match match)
+    protected virtual async Task<string> HandleNestingRegexMatchAsync(
+        string source,
+        string language,
+        IDictionary<string, object> args,
+        TranslateAsyncDelegate translateAsync,
+        Match match)
     {
         var expression = match.Groups[1];
         string key;
@@ -237,7 +256,9 @@ public class DefaultInterpolator : IInterpolator
         return source;
     }
 
-    protected virtual async Task<IDictionary<string, object>> ParseNestedArgsAsync(string argsString, string language,
+    protected virtual async Task<IDictionary<string, object>> ParseNestedArgsAsync(
+        string argsString,
+        string language,
         IDictionary<string, object> parentArgs)
     {
         argsString = await InterpolateAsync(argsString, null, language, parentArgs);
