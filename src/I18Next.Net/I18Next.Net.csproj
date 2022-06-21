@@ -10,6 +10,7 @@
         <RepositoryType>git</RepositoryType>
         <LangVersion>latest</LangVersion>
         <NoWarn>CS1591</NoWarn>
+        <PackageVersion>1.0.1</PackageVersion>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
         <DocumentationFile>bin\Debug\I18Next.Net.xml</DocumentationFile>

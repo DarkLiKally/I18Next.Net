@@ -153,7 +153,10 @@ public class I18NextNet : II18Next
     private async Task<string> Ta(string language, string key, object args, TranslationOptions options)
     {
         if (DetectLanguageOnEachTranslation)
+        {
             UseDetectedLanguage();
+            language = Language;
+        }
 
         var argsDict = args.ToDictionary();
 
