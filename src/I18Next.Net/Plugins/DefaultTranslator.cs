@@ -84,7 +84,7 @@ public class DefaultTranslator : ITranslator
         var result = await ResolveTranslationAsync(language, actualNamespace, key, args, options);
 
         if (result == null)
-            return key;
+            throw new TranslationNotFoundException(key);
 
         return await ExtendTranslationAsync(result, key, language, args, options);
     }
