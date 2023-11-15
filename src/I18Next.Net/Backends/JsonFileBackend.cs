@@ -47,7 +47,7 @@ public class JsonFileBackend : ITranslationBackend
         using (var streamReader = new StreamReader(path, Encoding))
         using (var reader = new JsonTextReader(streamReader))
         {
-            parsedJson = (JObject) await JToken.ReadFromAsync(reader);
+            parsedJson = (JObject) await JToken.ReadFromAsync(reader).ConfigureAwait(false);
         }
 
         var builder = _treeBuilderFactory.Create();
