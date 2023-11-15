@@ -157,6 +157,6 @@ public class I18NextNet : II18Next
 
         var argsDict = args.ToDictionary();
 
-        return await Translator.TranslateAsync(language, key, argsDict, options);
+        return await Translator.TranslateAsync(language, key, argsDict, options).ConfigureAwait(false);
     }
 }
