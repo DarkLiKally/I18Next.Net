@@ -26,12 +26,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "I18Next.Net.Gettext", "src\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "I18Next.Net.Benchmarks", "tests\I18Next.Net.Benchmarks\I18Next.Net.Benchmarks.csproj", "{28A8E334-B484-47BF-A46F-0142830C9951}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "build\_build.csproj", "{7968852A-4812-4D63-B6D6-3247D7BF5D66}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7968852A-4812-4D63-B6D6-3247D7BF5D66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7968852A-4812-4D63-B6D6-3247D7BF5D66}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{71F47BEC-C9FB-4393-AA78-8D7AD2D51863}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{71F47BEC-C9FB-4393-AA78-8D7AD2D51863}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{71F47BEC-C9FB-4393-AA78-8D7AD2D51863}.Release|Any CPU.ActiveCfg = Release|Any CPU
