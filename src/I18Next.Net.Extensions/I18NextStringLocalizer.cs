@@ -59,6 +59,13 @@ public class I18NextStringLocalizer : IStringLocalizer
 
         var language = _language ?? _instance.Language;
 
-        return new LocalizedString(name, _instance.T(language, _defaultNamespace, name, args));
+        try
+        {
+            return new LocalizedString(name, _instance.T(language, _defaultNamespace, name, args));
+        }
+        catch (TranslationNotFoundException ex)
+        {
+            return new LocalizedString(name, ex.AlternateString, true);
+        }
     }
 }

@@ -670,9 +670,9 @@ public class DefaultTranslatorFixture
             missingKeyCalls++;
         };
 
-        var result = await _translator.TranslateAsync("en-US", "test", null, _options);
+        var result = Assert.ThrowsAsync<TranslationNotFoundException>(() => _translator.TranslateAsync("en-US", "test", null, _options));        
 
-        result.Should().Be("test");
+        result.AlternateString.Should().Be("test");
         missingKeyCalls.Should().Be(1);
 
         await _backend.Received(1).LoadNamespaceAsync("en-US", "test");
@@ -706,9 +706,9 @@ public class DefaultTranslatorFixture
             missingKeyCalls++;
         };
 
-        var result = await _translator.TranslateAsync("en-US", "test", arguments, _options);
+        var result = Assert.ThrowsAsync<TranslationNotFoundException>(() => _translator.TranslateAsync("en-US", "test", arguments, _options));
 
-        result.Should().Be("test");
+        result.AlternateString.Should().Be("test");
         missingKeyCalls.Should().Be(1);
 
         await _backend.Received(1).LoadNamespaceAsync("en-US", "test");
@@ -744,9 +744,9 @@ public class DefaultTranslatorFixture
             args.PossibleKeys.Should().BeEquivalentTo("test_ctx_2", "test_ctx", "test_2", "test");
             missingKeyCalls++;
         };
-        var result = await _translator.TranslateAsync("en-US", "test", arguments, _options);
+        var result = Assert.ThrowsAsync<TranslationNotFoundException>(() => _translator.TranslateAsync("en-US", "test", arguments, _options));        
 
-        result.Should().Be("test");
+        result.AlternateString.Should().Be("test");
         missingKeyCalls.Should().Be(1);
 
         await _backend.Received(1).LoadNamespaceAsync("en-US", "test");
@@ -778,9 +778,9 @@ public class DefaultTranslatorFixture
         _translator.MissingKeyHandlers.Add(missingKeyHandlerA);
         _translator.MissingKeyHandlers.Add(missingKeyHandlerB);
 
-        var result = await _translator.TranslateAsync("en-US", "test", null, _options);
+        var result = Assert.ThrowsAsync<TranslationNotFoundException>(() => _translator.TranslateAsync("en-US", "test", null, _options));
 
-        result.Should().Be("test");
+        result.AlternateString.Should().Be("test");
 
         await _backend.Received(1).LoadNamespaceAsync("en-US", "test");
         _translationTree.Received(1).GetValue("test", null);
@@ -806,9 +806,9 @@ public class DefaultTranslatorFixture
 
         _translator.MissingKeyHandlers.Add(missingKeyHandler);
 
-        var result = await _translator.TranslateAsync("en-US", "test", null, _options);
+        var result = Assert.ThrowsAsync<TranslationNotFoundException>(() => _translator.TranslateAsync("en-US", "test", null, _options));
 
-        result.Should().Be("test");
+        result.AlternateString.Should().Be("test");
 
         await _backend.Received(1).LoadNamespaceAsync("en-US", "test");
         _translationTree.Received(1).GetValue("test", null);
@@ -842,9 +842,9 @@ public class DefaultTranslatorFixture
             missingKeyCalls++;
         };
 
-        var result = await _translator.TranslateAsync("en-US", "test", arguments, _options);
+        var result = Assert.ThrowsAsync<TranslationNotFoundException>(() => _translator.TranslateAsync("en-US", "test", arguments, _options));
 
-        result.Should().Be("test");
+        result.AlternateString.Should().Be("test");
         missingKeyCalls.Should().Be(1);
 
         await _backend.Received(1).LoadNamespaceAsync("en-US", "test");
