@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>        
+        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+        <RepositoryUrl>https://github.com/DarkLiKally/Localizer</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/DarkLiKally/Localizer</PackageProjectUrl>
+        <Version>1.1.0</Version>
+        <Authors>DarkLiKally</Authors>
+        <RepositoryType>git</RepositoryType>
+        <LangVersion>latest</LangVersion>
+        <NoWarn>CS1591</NoWarn>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+        <DocumentationFile>bin\Debug\Localizer.xml</DocumentationFile>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+        <DocumentationFile>bin\Release\Localizer.xml</DocumentationFile>
+    </PropertyGroup>
+    <ItemGroup>
+        <Content Include="bin\$(Configuration)\$(TargetFramework)\Localizer.dll">
+            <PackagePath>lib\$(TargetFramework)\</PackagePath>
+            <Pack>true</Pack>
+        </Content>
+        <Content Include="bin\$(Configuration)\$(TargetFramework)\Localizer.Abstractions.dll">
+            <PackagePath>lib\$(TargetFramework)\</PackagePath>
+            <Pack>true</Pack>
+        </Content>
+        <Content Include="bin\$(Configuration)\$(TargetFramework)\Localizer.AspNetCore.dll">
+            <PackagePath>lib\$(TargetFramework)\</PackagePath>
+            <Pack>true</Pack>
+        </Content>
+        <Content Include="bin\$(Configuration)\$(TargetFramework)\Localizer.Extensions.dll">
+            <PackagePath>lib\$(TargetFramework)\</PackagePath>
+            <Pack>true</Pack>
+        </Content>
+        <Content Include="bin\$(Configuration)\$(TargetFramework)\Localizer.PolyglotJs.dll">
+            <PackagePath>lib\$(TargetFramework)\</PackagePath>
+            <Pack>true</Pack>
+        </Content>
+    </ItemGroup>
+</Project>

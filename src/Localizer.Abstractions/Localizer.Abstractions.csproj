@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net6.0</TargetFrameworks>
+        <BaseOutputPath>..\Localizer.Bundle\bin\</BaseOutputPath>
+        <TargetFramework>net6.0</TargetFramework>
         <Product>Localizer</Product>
         <Authors>DarkLiKally</Authors>
         <Company>DarkLiKally</Company>
@@ -9,7 +10,6 @@
         <RepositoryUrl>https://github.com/DarkLiKally/Localizer</RepositoryUrl>
         <PackageProjectUrl>https://github.com/DarkLiKally/Localizer</PackageProjectUrl>
         <RepositoryType>git</RepositoryType>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <RootNamespace>Localizer</RootNamespace>
         <LangVersion>latest</LangVersion>
         <NoWarn>CS1591</NoWarn>

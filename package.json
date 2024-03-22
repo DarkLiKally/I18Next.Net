@@ -1,0 +1,10 @@
+{
+    "dependencies": {},
+    "devDependencies": {
+        "git-commit-msg-linter": "^2.4.2"
+    },
+    "scripts": {
+        "publish-new": "dotnet build-server shutdown && node ./scripts/publish-new",
+        "publish-local": "dotnet build-server shutdown && node ./scripts/publish-local"
+    }
+}

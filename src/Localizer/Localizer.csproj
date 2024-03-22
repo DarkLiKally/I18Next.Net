@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFrameworks>net6.0</TargetFrameworks>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <BaseOutputPath>..\Localizer.Bundle\bin\</BaseOutputPath>
+        <TargetFramework>net6.0</TargetFramework>
         <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
         <RepositoryUrl>https://github.com/DarkLiKally/Localizer</RepositoryUrl>
         <PackageProjectUrl>https://github.com/DarkLiKally/Localizer</PackageProjectUrl>
@@ -19,8 +19,6 @@
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    </ItemGroup>
-    <ItemGroup>
         <ProjectReference Include="..\Localizer.Abstractions\Localizer.Abstractions.csproj" />
     </ItemGroup>
 </Project>

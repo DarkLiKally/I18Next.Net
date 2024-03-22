@@ -4,8 +4,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Localizer", "src\Localizer\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Localizer.Extensions", "src\Localizer.Extensions\Localizer.Extensions.csproj", "{96A82CDF-B1FF-41D8-976E-52ECF9CFD82A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Localizer.ICU", "src\Localizer.ICU\Localizer.ICU.csproj", "{D79824CC-B177-4BD7-9B06-C780AA573B8F}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Localizer.PolyglotJs", "src\Localizer.PolyglotJs\Localizer.PolyglotJs.csproj", "{0A39C392-2FB2-4D24-9A82-919F5C626A68}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Localizer.Tests", "tests\Localizer.Tests\Localizer.Tests.csproj", "{8041F656-7FAD-48A8-91C5-1D7239984CB5}"
@@ -17,8 +15,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Localizer.Abstractions", "src\Localizer.Abstractions\Localizer.Abstractions.csproj", "{42AB2562-8DA6-41E1-ABD5-152DDD622E6D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Example.ConsoleApp.NetCore", "samples\Example.ConsoleApp.NetCore\Example.ConsoleApp.NetCore.csproj", "{4F2A9939-3351-465F-9E4C-12616F64A0CD}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Localizer.Gettext", "src\Localizer.Gettext\Localizer.Gettext.csproj", "{F5690CC5-1E6E-4327-987D-211BC54AE9AF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Localizer.Benchmarks", "tests\Localizer.Benchmarks\Localizer.Benchmarks.csproj", "{28A8E334-B484-47BF-A46F-0142830C9951}"
 EndProject

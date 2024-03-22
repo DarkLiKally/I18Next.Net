@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFrameworks>net6.0</TargetFrameworks>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <TargetFramework>net6.0</TargetFramework>
+        <BaseOutputPath>..\Localizer.Bundle\bin\</BaseOutputPath>
         <Authors>DarkLiKally</Authors>
         <Company>DarkLiKally</Company>
         <Product>Localizer</Product>
