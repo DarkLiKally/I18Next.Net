@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace I18Next.Net.Plugins;
+namespace Localizer.Plugins;
 
 public delegate Task<string> TranslateAsyncDelegate(string language, string key, IDictionary<string, object> args);
 

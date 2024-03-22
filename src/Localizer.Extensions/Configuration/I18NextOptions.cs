@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace I18Next.Net.Extensions.Configuration;
+namespace Localizer.Extensions.Configuration;
 
 public class I18NextOptions
 {

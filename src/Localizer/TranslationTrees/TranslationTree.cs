@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace I18Next.Net.TranslationTrees;
+namespace Localizer.TranslationTrees;
 
 public class TranslationTree : ITranslationTree
 {
@@ -19,7 +19,7 @@ public class TranslationTree : ITranslationTree
         if (Root == null)
             return result;
 
-        MapTranslationGroup(result, (TranslationGroup) Root);
+        MapTranslationGroup(result, (TranslationGroup)Root);
 
         return result;
     }
@@ -55,7 +55,7 @@ public class TranslationTree : ITranslationTree
             throw new TranslationKeyInvalidException(key,
                 $"The key `{key}` leads to a group of translations. Unable to resolve a final value for the given key. Please check the key you've provided.");
 
-        var translation = (Translation) node;
+        var translation = (Translation)node;
 
         return translation.Value;
     }

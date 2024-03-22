@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
-using I18Next.Net.Backends;
-using I18Next.Net.Internal;
-using I18Next.Net.Logging;
-using I18Next.Net.Plugins;
+using Localizer.Backends;
+using Localizer.Internal;
+using Localizer.Logging;
+using Localizer.Plugins;
 
-namespace I18Next.Net;
+namespace Localizer;
 
 public class I18NextNet : II18Next
 {
@@ -137,7 +137,7 @@ public class I18NextNet : II18Next
                 DefaultNamespace = defaultNamespace ?? _options.DefaultNamespace
             };
         }
-        
+
         return new TranslationOptions
         {
             FallbackLanguages = Array.Empty<string>(),

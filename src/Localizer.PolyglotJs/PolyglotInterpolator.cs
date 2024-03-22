@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using I18Next.Net.Internal;
-using I18Next.Net.Plugins;
+using Localizer.Internal;
+using Localizer.Plugins;
 
-namespace I18Next.Net.PolyglotJs;
+namespace Localizer.PolyglotJs;
 
 public class PolyglotInterpolator : IInterpolator
 {
@@ -135,7 +135,7 @@ public class PolyglotInterpolator : IInterpolator
     public Task<string> InterpolateAsync(string source, string key, string language, IDictionary<string, object> args)
     {
         if (source == null)
-            return Task.FromResult((string) null);
+            return Task.FromResult((string)null);
 
         if (language == null)
             language = "en";

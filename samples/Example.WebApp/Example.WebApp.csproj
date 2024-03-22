@@ -5,9 +5,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\src\I18Next.Net.AspNetCore\I18Next.Net.AspNetCore.csproj" />
-      <ProjectReference Include="..\..\src\I18Next.Net.Extensions\I18Next.Net.Extensions.csproj" />
-      <ProjectReference Include="..\..\src\I18Next.Net\I18Next.Net.csproj" />
+      <ProjectReference Include="..\..\src\Localizer.AspNetCore\Localizer.AspNetCore.csproj" />
+      <ProjectReference Include="..\..\src\Localizer.Extensions\Localizer.Extensions.csproj" />
+      <ProjectReference Include="..\..\src\Localizer\Localizer.csproj" />
     </ItemGroup>
 
     <ItemGroup>

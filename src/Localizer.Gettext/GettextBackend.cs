@@ -1,11 +1,11 @@
 using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
-using I18Next.Net.Backends;
-using I18Next.Net.TranslationTrees;
+using Localizer.Backends;
+using Localizer.TranslationTrees;
 using NGettext;
 
-namespace I18Next.Net.Gettext;
+namespace Localizer.Gettext;
 
 /// <summary>
 ///     Backend for retrieving translations from a compiled Gettext mo-file.
@@ -90,7 +90,7 @@ public class GettextBackend : ITranslationBackend
             }
         }
 
-        return Task.FromResult((ITranslationTree) translationTree);
+        return Task.FromResult((ITranslationTree)translationTree);
     }
 
     private string FindFile(string language, string @namespace)

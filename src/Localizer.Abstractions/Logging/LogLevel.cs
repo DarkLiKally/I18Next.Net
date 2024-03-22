@@ -1,4 +1,4 @@
-namespace I18Next.Net.Logging;
+namespace Localizer.Logging;
 
 /// <summary>
 /// Defines logging severity levels.

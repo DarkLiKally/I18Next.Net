@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace I18Next.Net.Plugins;
+namespace Localizer.Plugins;
 
 /// <summary>
 ///     Abstraction for a post processor plugin for I18Next.
@@ -22,13 +22,13 @@ public interface IPostProcessor
     /// <param name="translator">The translator used for translation. Can be used for further translating things.</param>
     /// <returns>Post processed value.</returns>
     string ProcessTranslation(string key, string value, IDictionary<string, object> args, string language, ITranslator translator)
-        #if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER
     {
         return value;
     }
-    #else
+#else
     ;
-    #endif
+#endif
 
     /// <summary>
     ///     Apply the post processing onto the given result string after interpolation and nesting..
@@ -40,11 +40,11 @@ public interface IPostProcessor
     /// <param name="translator">The translator used for translation. Can be used for further translating things.</param>
     /// <returns>Post processed value.</returns>
     string ProcessResult(string key, string value, IDictionary<string, object> args, string language, ITranslator translator)
-        #if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER
     {
         return value;
     }
-    #else
+#else
     ;
-    #endif
+#endif
 }

@@ -1,7 +1,7 @@
-﻿using I18Next.Net.Extensions.Builder;
-using I18Next.Net.Plugins;
+﻿using Localizer.Extensions.Builder;
+using Localizer.Plugins;
 
-namespace I18Next.Net.AspNetCore;
+namespace Localizer.AspNetCore;
 
 public static class I18NextBuilderExtensions
 {

@@ -1,11 +1,11 @@
 using System.Linq;
-using I18Next.Net.Backends;
-using I18Next.Net.Extensions.Configuration;
-using I18Next.Net.Logging;
-using I18Next.Net.Plugins;
+using Localizer.Backends;
+using Localizer.Extensions.Configuration;
+using Localizer.Logging;
+using Localizer.Plugins;
 using Microsoft.Extensions.Options;
 
-namespace I18Next.Net.Extensions;
+namespace Localizer.Extensions;
 
 public class I18NextFactory : II18NextFactory
 {

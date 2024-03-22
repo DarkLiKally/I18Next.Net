@@ -1,4 +1,4 @@
-﻿namespace I18Next.Net.Plugins;
+﻿namespace Localizer.Plugins;
 
 /// <summary>
 ///     Abstraction of a plural resolver plugin for I18Next.

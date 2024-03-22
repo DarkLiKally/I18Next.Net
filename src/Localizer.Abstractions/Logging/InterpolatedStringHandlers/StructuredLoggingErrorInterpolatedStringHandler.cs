@@ -1,7 +1,7 @@
 #if NET6_0_OR_GREATER
 using System.Runtime.CompilerServices;
 
-namespace I18Next.Net.Logging.InterpolatedStringHandlers;
+namespace Localizer.Logging.InterpolatedStringHandlers;
 
 [InterpolatedStringHandler]
 public ref struct StructuredLoggingErrorInterpolatedStringHandler

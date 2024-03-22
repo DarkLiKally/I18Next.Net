@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace I18Next.Net.Internal;
+namespace Localizer.Internal;
 
 public static class ObjectExtensions
 {
@@ -42,7 +42,7 @@ public static class ObjectExtensions
             .Where(prop =>
             {
                 if (prop.GetIndexParameters().Length == 0)
-                    return prop.GetMethod != (MethodInfo) null;
+                    return prop.GetMethod != (MethodInfo)null;
 
                 return false;
             });

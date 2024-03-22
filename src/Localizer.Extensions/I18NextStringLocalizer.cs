@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Linq;
 using Microsoft.Extensions.Localization;
 
-namespace I18Next.Net.Extensions;
+namespace Localizer.Extensions;
 
 public class I18NextStringLocalizer : IStringLocalizer
 {

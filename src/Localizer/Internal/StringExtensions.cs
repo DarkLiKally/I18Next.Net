@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace I18Next.Net.Internal;
+namespace Localizer.Internal;
 
 public static class StringExtensions
 {

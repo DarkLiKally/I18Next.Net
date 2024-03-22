@@ -1,5 +1,5 @@
-﻿using I18Next.Net.AspNetCore;
-using I18Next.Net.Extensions;
+﻿using Localizer.AspNetCore;
+using Localizer.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;

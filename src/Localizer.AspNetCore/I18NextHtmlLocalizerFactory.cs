@@ -2,7 +2,7 @@ using System;
 using Microsoft.AspNetCore.Mvc.Localization;
 using Microsoft.Extensions.Localization;
 
-namespace I18Next.Net.AspNetCore;
+namespace Localizer.AspNetCore;
 
 public class I18NextHtmlLocalizerFactory : IHtmlLocalizerFactory
 {

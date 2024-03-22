@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace I18Next.Net.Plugins;
+namespace Localizer.Plugins;
 
 public class PseudoLocalizationOptions
 {
@@ -82,7 +82,7 @@ public class PseudoLocalizationOptions
         {
             if (value < 1 || value > 100)
                 throw new ArgumentOutOfRangeException();
-            
+
             _letterMultiplier = value;
         }
     }

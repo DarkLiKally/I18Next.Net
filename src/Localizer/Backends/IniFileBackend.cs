@@ -2,9 +2,9 @@
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using I18Next.Net.TranslationTrees;
+using Localizer.TranslationTrees;
 
-namespace I18Next.Net.Backends;
+namespace Localizer.Backends;
 
 public class IniFileBackend : ITranslationBackend
 {

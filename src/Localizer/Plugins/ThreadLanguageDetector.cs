@@ -1,6 +1,6 @@
 using System.Threading;
 
-namespace I18Next.Net.Plugins;
+namespace Localizer.Plugins;
 
 public class ThreadLanguageDetector : ILanguageDetector
 {
@@ -16,9 +16,9 @@ public class ThreadLanguageDetector : ILanguageDetector
 
     public string FallbackLanguage { get; set; }
 
-        public string GetLanguage()
-        {
-            var languageTag = Thread.CurrentThread.CurrentCulture.Name;
+    public string GetLanguage()
+    {
+        var languageTag = Thread.CurrentThread.CurrentCulture.Name;
 
         if (string.IsNullOrEmpty(languageTag))
             return FallbackLanguage;

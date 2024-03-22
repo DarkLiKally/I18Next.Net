@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace I18Next.Net.Logging.InterpolatedStringHandlers;
+namespace Localizer.Logging.InterpolatedStringHandlers;
 
 [InterpolatedStringHandler]
 public ref struct StructuredLoggingInterpolatedStringHandler

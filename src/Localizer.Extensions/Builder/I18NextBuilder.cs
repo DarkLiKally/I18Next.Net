@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using I18Next.Net.Backends;
-using I18Next.Net.Extensions.Configuration;
-using I18Next.Net.Logging;
-using I18Next.Net.Plugins;
+using Localizer.Backends;
+using Localizer.Extensions.Configuration;
+using Localizer.Logging;
+using Localizer.Plugins;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
 
-namespace I18Next.Net.Extensions.Builder;
+namespace Localizer.Extensions.Builder;
 
 /// <summary>
 ///     Allows registering I18Next into an IServiceCollection using simple fluent configuration methods.

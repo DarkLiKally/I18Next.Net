@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using I18Next.Net.Formatters;
-using I18Next.Net.Internal;
-using I18Next.Net.Logging;
+using Localizer.Formatters;
+using Localizer.Internal;
+using Localizer.Logging;
 using Newtonsoft.Json.Linq;
 
-namespace I18Next.Net.Plugins;
+namespace Localizer.Plugins;
 
 public class DefaultInterpolator : IInterpolator
 {

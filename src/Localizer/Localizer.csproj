@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFrameworks>net6.0</TargetFrameworks>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+        <RepositoryUrl>https://github.com/DarkLiKally/Localizer</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/DarkLiKally/Localizer</PackageProjectUrl>
+        <Version>1.0.0</Version>
+        <Authors>DarkLiKally</Authors>
+        <RepositoryType>git</RepositoryType>
+        <LangVersion>latest</LangVersion>
+        <NoWarn>CS1591</NoWarn>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+        <DocumentationFile>bin\Debug\Localizer.xml</DocumentationFile>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+        <DocumentationFile>bin\Release\Localizer.xml</DocumentationFile>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Localizer.Abstractions\Localizer.Abstractions.csproj" />
+    </ItemGroup>
+</Project>

@@ -1,4 +1,4 @@
-﻿namespace I18Next.Net.TranslationTrees;
+﻿namespace Localizer.TranslationTrees;
 
 public class GenericTranslationTreeBuilderFactory<T> : ITranslationTreeBuilderFactory
     where T : ITranslationTreeBuilder, new()

@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using I18Next.Net.Internal;
+using Localizer.Internal;
 
-namespace I18Next.Net.Plugins;
+namespace Localizer.Plugins;
 
 public class IntervalPostProcessor : IPostProcessor
 {

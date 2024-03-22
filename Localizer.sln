@@ -1,30 +1,26 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "I18Next.Net", "src\I18Next.Net\I18Next.Net.csproj", "{71F47BEC-C9FB-4393-AA78-8D7AD2D51863}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Localizer", "src\Localizer\Localizer.csproj", "{71F47BEC-C9FB-4393-AA78-8D7AD2D51863}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "I18Next.Net.Extensions", "src\I18Next.Net.Extensions\I18Next.Net.Extensions.csproj", "{96A82CDF-B1FF-41D8-976E-52ECF9CFD82A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Localizer.Extensions", "src\Localizer.Extensions\Localizer.Extensions.csproj", "{96A82CDF-B1FF-41D8-976E-52ECF9CFD82A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "I18Next.Net.ICU", "src\I18Next.Net.ICU\I18Next.Net.ICU.csproj", "{D79824CC-B177-4BD7-9B06-C780AA573B8F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Localizer.ICU", "src\Localizer.ICU\Localizer.ICU.csproj", "{D79824CC-B177-4BD7-9B06-C780AA573B8F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "I18Next.Net.PolyglotJs", "src\I18Next.Net.PolyglotJs\I18Next.Net.PolyglotJs.csproj", "{0A39C392-2FB2-4D24-9A82-919F5C626A68}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Localizer.PolyglotJs", "src\Localizer.PolyglotJs\Localizer.PolyglotJs.csproj", "{0A39C392-2FB2-4D24-9A82-919F5C626A68}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "I18Next.Net.Tests", "tests\I18Next.Net.Tests\I18Next.Net.Tests.csproj", "{8041F656-7FAD-48A8-91C5-1D7239984CB5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Localizer.Tests", "tests\Localizer.Tests\Localizer.Tests.csproj", "{8041F656-7FAD-48A8-91C5-1D7239984CB5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "I18Next.Net.AspNetCore", "src\I18Next.Net.AspNetCore\I18Next.Net.AspNetCore.csproj", "{AC1CFDD9-1DBC-4E21-A1CF-F9C154BBF177}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Localizer.AspNetCore", "src\Localizer.AspNetCore\Localizer.AspNetCore.csproj", "{AC1CFDD9-1DBC-4E21-A1CF-F9C154BBF177}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Example.WebApp", "samples\Example.WebApp\Example.WebApp.csproj", "{7A9BDD90-BC7A-4B7D-A3F0-42A83D04E6C3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "I18Next.Net.Abstractions", "src\I18Next.Net.Abstractions\I18Next.Net.Abstractions.csproj", "{42AB2562-8DA6-41E1-ABD5-152DDD622E6D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Localizer.Abstractions", "src\Localizer.Abstractions\Localizer.Abstractions.csproj", "{42AB2562-8DA6-41E1-ABD5-152DDD622E6D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Example.ConsoleApp.NetCore", "samples\Example.ConsoleApp.NetCore\Example.ConsoleApp.NetCore.csproj", "{4F2A9939-3351-465F-9E4C-12616F64A0CD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Example.ConsoleApp.NetFramework", "samples\Example.ConsoleApp.NetFramework\Example.ConsoleApp.NetFramework.csproj", "{15DAA359-C831-4260-9F6F-6255B7A45110}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Localizer.Gettext", "src\Localizer.Gettext\Localizer.Gettext.csproj", "{F5690CC5-1E6E-4327-987D-211BC54AE9AF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "I18Next.Net.Serilog", "src\I18Next.Net.Serilog\I18Next.Net.Serilog.csproj", "{3972D474-9549-450D-855A-8E75C4C01D6B}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "I18Next.Net.Gettext", "src\I18Next.Net.Gettext\I18Next.Net.Gettext.csproj", "{F5690CC5-1E6E-4327-987D-211BC54AE9AF}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "I18Next.Net.Benchmarks", "tests\I18Next.Net.Benchmarks\I18Next.Net.Benchmarks.csproj", "{28A8E334-B484-47BF-A46F-0142830C9951}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Localizer.Benchmarks", "tests\Localizer.Benchmarks\Localizer.Benchmarks.csproj", "{28A8E334-B484-47BF-A46F-0142830C9951}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

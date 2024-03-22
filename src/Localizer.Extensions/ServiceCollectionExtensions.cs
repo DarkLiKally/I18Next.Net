@@ -1,8 +1,8 @@
 ﻿using System;
-using I18Next.Net.Extensions.Builder;
+using Localizer.Extensions.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace I18Next.Net.Extensions;
+namespace Localizer.Extensions;
 
 public static class ServiceCollectionExtensions
 {

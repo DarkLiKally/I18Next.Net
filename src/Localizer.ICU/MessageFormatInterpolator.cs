@@ -2,10 +2,10 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using I18Next.Net.Plugins;
+using Localizer.Plugins;
 using Jeffijoe.MessageFormat;
 
-namespace I18Next.Net.ICU;
+namespace Localizer.ICU;
 
 public class MessageFormatInterpolator : IInterpolator
 {
@@ -32,7 +32,7 @@ public class MessageFormatInterpolator : IInterpolator
     public Task<string> InterpolateAsync(string source, string key, string language, IDictionary<string, object> args)
     {
         if (source == null)
-            return Task.FromResult((string) null);
+            return Task.FromResult((string)null);
 
         var messageFormatter = EnsureMessageFormatter(language);
 

@@ -1,8 +1,8 @@
 ﻿using System;
-using I18Next.Net;
-using I18Next.Net.Backends;
-using I18Next.Net.Extensions;
-using I18Next.Net.Plugins;
+using Localizer;
+using Localizer.Backends;
+using Localizer.Extensions;
+using Localizer.Plugins;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 
@@ -48,7 +48,7 @@ internal class Program
 
         var services = new ServiceCollection();
 
-        // Register I18Next.Net
+        // Register Localizer
         services.AddI18NextLocalization(builder => builder.AddBackend(_backend).UseFallbackLanguage("en"));
 
         using (var serviceProvider = services.BuildServiceProvider())

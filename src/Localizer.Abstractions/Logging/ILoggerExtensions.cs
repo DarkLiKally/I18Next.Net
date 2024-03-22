@@ -2,10 +2,10 @@ using System;
 
 #if NET6_0_OR_GREATER
 using System.Runtime.CompilerServices;
-using I18Next.Net.Logging.InterpolatedStringHandlers;
+using Localizer.Logging.InterpolatedStringHandlers;
 #endif
 
-namespace I18Next.Net.Logging;
+namespace Localizer.Logging;
 
 public static class ILoggerExtensions
 {
@@ -171,7 +171,7 @@ public static class ILoggerExtensions
         logger.Log(LogLevel.Warning, exception, message, args);
     }
 
-    #if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER
     public static void Log(
         this ILogger logger,
         LogLevel logLevel,
@@ -348,5 +348,5 @@ public static class ILoggerExtensions
             logger.Log(LogLevel.Warning, exception, template, arguments);
         }
     }
-    #endif
+#endif
 }

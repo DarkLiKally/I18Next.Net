@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace I18Next.Net.Plugins;
+namespace Localizer.Plugins;
 
 public class SprintfPostProcessor : IPostProcessor
 {

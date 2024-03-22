@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace I18Next.Net.Backends;
+namespace Localizer.Backends;
 
 public class TranslationNamespaceNotFoundException : Exception
 {

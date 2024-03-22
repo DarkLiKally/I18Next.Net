@@ -1,11 +1,11 @@
 ﻿using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using I18Next.Net.TranslationTrees;
+using Localizer.TranslationTrees;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace I18Next.Net.Backends;
+namespace Localizer.Backends;
 
 public class JsonFileBackend : ITranslationBackend
 {
@@ -47,7 +47,7 @@ public class JsonFileBackend : ITranslationBackend
         using (var streamReader = new StreamReader(path, Encoding))
         using (var reader = new JsonTextReader(streamReader))
         {
-            parsedJson = (JObject) await JToken.ReadFromAsync(reader);
+            parsedJson = (JObject)await JToken.ReadFromAsync(reader);
         }
 
         var builder = _treeBuilderFactory.Create();

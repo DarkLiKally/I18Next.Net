@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
-using I18Next.Net.Backends;
-using I18Next.Net.Plugins;
+using Localizer.Backends;
+using Localizer.Plugins;
 
-namespace I18Next.Net;
+namespace Localizer;
 
 /// <summary>
-///     I18Next.Net instance.
+///     Localizer instance.
 /// </summary>
 public interface II18Next
 {

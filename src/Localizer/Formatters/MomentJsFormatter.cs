@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text.RegularExpressions;
-using I18Next.Net.Internal;
-using I18Next.Net.Plugins;
+using Localizer.Internal;
+using Localizer.Plugins;
 
-namespace I18Next.Net.Formatters;
+namespace Localizer.Formatters;
 
 /// <summary>
 ///     Translates MomentJS tokens to .Net format tokens and uses this to format DateTime and DateTimeOffset values.
@@ -132,9 +132,9 @@ public class MomentJsFormatter : IFormatter
 
         switch (num % 10)
         {
-            case 1:  return num + "st";
-            case 2:  return num + "nd";
-            case 3:  return num + "rd";
+            case 1: return num + "st";
+            case 2: return num + "nd";
+            case 3: return num + "rd";
             default: return num + "th";
         }
     }
@@ -148,17 +148,17 @@ public class MomentJsFormatter : IFormatter
     {
         switch (token)
         {
-            case "Mo":   return AddOrdinal(value.Month);
-            case "Q":    return GetQuarter(value.Month).ToString();
-            case "Qo":   return AddOrdinal(GetQuarter(value.Month));
-            case "Do":   return AddOrdinal(value.Day);
-            case "DDD":  return value.DayOfYear.ToString();
+            case "Mo": return AddOrdinal(value.Month);
+            case "Q": return GetQuarter(value.Month).ToString();
+            case "Qo": return AddOrdinal(GetQuarter(value.Month));
+            case "Do": return AddOrdinal(value.Day);
+            case "DDD": return value.DayOfYear.ToString();
             case "DDDo": return AddOrdinal(value.DayOfYear);
             case "DDDD": return value.DayOfYear.ToString("000");
-            case "d":    return ((int) value.DayOfWeek).ToString();
-            case "do":   return AddOrdinal((int) value.DayOfWeek);
-            case "e":    return ((int) value.DayOfWeek).ToString();
-            case "E":    return ((int) value.DayOfWeek + 1).ToString();
+            case "d": return ((int)value.DayOfWeek).ToString();
+            case "do": return AddOrdinal((int)value.DayOfWeek);
+            case "e": return ((int)value.DayOfWeek).ToString();
+            case "E": return ((int)value.DayOfWeek + 1).ToString();
             case "w":
             case "wo":
             case "ww":
@@ -166,17 +166,17 @@ public class MomentJsFormatter : IFormatter
             case "Wo":
             case "WW":
                 return GetWeekTokenValue(value, token, culture);
-            case "a":         return value.ToString("tt", culture).ToLower();
-            case "k":         return (value.Hour + 1).ToString();
-            case "kk":        return (value.Hour + 1).ToString("00");
-            case "SSSSSSSS":  return value.ToString("fffffff00", culture);
+            case "a": return value.ToString("tt", culture).ToLower();
+            case "k": return (value.Hour + 1).ToString();
+            case "kk": return (value.Hour + 1).ToString("00");
+            case "SSSSSSSS": return value.ToString("fffffff00", culture);
             case "SSSSSSSSS": return value.ToString("fffffff000", culture);
             case "z":
             case "zz":
                 return TimeZoneData.GetFirstForOffset(value.Offset).Abbreviation;
             case "ZZ": return value.ToString("zzz", culture).Replace(":", "");
-            case "X":  return value.ToUnixTimeSeconds().ToString();
-            case "x":  return value.ToUnixTimeMilliseconds().ToString();
+            case "X": return value.ToUnixTimeSeconds().ToString();
+            case "x": return value.ToUnixTimeMilliseconds().ToString();
         }
 
         return token;
@@ -195,7 +195,7 @@ public class MomentJsFormatter : IFormatter
                 {
                     case "ww": return week.ToString("00");
                     case "wo": return AddOrdinal(week);
-                    default:   return week.ToString();
+                    default: return week.ToString();
                 }
 
             case "W":
@@ -208,7 +208,7 @@ public class MomentJsFormatter : IFormatter
                 {
                     case "WW": return weekIso.ToString("00");
                     case "Wo": return AddOrdinal(weekIso);
-                    default:   return weekIso.ToString();
+                    default: return weekIso.ToString();
                 }
         }
 

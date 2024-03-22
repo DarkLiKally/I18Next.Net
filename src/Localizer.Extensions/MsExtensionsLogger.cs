@@ -1,8 +1,8 @@
 using System;
 using Microsoft.Extensions.Logging;
-using LogLevel = I18Next.Net.Logging.LogLevel;
+using LogLevel = Localizer.Logging.LogLevel;
 
-namespace I18Next.Net.Extensions;
+namespace Localizer.Extensions;
 
 /// <summary>
 ///     Logger implementation which forwards the logging method calls to a Microsoft.Extensions.Logging.ILogger.

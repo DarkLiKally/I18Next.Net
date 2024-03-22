@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.Localization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace I18Next.Net.AspNetCore;
+namespace Localizer.AspNetCore;
 
 public static class MvcBuilderExtensions
 {

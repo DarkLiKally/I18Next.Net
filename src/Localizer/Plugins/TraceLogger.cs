@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
-using I18Next.Net.Logging;
+using Localizer.Logging;
 
-namespace I18Next.Net.Plugins;
+namespace Localizer.Plugins;
 
 /// <summary>
 ///     Logger implementation that forwards the log messages to the diagnostics trace logging system.

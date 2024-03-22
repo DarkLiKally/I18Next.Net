@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 
-namespace I18Next.Net.Plugins;
+namespace Localizer.Plugins;
 
 public enum JsonFormat
 {
@@ -172,7 +172,7 @@ public class DefaultPluralResolver : IPluralResolver
                 if (rule.Numbers.Length == 1 || suffix == null)
                     return string.Empty;
 
-                return $"{PluralSeparator}{suffix}";    
+                return $"{PluralSeparator}{suffix}";
 
             default:
                 if (UseSimplePluralSuffixIfPossible && rule.Numbers.Length == 2 && rule.Numbers[0] == 1)

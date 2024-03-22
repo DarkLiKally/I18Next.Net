@@ -1,4 +1,4 @@
-﻿namespace I18Next.Net.Backends;
+﻿namespace Localizer.Backends;
 
 /// <summary>
 ///     Provides some utility methods for easier implementation of backends.

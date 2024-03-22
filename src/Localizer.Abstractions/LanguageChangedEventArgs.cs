@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace I18Next.Net;
+namespace Localizer;
 
 public class LanguageChangedEventArgs : EventArgs
 {

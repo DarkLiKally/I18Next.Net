@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace I18Next.Net.Internal;
+namespace Localizer.Internal;
 
 // TODO Integrate https://github.com/mj1856/TimeZoneNames/
 // Like mentioned here https://stackoverflow.com/questions/15302083/timezone-abbreviations

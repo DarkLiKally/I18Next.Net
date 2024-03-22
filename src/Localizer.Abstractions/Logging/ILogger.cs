@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace I18Next.Net.Logging;
+namespace Localizer.Logging;
 
 /// <summary>
 ///     ILogger interface for common scenarios.

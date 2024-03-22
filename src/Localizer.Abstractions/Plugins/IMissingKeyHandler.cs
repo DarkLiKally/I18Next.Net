@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace I18Next.Net.Plugins;
+namespace Localizer.Plugins;
 
 /// <summary>
 ///     Abstraction for a handler which can handle the occurence of a missing key in the used translation backend.

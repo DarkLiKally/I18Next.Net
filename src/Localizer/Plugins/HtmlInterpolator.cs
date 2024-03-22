@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using I18Next.Net.Logging;
+using Localizer.Logging;
 
-namespace I18Next.Net.Plugins;
+namespace Localizer.Plugins;
 
 public class HtmlInterpolator : DefaultInterpolator
 {
@@ -17,7 +17,7 @@ public class HtmlInterpolator : DefaultInterpolator
 
     public HtmlInterpolator(ILogger logger) : base(logger)
     {
-        
+
     }
 
     protected override string EscapeValue(string value)

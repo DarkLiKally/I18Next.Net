@@ -1,4 +1,4 @@
-﻿namespace I18Next.Net.Plugins;
+﻿namespace Localizer.Plugins;
 
 public interface ILanguageDetector
 {

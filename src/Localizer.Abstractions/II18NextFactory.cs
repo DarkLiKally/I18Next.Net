@@ -1,4 +1,4 @@
-namespace I18Next.Net;
+namespace Localizer;
 
 public interface II18NextFactory
 {

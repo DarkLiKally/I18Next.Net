@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace I18Next.Net.Plugins;
+namespace Localizer.Plugins;
 
 public class PseudoLocalizationPostProcessor : IPostProcessor
 {
@@ -28,7 +28,7 @@ public class PseudoLocalizationPostProcessor : IPostProcessor
             return value;
 
         var output = new StringBuilder();
-        
+
         foreach (var c in value)
         {
             var newChar = _options.Letters.TryGetValue(c, out var c2) ? c2 : c;

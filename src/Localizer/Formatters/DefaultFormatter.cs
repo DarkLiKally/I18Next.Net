@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Globalization;
-using I18Next.Net.Logging;
-using I18Next.Net.Plugins;
+using Localizer.Logging;
+using Localizer.Plugins;
 
-namespace I18Next.Net.Formatters;
+namespace Localizer.Formatters;
 
 public class DefaultFormatter : IFormatter
 {
@@ -13,7 +13,7 @@ public class DefaultFormatter : IFormatter
     {
         _logger = logger;
     }
-    
+
     public bool CanFormat(object value, string format, string language)
     {
         return true;
@@ -26,7 +26,7 @@ public class DefaultFormatter : IFormatter
 
         if (format == null)
             return value.ToString();
-        
+
         var formatString = $"{{0:{format}}}";
 
         try

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace I18Next.Net.Internal;
+namespace Localizer.Internal;
 
 public static class DictionaryExtensions
 {

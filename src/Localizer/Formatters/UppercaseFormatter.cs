@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
-using I18Next.Net.Plugins;
+using Localizer.Plugins;
 
-namespace I18Next.Net.Formatters;
+namespace Localizer.Formatters;
 
 public class UppercaseFormatter : IFormatter
 {

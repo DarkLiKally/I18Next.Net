@@ -1,4 +1,4 @@
-﻿namespace I18Next.Net.Plugins;
+﻿namespace Localizer.Plugins;
 
 /// <summary>
 ///     A I18Next formatter plugin used to apply formatting to an interpolation result.

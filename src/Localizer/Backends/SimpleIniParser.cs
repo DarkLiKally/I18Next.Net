@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace I18Next.Net.Backends;
+namespace Localizer.Backends;
 
 public class SimpleIniParser
 {
