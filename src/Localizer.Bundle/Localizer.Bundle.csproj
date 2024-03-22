@@ -2,9 +2,9 @@
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>        
         <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-        <RepositoryUrl>https://github.com/DarkLiKally/Localizer</RepositoryUrl>
-        <PackageProjectUrl>https://github.com/DarkLiKally/Localizer</PackageProjectUrl>
-        <Version>1.1.0</Version>
+        <RepositoryUrl>https://github.com/optimuz-optz/Localizer</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/optimuz-optz/Localizer</PackageProjectUrl>
+        <Version>1.1.1</Version>
         <Authors>DarkLiKally</Authors>
         <RepositoryType>git</RepositoryType>
         <LangVersion>latest</LangVersion>
