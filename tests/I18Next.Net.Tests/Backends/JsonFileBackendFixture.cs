@@ -41,6 +41,12 @@ public class JsonFileBackendFixture : IAsyncLifetime
     }
 
     [Fact]
+    public void LoadNamespaceAsync_ShouldSetNamespace()
+    {
+        _tree.Namespace.ShouldBe("test");
+    }
+
+    [Fact]
     public void LoadNamespaceAsync_NestedKeys_ShouldProvideCorrectTranslations()
     {
         _tree.ShouldNotBeNull();

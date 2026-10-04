@@ -47,7 +47,7 @@ public class HierarchicalTranslationTreeBuilder : ITranslationTreeBuilder
     {
         var root = BuildNode("", _root);
 
-        return new TranslationTree(root);
+        return new TranslationTree(root) { Namespace = Namespace };
     }
 
     public string Namespace { get; set; }

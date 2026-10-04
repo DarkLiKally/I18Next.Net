@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 
 using I18Next.Net.Backends;
 using I18Next.Net.Extensions.Configuration;
@@ -41,7 +42,7 @@ public class I18NextBuilder
     ///     <para>
     ///         Note: The configuring I18Next instance can only use one backend at a time. By default the last registered
     ///         backend will be used.
-    ///         You can use a CompositeBackend to combine multiple backend implementations into one.
+    ///         You can use a ChainedBackend to combine multiple backend implementations into one.
     ///     </para>
     /// </remarks>
     /// <param name="backend">The translation backend instance.</param>
@@ -60,7 +61,7 @@ public class I18NextBuilder
     ///     <para>
     ///         Note: The configuring I18Next instance can only use one backend at a time. By default the last registered
     ///         backend will be used.
-    ///         You can use a CompositeBackend to combine multiple backend implementations into one.
+    ///         You can use a ChainedBackend to combine multiple backend implementations into one.
     ///     </para>
     /// </remarks>
     /// <typeparam name="T">Type of the translation backend.</typeparam>
@@ -80,7 +81,7 @@ public class I18NextBuilder
     ///     <para>
     ///         Note: The configuring I18Next instance can only use one backend at a time. By default the last registered
     ///         backend will be used.
-    ///         You can use a CompositeBackend to combine multiple backend implementations into one.
+    ///         You can use a ChainedBackend to combine multiple backend implementations into one.
     ///     </para>
     /// </remarks>
     /// <param name="factory">Translation backend factory function.</param>
@@ -90,6 +91,35 @@ public class I18NextBuilder
         where T : class, ITranslationBackend
     {
         Services.AddSingleton<ITranslationBackend, T>(factory);
+
+        return this;
+    }
+
+    /// <summary>
+    ///     Registers a <see cref="HttpBackend" /> which uses a http client created by the IHttpClientFactory.
+    /// </summary>
+    /// <param name="loadPath">
+    ///     The path or url the namespaces are loaded from. <c>{{lng}}</c> and <c>{{ns}}</c> are replaced with the language and
+    ///     the namespace.
+    /// </param>
+    /// <param name="configureBackend">Configures the backend instance.</param>
+    /// <param name="configureHttpClient">Configures the named http client, e.g. its base address or message handlers.</param>
+    /// <returns>The current I18Next builder instance.</returns>
+    public I18NextBuilder AddHttpBackend(string loadPath = HttpBackend.DefaultLoadPath, Action<HttpBackend> configureBackend = null,
+        Action<IHttpClientBuilder> configureHttpClient = null)
+    {
+        var httpClientBuilder = Services.AddHttpClient(HttpBackend.HttpClientName);
+        configureHttpClient?.Invoke(httpClientBuilder);
+
+        Services.AddSingleton<ITranslationBackend>(serviceProvider =>
+        {
+            var httpClientFactory = serviceProvider.GetRequiredService<IHttpClientFactory>();
+            var backend = new HttpBackend(() => httpClientFactory.CreateClient(HttpBackend.HttpClientName), loadPath);
+
+            configureBackend?.Invoke(backend);
+
+            return backend;
+        });
 
         return this;
     }
