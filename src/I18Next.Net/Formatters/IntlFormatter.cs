@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using I18Next.Net.Internal;
 using I18Next.Net.Plugins;
 
@@ -54,7 +55,7 @@ public class IntlFormatter : IFormatter
             case "currency":
                 return FormatCurrency((IFormattable) value, options, positionalOption, culture);
             case "datetime":
-                return FormatDateTime((IFormattable) value, options, culture);
+                return FormatDateTime(value, options, language, culture);
             case "relativetime":
                 return FormatRelativeTime((IFormattable) value, options, positionalOption, language, culture);
             case "list":
@@ -99,23 +100,120 @@ public class IntlFormatter : IFormatter
         return RoundAwayFromZero(value, fractionDigits).ToString("C" + fractionDigits.ToString(CultureInfo.InvariantCulture), numberFormat);
     }
 
-    private static string FormatDateTime(IFormattable value, IDictionary<string, string> options, CultureInfo culture)
+    private static string FormatDateTime(object value, IDictionary<string, string> options, string language, CultureInfo culture)
     {
+        var date = value is DateTimeOffset dateTimeOffset ? dateTimeOffset : ToDateTimeOffset((DateTime) value);
+
         options.TryGetValue("dateStyle", out var dateStyle);
         options.TryGetValue("timeStyle", out var timeStyle);
 
-        if (dateStyle == null && timeStyle == null)
-            dateStyle = "short";
+        var hourLetter = GetHourLetter(options, language);
+        string pattern;
 
-        var formats = new List<string>(2);
+        if (dateStyle != null || timeStyle != null)
+        {
+            var hourCycle = options.ContainsKey("hour12") || options.ContainsKey("hourCycle") ? hourLetter : (char?) null;
 
-        if (dateStyle != null)
-            formats.Add(dateStyle == "full" || dateStyle == "long" ? culture.DateTimeFormat.LongDatePattern : culture.DateTimeFormat.ShortDatePattern);
+            pattern = LdmlDateFormat.GetStylePattern(language, dateStyle?.ToLowerInvariant(), timeStyle?.ToLowerInvariant(), hourCycle);
+        }
+        else
+        {
+            pattern = LdmlDateFormat.GetSkeletonPattern(language, BuildSkeleton(options, hourLetter),
+                options.ContainsKey("hour12") || options.ContainsKey("hourCycle"));
+        }
 
-        if (timeStyle != null)
-            formats.Add(timeStyle == "short" ? culture.DateTimeFormat.ShortTimePattern : culture.DateTimeFormat.LongTimePattern);
+        var fractionalSecondDigits = GetIntOption(options, "fractionalSecondDigits", 0);
 
-        return value.ToString(string.Join(" ", formats), culture);
+        if (fractionalSecondDigits > 0)
+            pattern = AddFractionalSeconds(pattern, Math.Min(fractionalSecondDigits, 3), LdmlDateFormat.GetDecimalSeparator(language));
+
+        return LdmlDateFormat.Format(date, pattern, language);
+    }
+
+    private static DateTimeOffset ToDateTimeOffset(DateTime value)
+    {
+        if (value.Kind == DateTimeKind.Utc)
+            return new DateTimeOffset(value, TimeSpan.Zero);
+
+        return new DateTimeOffset(DateTime.SpecifyKind(value, DateTimeKind.Unspecified), TimeZoneInfo.Local.GetUtcOffset(value));
+    }
+
+    private static char GetHourLetter(IDictionary<string, string> options, string language)
+    {
+        if (options.TryGetValue("hourCycle", out var hourCycle))
+        {
+            switch (hourCycle.ToLowerInvariant())
+            {
+                case "h11":
+                    return 'K';
+                case "h12":
+                    return 'h';
+                case "h23":
+                    return 'H';
+                case "h24":
+                    return 'k';
+            }
+        }
+
+        var preferred = LdmlDateFormat.GetPreferredHourLetter(language);
+
+        if (options.TryGetValue("hour12", out var hour12))
+        {
+            if (string.Equals(hour12, "true", StringComparison.OrdinalIgnoreCase))
+                return preferred == 'K' ? 'K' : 'h';
+
+            return 'H';
+        }
+
+        return preferred;
+    }
+
+    private static string BuildSkeleton(IDictionary<string, string> options, char hourLetter)
+    {
+        var skeleton = new StringBuilder();
+
+        void Append(string option, Func<string, string> map)
+        {
+            if (options.TryGetValue(option, out var optionValue))
+                skeleton.Append(map(optionValue.ToLowerInvariant()));
+        }
+
+        Append("era", v => v == "long" ? "GGGG" : v == "narrow" ? "GGGGG" : "G");
+        Append("year", v => v == "2-digit" ? "yy" : "y");
+        Append("month", v => v switch { "2-digit" => "MM", "short" => "MMM", "long" => "MMMM", "narrow" => "MMMMM", _ => "M" });
+        Append("weekday", v => v == "long" ? "EEEE" : v == "narrow" ? "EEEEE" : "EEE");
+        Append("day", v => v == "2-digit" ? "dd" : "d");
+        Append("hour", v => new string(hourLetter, v == "2-digit" ? 2 : 1));
+        Append("minute", v => v == "2-digit" ? "mm" : "m");
+        Append("second", v => v == "2-digit" ? "ss" : "s");
+        Append("timeZoneName", v => v switch { "long" => "zzzz", "shortoffset" => "O", "longoffset" => "OOOO", "shortgeneric" => "v", "longgeneric" => "vvvv", _ => "z" });
+
+        if (skeleton.Length == 0 || skeleton.ToString().All(c => c is 'z' or 'O' or 'v'))
+            skeleton.Insert(0, "yMd");
+
+        return skeleton.ToString();
+    }
+
+    private static string AddFractionalSeconds(string pattern, int digits, string decimalSeparator)
+    {
+        var fields = LdmlDateFormat.Parse(pattern);
+        var result = new StringBuilder();
+
+        foreach (var field in fields)
+        {
+            if (field.Letter == '\0')
+            {
+                result.Append('\'').Append(field.Literal.Replace("'", "''")).Append('\'');
+                continue;
+            }
+
+            result.Append(field.Letter, field.Width);
+
+            if (field.Letter == 's')
+                result.Append('\'').Append(decimalSeparator).Append('\'').Append('S', digits);
+        }
+
+        return result.ToString();
     }
 
     private static string FormatRelativeTime(IFormattable value, IDictionary<string, string> options, string positionalOption, string language,

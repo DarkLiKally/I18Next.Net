@@ -43,7 +43,7 @@ public class DefaultInterpolator_ChainedFormatsFixture
     [TestCase("{{days, relativetime(numeric: auto), uppercase}}", ExpectedResult = "YESTERDAY")]
     [TestCase("{{text, uppercase, lowercase}}", ExpectedResult = "hello")]
     [TestCase("{{price, number(minimumFractionDigits: 2), uppercase}}", ExpectedResult = "1,234.50")]
-    [TestCase("{{date, datetime(dateStyle: long), uppercase}}", ExpectedResult = "TUESDAY, OCTOBER 2, 2018")]
+    [TestCase("{{date, datetime(dateStyle: full), uppercase}}", ExpectedResult = "TUESDAY, OCTOBER 2, 2018")]
     public async Task<string> InterpolateAsync_ChainedFormats_ShouldApplyFormatsInOrder(string source)
     {
         return await InterpolateAsync(source);

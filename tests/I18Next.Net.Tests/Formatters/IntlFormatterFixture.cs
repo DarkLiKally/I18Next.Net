@@ -58,9 +58,10 @@ public class IntlFormatterFixture
     }
 
     [TestCase("datetime", "en-US", ExpectedResult = "1/25/2018")]
-    [TestCase("datetime(dateStyle: short)", "de-DE", ExpectedResult = "25.01.2018")]
-    [TestCase("datetime(dateStyle: long)", "en-US", ExpectedResult = "Thursday, January 25, 2018")]
-    [TestCase("datetime(dateStyle: long; timeStyle: short)", "de-DE", ExpectedResult = "Donnerstag, 25. Januar 2018 07:37")]
+    [TestCase("datetime(dateStyle: short)", "de-DE", ExpectedResult = "25.01.18")]
+    [TestCase("datetime(dateStyle: long)", "en-US", ExpectedResult = "January 25, 2018")]
+    [TestCase("datetime(dateStyle: full)", "en-US", ExpectedResult = "Thursday, January 25, 2018")]
+    [TestCase("datetime(dateStyle: long; timeStyle: short)", "de-DE", ExpectedResult = "25. Januar 2018 um 07:37")]
     [TestCase("datetime(timeStyle: medium)", "en-US", ExpectedResult = "7:37:59 AM")]
     public string Format_DateTimes_ShouldUseCultureStyles(string format, string language)
     {

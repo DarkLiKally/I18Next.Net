@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -19,19 +20,27 @@ internal sealed class CldrData
         ["short"] = "long"
     };
 
+    private readonly Dictionary<string, Dictionary<string, object>> _calendars;
+    private readonly ConcurrentDictionary<string, IReadOnlyDictionary<string, object>> _resolvedCalendars = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, Dictionary<string, string[]>> _lists;
     private readonly Dictionary<string, string> _parents;
     private readonly Dictionary<string, Dictionary<string, RelativeTimeData>> _relativeTimes;
 
     private CldrData(Dictionary<string, string> parents, Dictionary<string, Dictionary<string, RelativeTimeData>> relativeTimes,
-        Dictionary<string, Dictionary<string, string[]>> lists)
+        Dictionary<string, Dictionary<string, string[]>> lists, Dictionary<string, Dictionary<string, object>> calendars)
     {
         _parents = parents;
         _relativeTimes = relativeTimes;
         _lists = lists;
+        _calendars = calendars;
     }
 
     public static CldrData Default => Instance.Value;
+
+    public IReadOnlyDictionary<string, object> GetCalendar(string language)
+    {
+        return _resolvedCalendars.GetOrAdd(language ?? FallbackLocale, ResolveCalendar);
+    }
 
     public string[] GetListPatterns(string language, string type, string style)
     {
@@ -100,7 +109,55 @@ internal sealed class CldrData
             lists[locale.Name] = entries;
         }
 
-        return new CldrData(parents, relativeTimes, lists);
+        var calendars = new Dictionary<string, Dictionary<string, object>>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var locale in root.GetProperty("calendar").EnumerateObject())
+        {
+            var entries = new Dictionary<string, object>(StringComparer.Ordinal);
+
+            foreach (var entry in locale.Value.EnumerateObject())
+            {
+                if (entry.Value.ValueKind == JsonValueKind.Array)
+                {
+                    var values = new string[entry.Value.GetArrayLength()];
+                    var index = 0;
+
+                    foreach (var value in entry.Value.EnumerateArray())
+                        values[index++] = value.GetString();
+
+                    entries[entry.Name] = values;
+                }
+                else
+                {
+                    entries[entry.Name] = entry.Value.GetString();
+                }
+            }
+
+            calendars[locale.Name] = entries;
+        }
+
+        return new CldrData(parents, relativeTimes, lists, calendars);
+    }
+
+    private IReadOnlyDictionary<string, object> ResolveCalendar(string language)
+    {
+        var chain = new List<Dictionary<string, object>>();
+
+        foreach (var locale in GetLocaleChain(language))
+        {
+            if (_calendars.TryGetValue(locale, out var entries))
+                chain.Add(entries);
+        }
+
+        var result = new Dictionary<string, object>(StringComparer.Ordinal);
+
+        for (var i = chain.Count - 1; i >= 0; i--)
+        {
+            foreach (var entry in chain[i])
+                result[entry.Key] = entry.Value;
+        }
+
+        return result;
     }
 
     private TValue Find<TValue>(Dictionary<string, Dictionary<string, TValue>> table, string language, string name, string style)
