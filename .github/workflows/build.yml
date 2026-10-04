@@ -40,7 +40,10 @@ jobs:
           done
           exit $failed
       - name: Test
-        run: dotnet test tests/I18Next.Net.Tests -c Release --no-build --logger trx --results-directory artifacts/test-results
+        run: >-
+          for project in tests/I18Next.Net.Tests tests/I18Next.Net.Generators.Tests; do
+          dotnet test "$project" -c Release --no-build --logger trx --results-directory artifacts/test-results || exit 1;
+          done
       - name: Collect packages
         run: mkdir -p artifacts/packages && cp src/*/bin/Release/*.nupkg artifacts/packages/
       - uses: actions/upload-artifact@v4

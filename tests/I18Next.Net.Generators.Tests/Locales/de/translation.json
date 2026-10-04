@@ -1,0 +1,21 @@
+{
+    "welcome": "Hallo {{name}}!",
+    "item_one": "{{count}} Element",
+    "item_other": "{{count}} Elemente",
+    "place_ordinal_other": "{{count}}. Platz",
+    "friend": "Ein Freund",
+    "friend_male": "Ein Freund",
+    "friend_female": "Eine Freundin",
+    "friend_male_one": "{{count}} Freund",
+    "friend_male_other": "{{count}} Freunde",
+    "menu": {
+        "title": "Menü von {{user.name}}",
+        "items": [ "Start", "Über {{name}}" ]
+    },
+    "errors": {
+        "404": "Nicht gefunden",
+        "class": "Schlüsselwort"
+    },
+    "user_name": "Benutzername",
+    "nested": "$t(welcome, {\"name\": \"{{person}}\"})"
+}
