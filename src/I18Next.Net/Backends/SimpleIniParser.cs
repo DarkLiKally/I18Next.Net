@@ -23,15 +23,12 @@ public class SimpleIniParser
 
     public string[] GetKeys(string section)
     {
-        if (!_entries.ContainsKey(section))
-            return new string[0];
-
-        return _entries[section].Keys.ToArray();
+        return !_entries.ContainsKey(section) ? [] : [.. _entries[section].Keys];
     }
 
     public string[] GetSections()
     {
-        return _entries.Keys.Where(t => t != "").ToArray();
+        return [.. _entries.Keys.Where(t => t != "")];
     }
 
     public string GetValue(string key)
@@ -49,10 +46,7 @@ public class SimpleIniParser
         if (!_entries.ContainsKey(section))
             return @default;
 
-        if (!_entries[section].ContainsKey(key))
-            return @default;
-
-        return _entries[section][key];
+        return !_entries[section].ContainsKey(key) ? @default : _entries[section][key];
     }
 
     private void ParseIniContent(string txt)
@@ -61,7 +55,7 @@ public class SimpleIniParser
 
         _entries[""] = currentSection;
 
-        foreach (var line in txt.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries)
+        foreach (var line in txt.Split(["\r\n", "\n"], StringSplitOptions.RemoveEmptyEntries)
                      .Where(t => !string.IsNullOrWhiteSpace(t))
                      .Select(t => t.Trim()))
         {
@@ -86,10 +80,7 @@ public class SimpleIniParser
                 var key = line.Substring(0, idx).Trim();
                 var value = line.Substring(idx + 1).Trim();
 
-                if (value.StartsWith("\"", StringComparison.Ordinal))
-                    currentSection[key] = value.Substring(1, value.Length - 2);
-                else
-                    currentSection[key] = value;
+                currentSection[key] = value.StartsWith("\"", StringComparison.Ordinal) ? value.Substring(1, value.Length - 2) : value;
             }
         }
     }

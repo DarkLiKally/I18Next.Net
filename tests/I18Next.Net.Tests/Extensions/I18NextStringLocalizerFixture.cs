@@ -1,9 +1,12 @@
 using System.Globalization;
 using System.Linq;
+
 using I18Next.Net.Backends;
 using I18Next.Net.Extensions;
 using I18Next.Net.Plugins;
+
 using Shouldly;
+
 using Xunit;
 
 namespace I18Next.Net.Tests.Extensions;
@@ -23,8 +26,8 @@ public class I18NextStringLocalizerFixture
         _i18Next = new I18NextNet(backend, new DefaultTranslator(backend)) { Language = "en" };
         _localizer = new I18NextStringLocalizer(_i18Next);
     }
-    private I18NextNet _i18Next;
-    private I18NextStringLocalizer _localizer;
+    private readonly I18NextNet _i18Next;
+    private readonly I18NextStringLocalizer _localizer;
 
 
     [Fact]
@@ -89,7 +92,7 @@ public class I18NextStringLocalizerFixture
     [Fact]
     public void Indexer_DetectLanguageOnEachTranslation_ShouldUseDetectedLanguage()
     {
-        var backend = (InMemoryBackend) _i18Next.Backend;
+        var backend = (InMemoryBackend)_i18Next.Backend;
         var i18Next = new I18NextNet(backend, new DefaultTranslator(backend), new DefaultLanguageDetector("de"))
         {
             Language = "en",

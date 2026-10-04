@@ -1,8 +1,11 @@
 using System.Collections.Generic;
 using System.IO;
+
 using I18Next.Net.Backends;
 using I18Next.Net.Plugins;
+
 using Shouldly;
+
 using Xunit;
 
 namespace I18Next.Net.Tests.Backends;
@@ -121,7 +124,7 @@ public class JsonPluralFormatsFixture
     {
         var i18Next = CreateI18Next(JsonFormat.Version4, "v4");
         var possibleKeys = new List<string>();
-        ((DefaultTranslator) i18Next.Translator).MissingKey += (_, args) => possibleKeys.AddRange(args.PossibleKeys);
+        ((DefaultTranslator)i18Next.Translator).MissingKey += (_, args) => possibleKeys.AddRange(args.PossibleKeys);
 
         i18Next.T("en", "missing", new { count = 2 }).ShouldBe("missing");
 

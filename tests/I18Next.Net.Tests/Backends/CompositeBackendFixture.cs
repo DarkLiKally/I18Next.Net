@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Threading.Tasks;
+
 using I18Next.Net.Backends;
 using I18Next.Net.TranslationTrees;
+
 using NSubstitute;
+
 using Shouldly;
+
 using Xunit;
 
 namespace I18Next.Net.Tests.Backends;
@@ -17,20 +21,20 @@ public class CompositeBackendFixture : IDisposable
 
         _backend = new CompositeBackend(_backendA, _backendB);
 
-        _backendA.LoadNamespaceAsync("en", "backB").Returns((ITranslationTree) null);
-        _backendB.LoadNamespaceAsync("en", "backA").Returns((ITranslationTree) null);
+        _backendA.LoadNamespaceAsync("en", "backB").Returns((ITranslationTree)null);
+        _backendB.LoadNamespaceAsync("en", "backA").Returns((ITranslationTree)null);
     }
 
     public void Dispose()
     {
         _backendA.ClearReceivedCalls();
         _backendB.ClearReceivedCalls();
-    
+
     }
 
-    private ITranslationBackend _backendB;
-    private ITranslationBackend _backendA;
-    private CompositeBackend _backend;
+    private readonly ITranslationBackend _backendB;
+    private readonly ITranslationBackend _backendA;
+    private readonly CompositeBackend _backend;
 
 
     [Fact]

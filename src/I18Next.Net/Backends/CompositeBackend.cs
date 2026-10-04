@@ -1,16 +1,12 @@
 ﻿using System.Threading.Tasks;
+
 using I18Next.Net.TranslationTrees;
 
 namespace I18Next.Net.Backends;
 
-public class CompositeBackend : ITranslationBackend
+public class CompositeBackend(params ITranslationBackend[] backends) : ITranslationBackend
 {
-    private readonly ITranslationBackend[] _backends;
-
-    public CompositeBackend(params ITranslationBackend[] backends)
-    {
-        _backends = backends;
-    }
+    private readonly ITranslationBackend[] _backends = backends;
 
     public async Task<ITranslationTree> LoadNamespaceAsync(string language, string @namespace)
     {

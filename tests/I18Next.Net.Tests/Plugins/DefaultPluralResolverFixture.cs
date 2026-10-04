@@ -1,5 +1,7 @@
 ﻿using I18Next.Net.Plugins;
+
 using Shouldly;
+
 using Xunit;
 
 namespace I18Next.Net.Tests.Plugins;

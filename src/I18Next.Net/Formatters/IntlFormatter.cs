@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+
 using I18Next.Net.Internal;
 using I18Next.Net.Plugins;
 
@@ -22,22 +23,15 @@ public class IntlFormatter : IFormatter
 
     public bool CanFormat(object value, string format, string language)
     {
-        if (value == null || format == null)
-            return false;
-
-        switch (GetFormatName(format))
-        {
-            case "number":
-            case "currency":
-            case "relativetime":
-                return IsNumber(value);
-            case "datetime":
-                return value is DateTime || value is DateTimeOffset;
-            case "list":
-                return value is IEnumerable && value is not string;
-            default:
-                return false;
-        }
+        return value == null || format == null
+            ? false
+            : GetFormatName(format) switch
+            {
+                "number" or "currency" or "relativetime" => IsNumber(value),
+                "datetime" => value is DateTime || value is DateTimeOffset,
+                "list" => value is IEnumerable && value is not string,
+                _ => false,
+            };
     }
 
     public string Format(object value, string format, string language)
@@ -48,21 +42,15 @@ public class IntlFormatter : IFormatter
         var options = ParseOptions(format, out var positionalOption);
         var culture = GetCulture(language);
 
-        switch (GetFormatName(format))
+        return GetFormatName(format) switch
         {
-            case "number":
-                return FormatNumber((IFormattable) value, options, culture);
-            case "currency":
-                return FormatCurrency((IFormattable) value, options, positionalOption, culture);
-            case "datetime":
-                return FormatDateTime(value, options, language, culture);
-            case "relativetime":
-                return FormatRelativeTime((IFormattable) value, options, positionalOption, language, culture);
-            case "list":
-                return FormatList((IEnumerable) value, options, language);
-            default:
-                return value.ToString();
-        }
+            "number" => FormatNumber((IFormattable)value, options, culture),
+            "currency" => FormatCurrency((IFormattable)value, options, positionalOption, culture),
+            "datetime" => FormatDateTime(value, options, language, culture),
+            "relativetime" => FormatRelativeTime((IFormattable)value, options, positionalOption, language, culture),
+            "list" => FormatList((IEnumerable)value, options, language),
+            _ => value.ToString(),
+        };
     }
 
     private static string FormatNumber(IFormattable value, IDictionary<string, string> options, CultureInfo culture)
@@ -84,15 +72,15 @@ public class IntlFormatter : IFormatter
         if (!options.TryGetValue("currency", out var currency))
             currency = positionalOption;
 
-        var numberFormat = (NumberFormatInfo) culture.NumberFormat.Clone();
+        var numberFormat = (NumberFormatInfo)culture.NumberFormat.Clone();
         var defaultFractionDigits = numberFormat.CurrencyDecimalDigits;
 
         if (!string.IsNullOrEmpty(currency))
         {
-            var currencyInfo = GetCurrency(currency.ToUpperInvariant(), culture);
+            var (Symbol, DecimalDigits) = GetCurrency(currency.ToUpperInvariant(), culture);
 
-            numberFormat.CurrencySymbol = currencyInfo.Symbol;
-            defaultFractionDigits = currencyInfo.DecimalDigits;
+            numberFormat.CurrencySymbol = Symbol;
+            defaultFractionDigits = DecimalDigits;
         }
 
         var fractionDigits = GetIntOption(options, "maximumFractionDigits", GetIntOption(options, "minimumFractionDigits", defaultFractionDigits));
@@ -102,7 +90,7 @@ public class IntlFormatter : IFormatter
 
     private static string FormatDateTime(object value, IDictionary<string, string> options, string language, CultureInfo culture)
     {
-        var date = value is DateTimeOffset dateTimeOffset ? dateTimeOffset : ToDateTimeOffset((DateTime) value);
+        var date = value is DateTimeOffset dateTimeOffset ? dateTimeOffset : ToDateTimeOffset((DateTime)value);
 
         options.TryGetValue("dateStyle", out var dateStyle);
         options.TryGetValue("timeStyle", out var timeStyle);
@@ -112,7 +100,7 @@ public class IntlFormatter : IFormatter
 
         if (dateStyle != null || timeStyle != null)
         {
-            var hourCycle = options.ContainsKey("hour12") || options.ContainsKey("hourCycle") ? hourLetter : (char?) null;
+            var hourCycle = options.ContainsKey("hour12") || options.ContainsKey("hourCycle") ? hourLetter : (char?)null;
 
             pattern = LdmlDateFormat.GetStylePattern(language, dateStyle?.ToLowerInvariant(), timeStyle?.ToLowerInvariant(), hourCycle);
         }
@@ -132,10 +120,9 @@ public class IntlFormatter : IFormatter
 
     private static DateTimeOffset ToDateTimeOffset(DateTime value)
     {
-        if (value.Kind == DateTimeKind.Utc)
-            return new DateTimeOffset(value, TimeSpan.Zero);
-
-        return new DateTimeOffset(DateTime.SpecifyKind(value, DateTimeKind.Unspecified), TimeZoneInfo.Local.GetUtcOffset(value));
+        return value.Kind == DateTimeKind.Utc
+            ? new DateTimeOffset(value, TimeSpan.Zero)
+            : new DateTimeOffset(DateTime.SpecifyKind(value, DateTimeKind.Unspecified), TimeZoneInfo.Local.GetUtcOffset(value));
     }
 
     private static char GetHourLetter(IDictionary<string, string> options, string language)
@@ -159,10 +146,7 @@ public class IntlFormatter : IFormatter
 
         if (options.TryGetValue("hour12", out var hour12))
         {
-            if (string.Equals(hour12, "true", StringComparison.OrdinalIgnoreCase))
-                return preferred == 'K' ? 'K' : 'h';
-
-            return 'H';
+            return string.Equals(hour12, "true", StringComparison.OrdinalIgnoreCase) ? preferred == 'K' ? 'K' : 'h' : 'H';
         }
 
         return preferred;
@@ -235,12 +219,12 @@ public class IntlFormatter : IFormatter
         var isInteger = Math.Abs(number % 1) < double.Epsilon;
 
         if (options.TryGetValue("numeric", out var numeric) && string.Equals(numeric, "auto", StringComparison.OrdinalIgnoreCase) && isInteger &&
-            data.Relative.TryGetValue(((long) number).ToString(CultureInfo.InvariantCulture), out var relative))
+            data.Relative.TryGetValue(((long)number).ToString(CultureInfo.InvariantCulture), out var relative))
             return relative;
 
         var isPast = BitConverter.DoubleToInt64Bits(number) < 0;
         var absolute = Math.Abs(number);
-        var category = isInteger && absolute <= int.MaxValue ? DefaultPluralResolver.GetPluralCategory(language, (int) absolute) : "other";
+        var category = isInteger && absolute <= int.MaxValue ? DefaultPluralResolver.GetPluralCategory(language, (int)absolute) : "other";
         var patterns = isPast ? data.Past : data.Future;
 
         if (!patterns.TryGetValue(category, out var pattern))
@@ -285,27 +269,22 @@ public class IntlFormatter : IFormatter
         var firstIndex = pattern.IndexOf("{0}", StringComparison.Ordinal);
         var secondIndex = pattern.IndexOf("{1}", StringComparison.Ordinal);
 
-        if (firstIndex < secondIndex)
-            return pattern.Substring(0, firstIndex) + first + pattern.Substring(firstIndex + 3, secondIndex - firstIndex - 3) + second +
-                   pattern.Substring(secondIndex + 3);
-
-        return pattern.Substring(0, secondIndex) + second + pattern.Substring(secondIndex + 3, firstIndex - secondIndex - 3) + first +
+        return firstIndex < secondIndex
+            ? pattern.Substring(0, firstIndex) + first + pattern.Substring(firstIndex + 3, secondIndex - firstIndex - 3) + second +
+                   pattern.Substring(secondIndex + 3)
+            : pattern.Substring(0, secondIndex) + second + pattern.Substring(secondIndex + 3, firstIndex - secondIndex - 3) + first +
                pattern.Substring(firstIndex + 3);
     }
 
     private static IFormattable RoundAwayFromZero(IFormattable value, int fractionDigits)
     {
-        switch (value)
+        return value switch
         {
-            case double doubleValue when !double.IsNaN(doubleValue) && !double.IsInfinity(doubleValue):
-                return Math.Round(doubleValue, Math.Min(fractionDigits, 15), MidpointRounding.AwayFromZero);
-            case float floatValue when !float.IsNaN(floatValue) && !float.IsInfinity(floatValue):
-                return Math.Round((double) floatValue, Math.Min(fractionDigits, 15), MidpointRounding.AwayFromZero);
-            case decimal decimalValue:
-                return Math.Round(decimalValue, Math.Min(fractionDigits, 28), MidpointRounding.AwayFromZero);
-            default:
-                return value;
-        }
+            double doubleValue when !double.IsNaN(doubleValue) && !double.IsInfinity(doubleValue) => Math.Round(doubleValue, Math.Min(fractionDigits, 15), MidpointRounding.AwayFromZero),
+            float floatValue when !float.IsNaN(floatValue) && !float.IsInfinity(floatValue) => Math.Round((double)floatValue, Math.Min(fractionDigits, 15), MidpointRounding.AwayFromZero),
+            decimal decimalValue => Math.Round(decimalValue, Math.Min(fractionDigits, 28), MidpointRounding.AwayFromZero),
+            _ => value,
+        };
     }
 
     private static (string Symbol, int DecimalDigits) GetCurrency(string currency, CultureInfo culture)
@@ -363,20 +342,13 @@ public class IntlFormatter : IFormatter
 
     internal static bool IsFormatName(string format)
     {
-        if (format == null)
-            return false;
-
-        switch (GetFormatName(format))
-        {
-            case "number":
-            case "currency":
-            case "datetime":
-            case "relativetime":
-            case "list":
-                return true;
-            default:
-                return false;
-        }
+        return format == null
+            ? false
+            : GetFormatName(format) switch
+            {
+                "number" or "currency" or "datetime" or "relativetime" or "list" => true,
+                _ => false,
+            };
     }
 
     private static string GetFormatName(string format)
@@ -389,10 +361,9 @@ public class IntlFormatter : IFormatter
 
     private static int GetIntOption(IDictionary<string, string> options, string name, int defaultValue)
     {
-        if (options.TryGetValue(name, out var value) && int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var result))
-            return Math.Max(0, Math.Min(result, 20));
-
-        return defaultValue;
+        return options.TryGetValue(name, out var value) && int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var result)
+            ? Math.Max(0, Math.Min(result, 20))
+            : defaultValue;
     }
 
     private static bool IsNumber(object value)

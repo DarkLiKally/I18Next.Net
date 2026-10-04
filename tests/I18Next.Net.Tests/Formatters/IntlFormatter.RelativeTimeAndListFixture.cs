@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using I18Next.Net.Formatters;
 using I18Next.Net.Plugins;
+
 using Shouldly;
+
 using Xunit;
 
 namespace I18Next.Net.Tests.Formatters;
@@ -14,7 +17,7 @@ public class IntlFormatterRelativeTimeAndListFixture
     {
         _formatter = new IntlFormatter();
     }
-    private IntlFormatter _formatter;
+    private readonly IntlFormatter _formatter;
 
 
     [Theory]

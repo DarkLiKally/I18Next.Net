@@ -161,11 +161,11 @@ internal static class LdmlDateFormat
         exactMatch = false;
         matchedSkeleton = null;
         var bestDistance = int.MaxValue;
-        var requestedTypes = new string(requested.Select(f => GetFieldType(f.Letter)).OrderBy(c => c).ToArray());
+        var requestedTypes = new string([.. requested.Select(f => GetFieldType(f.Letter)).OrderBy(c => c)]);
 
         foreach (var (candidate, candidatePattern, isAvailableFormat) in GetCandidates(calendar))
         {
-            var candidateTypes = new string(candidate.Select(f => GetFieldType(f.Letter)).OrderBy(c => c).ToArray());
+            var candidateTypes = new string([.. candidate.Select(f => GetFieldType(f.Letter)).OrderBy(c => c)]);
 
             if (candidateTypes != requestedTypes || candidate.Any(f => f.Letter == 'B'))
                 continue;
@@ -231,7 +231,7 @@ internal static class LdmlDateFormat
         foreach (var entry in calendar)
         {
             if (entry.Key.StartsWith("skeleton-", StringComparison.Ordinal))
-                yield return (ParseSkeleton(entry.Key.Substring(9)), (string) entry.Value, true);
+                yield return (ParseSkeleton(entry.Key.Substring(9)), (string)entry.Value, true);
         }
     }
 
@@ -331,43 +331,26 @@ internal static class LdmlDateFormat
 
     private static char GetFieldType(char letter)
     {
-        switch (letter)
+        return letter switch
         {
-            case 'L':
-                return 'M';
-            case 'c':
-            case 'e':
-                return 'E';
-            case 'H':
-            case 'K':
-            case 'k':
-            case 'j':
-                return 'h';
-            case 'v':
-            case 'V':
-            case 'O':
-                return 'z';
-            case 'Y':
-            case 'u':
-                return 'y';
-            default:
-                return letter;
-        }
+            'L' => 'M',
+            'c' or 'e' => 'E',
+            'H' or 'K' or 'k' or 'j' => 'h',
+            'v' or 'V' or 'O' => 'z',
+            'Y' or 'u' => 'y',
+            _ => letter,
+        };
     }
 
     private static bool IsText(Field field)
     {
-        switch (GetFieldType(field.Letter))
+        return GetFieldType(field.Letter) switch
         {
-            case 'M':
-                return field.Width >= 3;
-            case 'E':
-                return field.Letter == 'E' || field.Width >= 3;
-            case 'G':
-                return true;
-            default:
-                return false;
-        }
+            'M' => field.Width >= 3,
+            'E' => field.Letter == 'E' || field.Width >= 3,
+            'G' => true,
+            _ => false,
+        };
     }
 
     public static List<Field> Parse(string pattern)
@@ -488,10 +471,10 @@ internal static class LdmlDateFormat
             case 'e':
             case 'c':
                 if (letter != 'E' && width <= 2)
-                    return Number((int) value.DayOfWeek + 1, width, digits);
+                    return Number((int)value.DayOfWeek + 1, width, digits);
 
                 return GetArray(calendar, $"days-{(letter == 'c' ? "stand-alone" : "format")}-{GetDayWidthName(letter == 'E' ? Math.Max(width, 3) : width)}")[
-                    (int) value.DayOfWeek];
+                    (int)value.DayOfWeek];
             case 'a':
             case 'b':
                 return GetArray(calendar, $"dayPeriods-format-{(width >= 5 ? "narrow" : "wide")}")[value.Hour < 12 ? 0 : 1];
@@ -539,7 +522,7 @@ internal static class LdmlDateFormat
         var minutes = value.Hour * 60 + value.Minute;
         string period = null;
 
-        foreach (var rule in (string[]) rulesValue)
+        foreach (var rule in (string[])rulesValue)
         {
             var parts = rule.Split('|');
 
@@ -564,7 +547,7 @@ internal static class LdmlDateFormat
         if (period == null)
             return null;
 
-        foreach (var name in (string[]) namesValue)
+        foreach (var name in (string[])namesValue)
         {
             if (name.StartsWith(period + "=", StringComparison.Ordinal))
                 return name.Substring(period.Length + 1);
@@ -614,15 +597,14 @@ internal static class LdmlDateFormat
         var sign = offset < TimeSpan.Zero ? "-" : "+";
         var hours = Number(absolute.Hours, 2, digits);
 
-        if (optionalMinutes && absolute.Minutes == 0)
-            return sign + hours;
-
-        return sign + hours + (withColon ? ":" : "") + Number(absolute.Minutes, 2, digits);
+        return optionalMinutes && absolute.Minutes == 0
+            ? sign + hours
+            : sign + hours + (withColon ? ":" : "") + Number(absolute.Minutes, 2, digits);
     }
 
     private static int GetIsoWeek(DateTime date)
     {
-        var day = (int) date.DayOfWeek;
+        var day = (int)date.DayOfWeek;
         var thursday = date.AddDays(3 - (day + 6) % 7);
 
         return (thursday.DayOfYear - 1) / 7 + 1;
@@ -672,22 +654,15 @@ internal static class LdmlDateFormat
 
     private static string[] GetArray(IReadOnlyDictionary<string, object> calendar, string key)
     {
-        return calendar.TryGetValue(key, out var value) ? (string[]) value : throw new KeyNotFoundException(key);
+        return calendar.TryGetValue(key, out var value) ? (string[])value : throw new KeyNotFoundException(key);
     }
 
-    internal readonly struct Field
+    internal readonly struct Field(char letter, int width, string literal)
     {
-        public Field(char letter, int width, string literal)
-        {
-            Letter = letter;
-            Width = width;
-            Literal = literal;
-        }
+        public char Letter { get; } = letter;
 
-        public char Letter { get; }
+        public int Width { get; } = width;
 
-        public int Width { get; }
-
-        public string Literal { get; }
+        public string Literal { get; } = literal;
     }
 }

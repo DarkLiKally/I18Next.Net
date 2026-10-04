@@ -1,5 +1,7 @@
 ﻿using System;
+
 using I18Next.Net.Extensions.Builder;
+
 using Microsoft.Extensions.DependencyInjection;
 
 namespace I18Next.Net.Extensions;

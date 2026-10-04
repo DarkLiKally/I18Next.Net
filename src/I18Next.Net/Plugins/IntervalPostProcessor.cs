@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
+
 using I18Next.Net.Internal;
 
 namespace I18Next.Net.Plugins;
@@ -52,42 +53,26 @@ public class IntervalPostProcessor : IPostProcessor
             // Negative infinity
             if (parts[0] == "inf")
             {
-                if (!int.TryParse(parts[1], out to))
-                    return false;
-
-                return count <= to;
+                return int.TryParse(parts[1], out to) && count <= to;
             }
 
             // Positive infinity
             if (parts[1] == "inf")
             {
-                if (!int.TryParse(parts[0], out from))
-                    return false;
-
-                return count >= from;
+                return int.TryParse(parts[0], out from) && count >= from;
             }
 
             // Both values set finite
-            if (!int.TryParse(parts[0], out from) || !int.TryParse(parts[1], out to))
-                return false;
-
-            return count >= from && count <= to;
+            return int.TryParse(parts[0], out from) && int.TryParse(parts[1], out to) && count >= from && count <= to;
         }
 
-        if (int.TryParse(value, out var intervalNum))
-
-            return intervalNum == count;
-
-        return false;
+        return int.TryParse(value, out var intervalNum) && intervalNum == count;
     }
 
     private string GetFirstMatchValue(string interval)
     {
         var match = IntervalRegex.Match(interval);
 
-        if (!match.Success)
-            return interval;
-
-        return match.Groups[2].Value;
+        return !match.Success ? interval : match.Groups[2].Value;
     }
 }

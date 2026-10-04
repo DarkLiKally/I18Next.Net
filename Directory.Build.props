@@ -17,6 +17,10 @@
         <PackageProjectUrl>https://github.com/DarkLiKally/I18Next.Net</PackageProjectUrl>
 
         <CheckEolTargetFramework>false</CheckEolTargetFramework>
+
+        <NuGetAudit>true</NuGetAudit>
+        <NuGetAuditMode>all</NuGetAuditMode>
+        <NuGetAuditLevel>low</NuGetAuditLevel>
     </PropertyGroup>
 
 </Project>

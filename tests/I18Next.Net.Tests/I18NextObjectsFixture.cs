@@ -2,9 +2,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+
 using I18Next.Net.Backends;
 using I18Next.Net.Plugins;
+
 using Shouldly;
+
 using Xunit;
 
 namespace I18Next.Net.Tests;
@@ -16,13 +19,13 @@ public class I18NextObjectsFixture
         var backend = new JsonFileBackend(Path.Combine("TestFiles", "objects"));
         var translator = new DefaultTranslator(backend);
 
-        _missingKeys = new List<string>();
+        _missingKeys = [];
         translator.MissingKey += (_, args) => _missingKeys.Add(args.Key);
 
         _i18Next = new I18NextNet(backend, translator) { Language = "en" };
     }
-    private I18NextNet _i18Next;
-    private List<string> _missingKeys;
+    private readonly I18NextNet _i18Next;
+    private readonly List<string> _missingKeys;
 
 
     [Fact]
@@ -34,12 +37,12 @@ public class I18NextObjectsFixture
         menu["items"].ShouldBeEquivalentTo(new object[] { "Home", "About Stefan", "Contact" });
         menu["count"].ShouldBe("3");
 
-        var footer = (IDictionary<string, object>) menu["footer"];
+        var footer = (IDictionary<string, object>)menu["footer"];
         footer["copyright"].ShouldBe("© 2026");
 
-        var links = (object[]) footer["links"];
+        var links = (object[])footer["links"];
         links.Count().ShouldBe(2);
-        ((IDictionary<string, object>) links[1])["label"].ShouldBe("Imprint");
+        ((IDictionary<string, object>)links[1])["label"].ShouldBe("Imprint");
     }
 
     [Fact]
@@ -106,7 +109,7 @@ public class I18NextObjectsFixture
     [Fact]
     public async Task TaModel_Array_ShouldMapToArray()
     {
-        (await _i18Next.Ta<string[]>("list")).ShouldBe(new[] { "first", "second", "third" });
+        (await _i18Next.Ta<string[]>("list")).ShouldBe(["first", "second", "third"]);
         _i18Next.T<List<string>>("de", "menu.items", new { name = "Stefan" }).ShouldBe(new[] { "Start", "Über Stefan" });
     }
 
@@ -152,8 +155,8 @@ public class I18NextObjectsFixture
 
         var group = i18Next.TObject("group", new { value = 1 });
         group["a"].ShouldBe("A 1");
-        ((IDictionary<string, object>) group["b"])["c"].ShouldBe("C");
-        i18Next.T<string[]>("array").ShouldBe(new[] { "zero", "one" });
+        ((IDictionary<string, object>)group["b"])["c"].ShouldBe("C");
+        i18Next.T<string[]>("array").ShouldBe(["zero", "one"]);
         i18Next.T("array", new { joinArrays = "-" }).ShouldBe("zero-one");
         i18Next.TObject("missing").ShouldBeNull();
     }

@@ -83,7 +83,7 @@ internal sealed class CldrData
                 entries[entry.Name] = new RelativeTimeData(
                     ReadStrings(entry.Value.GetProperty("future")),
                     ReadStrings(entry.Value.GetProperty("past")),
-                    entry.Value.TryGetProperty("relative", out var relative) ? ReadStrings(relative) : new Dictionary<string, string>());
+                    entry.Value.TryGetProperty("relative", out var relative) ? ReadStrings(relative) : []);
             }
 
             relativeTimes[locale.Name] = entries;
@@ -186,10 +186,9 @@ internal sealed class CldrData
         {
             yield return locale;
 
-            if (_parents.TryGetValue(locale, out var parent))
-                locale = parent;
-            else
-                locale = locale.IndexOf('-') > -1 ? locale.Substring(0, locale.LastIndexOf('-')) : null;
+            locale = _parents.TryGetValue(locale, out var parent)
+                ? parent
+                : locale.IndexOf('-') > -1 ? locale.Substring(0, locale.LastIndexOf('-')) : null;
 
             if (locale == "root")
                 break;
@@ -206,27 +205,19 @@ internal sealed class CldrData
         var locale = language.Replace('_', '-');
         var parts = locale.Split('-');
 
-        if (parts.Length == 2 && string.Equals(parts[0], "zh", StringComparison.OrdinalIgnoreCase) &&
+        return parts.Length == 2 && string.Equals(parts[0], "zh", StringComparison.OrdinalIgnoreCase) &&
             (parts[1].Equals("TW", StringComparison.OrdinalIgnoreCase) || parts[1].Equals("HK", StringComparison.OrdinalIgnoreCase) ||
-             parts[1].Equals("MO", StringComparison.OrdinalIgnoreCase)))
-            return $"zh-Hant-{parts[1].ToUpperInvariant()}";
-
-        return locale;
+             parts[1].Equals("MO", StringComparison.OrdinalIgnoreCase))
+            ? $"zh-Hant-{parts[1].ToUpperInvariant()}"
+            : locale;
     }
 
-    internal sealed class RelativeTimeData
+    internal sealed class RelativeTimeData(Dictionary<string, string> future, Dictionary<string, string> past, Dictionary<string, string> relative)
     {
-        public RelativeTimeData(Dictionary<string, string> future, Dictionary<string, string> past, Dictionary<string, string> relative)
-        {
-            Future = future;
-            Past = past;
-            Relative = relative;
-        }
+        public Dictionary<string, string> Future { get; } = future;
 
-        public Dictionary<string, string> Future { get; }
+        public Dictionary<string, string> Past { get; } = past;
 
-        public Dictionary<string, string> Past { get; }
-
-        public Dictionary<string, string> Relative { get; }
+        public Dictionary<string, string> Relative { get; } = relative;
     }
 }

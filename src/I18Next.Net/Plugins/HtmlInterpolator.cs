@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
+
 using I18Next.Net.Logging;
 
 namespace I18Next.Net.Plugins;
 
-public class HtmlInterpolator : DefaultInterpolator
+public class HtmlInterpolator(ILogger logger) : DefaultInterpolator(logger)
 {
     private static readonly Dictionary<string, string> TokenMap = new()
     {
@@ -14,11 +15,6 @@ public class HtmlInterpolator : DefaultInterpolator
         { "'", "&#39;" },
         { "/", "&#x2F;" }
     };
-
-    public HtmlInterpolator(ILogger logger) : base(logger)
-    {
-        
-    }
 
     protected override string EscapeValue(string value)
     {

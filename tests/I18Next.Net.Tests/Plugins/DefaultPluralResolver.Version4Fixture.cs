@@ -1,5 +1,7 @@
 using I18Next.Net.Plugins;
+
 using Shouldly;
+
 using Xunit;
 
 namespace I18Next.Net.Tests.Plugins;
@@ -10,7 +12,7 @@ public class DefaultPluralResolverVersion4Fixture
     {
         _pluralResolver = new DefaultPluralResolver { JsonFormatVersion = JsonFormat.Version4 };
     }
-    private DefaultPluralResolver _pluralResolver;
+    private readonly DefaultPluralResolver _pluralResolver;
 
 
     [Theory]

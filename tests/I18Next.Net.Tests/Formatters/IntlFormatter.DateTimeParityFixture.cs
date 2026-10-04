@@ -2,16 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+
 using I18Next.Net.Formatters;
+
 using Shouldly;
+
 using Xunit;
 
 namespace I18Next.Net.Tests.Formatters;
 
 public class IntlFormatterDateTimeParityFixture
 {
-    private static readonly HashSet<string> KnownDifferences = new()
-    {
+    private static readonly HashSet<string> KnownDifferences =
+    [
         "th|datetime(hour: numeric; minute: 2-digit)",
         "th|datetime(hour: 2-digit; minute: 2-digit)",
         "th|datetime(hour: numeric; minute: 2-digit; hour12: false)",
@@ -20,7 +23,7 @@ public class IntlFormatterDateTimeParityFixture
         "th|datetime(year: numeric; month: numeric; day: numeric; hour: numeric; minute: 2-digit)",
         "fi|datetime(weekday: long; year: numeric; month: long; day: numeric; hour: numeric; minute: 2-digit)",
         "fa|datetime(hour: numeric; minute: 2-digit; timeZoneName: short)"
-    };
+    ];
 
     private static readonly IntlFormatter Formatter = new();
 

@@ -1,6 +1,9 @@
 ﻿using System.Threading.Tasks;
+
 using I18Next.Net.Backends;
+
 using Shouldly;
+
 using Xunit;
 
 namespace I18Next.Net.Tests.Backends;
@@ -22,7 +25,7 @@ public class InMemoryBackendFixture
         _backend.AddTranslation("de", "test", "SectionA.Value2", "Translated section value 2");
     }
 
-    private InMemoryBackend _backend;
+    private readonly InMemoryBackend _backend;
 
     [Fact]
     public async Task AddTranslation_AlterExistingEntry_TranslationShouldBeAltered()

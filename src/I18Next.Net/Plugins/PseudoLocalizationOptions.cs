@@ -5,13 +5,33 @@ namespace I18Next.Net.Plugins;
 
 public class PseudoLocalizationOptions
 {
-    private int _letterMultiplier = 2;
-    private char[] _repeatedLetters =
-    {
-        'a', 'e', 'i', 'o', 'u', 'y', 'A', 'E', 'I', 'O', 'U', 'Y'
-    };
+    public ICollection<string> LanguagesToPseudo { get; } = new HashSet<string>();
 
-    private IDictionary<char, char> _letters = new Dictionary<char, char>
+    public char[] RepeatedLetters
+    {
+        get;
+        set => field = value ?? throw new ArgumentNullException(nameof(value));
+    } = [
+        'a', 'e', 'i', 'o', 'u', 'y', 'A', 'E', 'I', 'O', 'U', 'Y'
+    ];
+
+    public int LetterMultiplier
+    {
+        get;
+        set
+        {
+            if (value < 1 || value > 100)
+                throw new ArgumentOutOfRangeException();
+
+            field = value;
+        }
+    } = 2;
+
+    public IDictionary<char, char> Letters
+    {
+        get;
+        set => field = value ?? throw new ArgumentNullException(nameof(value));
+    } = new Dictionary<char, char>
     {
         { 'a', 'α' },
         { 'b', 'ḅ' },
@@ -66,32 +86,6 @@ public class PseudoLocalizationOptions
         { 'Y', 'Ŷ' },
         { 'Z', 'Ż' },
     };
-
-    public ICollection<string> LanguagesToPseudo { get; } = new HashSet<string>();
-
-    public char[] RepeatedLetters
-    {
-        get => _repeatedLetters;
-        set => _repeatedLetters = value ?? throw new ArgumentNullException(nameof(value));
-    }
-
-    public int LetterMultiplier
-    {
-        get => _letterMultiplier;
-        set
-        {
-            if (value < 1 || value > 100)
-                throw new ArgumentOutOfRangeException();
-            
-            _letterMultiplier = value;
-        }
-    }
-
-    public IDictionary<char, char> Letters
-    {
-        get => _letters;
-        set => _letters = value ?? throw new ArgumentNullException(nameof(value));
-    }
 
     public bool WrapStrings { get; set; }
 }

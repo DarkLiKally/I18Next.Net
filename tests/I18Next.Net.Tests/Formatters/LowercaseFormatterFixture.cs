@@ -1,5 +1,7 @@
 ﻿using I18Next.Net.Formatters;
+
 using Shouldly;
+
 using Xunit;
 
 namespace I18Next.Net.Tests.Formatters;
@@ -10,7 +12,7 @@ public class LowercaseFormatterFixture
     {
         _formatter = new LowercaseFormatter();
     }
-    private LowercaseFormatter _formatter;
+    private readonly LowercaseFormatter _formatter;
 
 
     [Fact]

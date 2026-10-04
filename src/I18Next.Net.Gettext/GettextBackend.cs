@@ -1,8 +1,10 @@
 using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
+
 using I18Next.Net.Backends;
 using I18Next.Net.TranslationTrees;
+
 using NGettext;
 
 namespace I18Next.Net.Gettext;
@@ -19,18 +21,13 @@ namespace I18Next.Net.Gettext;
 ///         resolver later.
 ///     </para>
 /// </remarks>
-public class GettextBackend : ITranslationBackend
+/// <remarks>
+///     Constructor providing a base path override.
+/// </remarks>
+/// <param name="basePath"></param>
+public class GettextBackend(string basePath) : ITranslationBackend
 {
-    private readonly string _basePath;
-
-    /// <summary>
-    ///     Constructor providing a base path override.
-    /// </summary>
-    /// <param name="basePath"></param>
-    public GettextBackend(string basePath)
-    {
-        _basePath = basePath;
-    }
+    private readonly string _basePath = basePath;
 
     /// <summary>
     ///     Default constructor.
@@ -90,7 +87,7 @@ public class GettextBackend : ITranslationBackend
             }
         }
 
-        return Task.FromResult((ITranslationTree) translationTree);
+        return Task.FromResult((ITranslationTree)translationTree);
     }
 
     private string FindFile(string language, string @namespace)

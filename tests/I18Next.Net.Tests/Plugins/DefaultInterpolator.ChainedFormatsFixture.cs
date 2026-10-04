@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using I18Next.Net.Formatters;
 using I18Next.Net.Plugins;
+
 using Shouldly;
+
 using Xunit;
 
 namespace I18Next.Net.Tests.Plugins;
@@ -27,8 +30,8 @@ public class DefaultInterpolator_ChainedFormatsFixture
             ["text"] = "Hello"
         };
     }
-    private DefaultInterpolator _interpolator;
-    private Dictionary<string, object> _args;
+    private readonly DefaultInterpolator _interpolator;
+    private readonly Dictionary<string, object> _args;
 
 
     private Task<string> InterpolateAsync(string source, string language = "en-US")

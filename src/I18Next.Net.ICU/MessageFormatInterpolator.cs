@@ -2,24 +2,21 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using I18Next.Net.Plugins;
+
 using Jeffijoe.MessageFormat;
 
 namespace I18Next.Net.ICU;
 
-public class MessageFormatInterpolator : IInterpolator
+public class MessageFormatInterpolator(bool useCache) : IInterpolator
 {
     private readonly ConcurrentDictionary<string, MessageFormatter> _messageFormatters = new();
-    private readonly bool _useCache;
+    private readonly bool _useCache = useCache;
 
     public MessageFormatInterpolator()
         : this(true)
     {
-    }
-
-    public MessageFormatInterpolator(bool useCache)
-    {
-        _useCache = useCache;
     }
 
     public bool CanNest(string source)
@@ -32,7 +29,7 @@ public class MessageFormatInterpolator : IInterpolator
     public Task<string> InterpolateAsync(string source, string key, string language, IDictionary<string, object> args)
     {
         if (source == null)
-            return Task.FromResult((string) null);
+            return Task.FromResult((string)null);
 
         var messageFormatter = EnsureMessageFormatter(language);
 

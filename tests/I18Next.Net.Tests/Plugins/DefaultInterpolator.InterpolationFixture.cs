@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Threading.Tasks;
+
 using I18Next.Net.Internal;
 using I18Next.Net.Logging;
 using I18Next.Net.Plugins;
+
 using NSubstitute;
+
 using Shouldly;
+
 using Xunit;
 
 namespace I18Next.Net.Tests.Plugins;
@@ -15,13 +19,14 @@ public class DefaultInterpolator_InterpolationFixture
     public DefaultInterpolator_InterpolationFixture()
     {
         var logger = Substitute.For<ILogger>();
-        _interpolator = new DefaultInterpolator(logger);
-    
-        _interpolator.MaximumReplaces = 1000;
-        _interpolator.MissingValueHandler = null;
+        _interpolator = new DefaultInterpolator(logger)
+        {
+            MaximumReplaces = 1000,
+            MissingValueHandler = null
+        };
     }
 
-    private DefaultInterpolator _interpolator;
+    private readonly DefaultInterpolator _interpolator;
 
 
     [Fact]

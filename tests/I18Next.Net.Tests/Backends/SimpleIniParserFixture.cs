@@ -1,6 +1,9 @@
 using System.IO;
+
 using I18Next.Net.Backends;
+
 using Shouldly;
+
 using Xunit;
 
 namespace I18Next.Net.Tests.Backends;
@@ -36,8 +39,8 @@ public class SimpleIniParserFixture
     {
         var parser = new SimpleIniParser(IniContent);
 
-        parser.GetSections().ShouldBe(new[] { "Section" });
-        parser.GetKeys("Section").ShouldBe(new[] { "Key", "Other" });
+        parser.GetSections().ShouldBe(["Section"]);
+        parser.GetKeys("Section").ShouldBe(["Key", "Other"]);
         parser.GetKeys("Missing").ShouldBeEmpty();
     }
 

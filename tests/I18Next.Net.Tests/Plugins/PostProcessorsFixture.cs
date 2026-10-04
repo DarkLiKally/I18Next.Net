@@ -1,7 +1,10 @@
 using System.Collections.Generic;
+
 using I18Next.Net.Backends;
 using I18Next.Net.Plugins;
+
 using Shouldly;
+
 using Xunit;
 
 namespace I18Next.Net.Tests.Plugins;
@@ -85,11 +88,11 @@ public class PostProcessorsFixture
         Should.Throw<System.ArgumentNullException>(() => options.RepeatedLetters = null);
         Should.Throw<System.ArgumentNullException>(() => options.Letters = null);
 
-        options.RepeatedLetters = new[] { 'x' };
+        options.RepeatedLetters = ['x'];
         options.Letters = new Dictionary<char, char> { ['x'] = 'y' };
         options.WrapStrings = true;
 
-        options.RepeatedLetters.ShouldBe(new[] { 'x' });
+        options.RepeatedLetters.ShouldBe(['x']);
         options.Letters.ShouldContainKey('x');
         options.WrapStrings.ShouldBeTrue();
     }

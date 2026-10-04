@@ -1,21 +1,17 @@
 ﻿using System;
 using System.Globalization;
+
 using I18Next.Net.Logging;
 using I18Next.Net.Plugins;
 
 namespace I18Next.Net.Formatters;
 
-public class DefaultFormatter : IFormatter
+public class DefaultFormatter(ILogger logger) : IFormatter
 {
     private static readonly IntlFormatter IntlFormatter = new();
 
-    private readonly ILogger _logger;
+    private readonly ILogger _logger = logger;
 
-    public DefaultFormatter(ILogger logger)
-    {
-        _logger = logger;
-    }
-    
     public bool CanFormat(object value, string format, string language)
     {
         return true;
@@ -31,7 +27,7 @@ public class DefaultFormatter : IFormatter
 
         if (IntlFormatter.CanFormat(value, format, language))
             return IntlFormatter.Format(value, format, language);
-        
+
         var formatString = $"{{0:{format}}}";
 
         try

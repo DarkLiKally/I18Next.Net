@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
+
 using I18Next.Net.Logging;
 
 namespace I18Next.Net.Plugins;
@@ -14,7 +15,7 @@ public class TraceLogger : ILogger
 {
     public LogLevel LogLevel { get; set; } = LogLevel.Warning;
 
-    private static readonly char[] FormatDelimiters = { ',', ':' };
+    private static readonly char[] FormatDelimiters = [',', ':'];
 
     public bool IsEnabled(LogLevel logLevel)
     {

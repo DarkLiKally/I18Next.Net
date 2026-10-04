@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using I18Next.Net.Formatters;
 using I18Next.Net.Plugins;
+
 using Shouldly;
+
 using Xunit;
 
 namespace I18Next.Net.Tests.Formatters;
@@ -14,7 +17,7 @@ public class IntlFormatterFixture
     {
         _formatter = new IntlFormatter();
     }
-    private IntlFormatter _formatter;
+    private readonly IntlFormatter _formatter;
 
 
     private static string Normalize(string value)
@@ -49,7 +52,7 @@ public class IntlFormatterFixture
     [Fact]
     public void Format_DifferentNumberTypes_ShouldBeSupported()
     {
-        foreach (var value in new object[] { (byte) 5, (sbyte) 5, (short) 5, (ushort) 5, 5, 5u, 5L, 5ul, 5f, 5d, 5m })
+        foreach (var value in new object[] { (byte)5, (sbyte)5, (short)5, (ushort)5, 5, 5u, 5L, 5ul, 5f, 5d, 5m })
         {
             _formatter.CanFormat(value, "number", "en").ShouldBeTrue();
             _formatter.Format(value, "number(minimumFractionDigits: 1)", "en").ShouldBe("5.0");

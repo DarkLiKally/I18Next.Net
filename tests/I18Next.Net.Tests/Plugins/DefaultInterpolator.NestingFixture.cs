@@ -1,10 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using I18Next.Net.Internal;
 using I18Next.Net.Logging;
 using I18Next.Net.Plugins;
+
 using NSubstitute;
+
 using Shouldly;
+
 using Xunit;
 
 namespace I18Next.Net.Tests.Plugins;
@@ -17,7 +21,7 @@ public class DefaultInterpolator_NestingFixture
         var logger = Substitute.For<ILogger>();
         _interpolator = new DefaultInterpolator(logger);
     }
-    private DefaultInterpolator _interpolator;
+    private readonly DefaultInterpolator _interpolator;
 
 
     private Task<string> DummyTranslateAsync(string language, string key, IDictionary<string, object> args)
@@ -25,10 +29,7 @@ public class DefaultInterpolator_NestingFixture
         if (key == "anotherKeyA")
             return Task.FromResult("another value A");
 
-        if (key == "anotherKeyB")
-            return Task.FromResult("another value B");
-
-        return Task.FromResult("translated dummy value");
+        return key == "anotherKeyB" ? Task.FromResult("another value B") : Task.FromResult("translated dummy value");
     }
 
     [Fact]
@@ -122,7 +123,7 @@ public class DefaultInterpolator_NestingFixture
     [Fact]
     public async Task NestAsync_OneNestingWithMissingValue_ShouldReturnTheSource()
     {
-        var result = await _interpolator.NestAsync("Hello $t(test)!", "en-US", null, (language, key, args) => Task.FromResult((string) null));
+        var result = await _interpolator.NestAsync("Hello $t(test)!", "en-US", null, (language, key, args) => Task.FromResult((string)null));
 
         result.ShouldBe("Hello $t(test)!");
     }
@@ -155,10 +156,7 @@ public class DefaultInterpolator_NestingFixture
     {
         var result = await _interpolator.NestAsync("Hello $t(test) $t(test2)!", "en-US", null, (language, key, args) =>
         {
-            if (key == "test")
-                return Task.FromResult((string) null);
-
-            return Task.FromResult("some value");
+            return key == "test" ? Task.FromResult((string)null) : Task.FromResult("some value");
         });
 
         result.ShouldBe("Hello $t(test) some value!");

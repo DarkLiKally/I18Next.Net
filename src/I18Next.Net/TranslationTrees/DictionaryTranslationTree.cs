@@ -10,7 +10,7 @@ public class DictionaryTranslationTree : IHierarchicalTranslationTree
     public DictionaryTranslationTree(string @namespace)
     {
         Namespace = @namespace;
-        _dictionary = new Dictionary<string, string>();
+        _dictionary = [];
     }
 
     public DictionaryTranslationTree(string @namespace, IDictionary<string, string> translations)
@@ -43,7 +43,7 @@ public class DictionaryTranslationTree : IHierarchicalTranslationTree
             if (!entry.Key.StartsWith(prefix, StringComparison.Ordinal))
                 continue;
 
-            result ??= new Dictionary<string, string>();
+            result ??= [];
             result[entry.Key.Substring(prefix.Length)] = entry.Value;
         }
 

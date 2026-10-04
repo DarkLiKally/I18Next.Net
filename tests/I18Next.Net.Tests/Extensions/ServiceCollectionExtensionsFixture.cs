@@ -1,14 +1,18 @@
 using System;
 using System.Linq;
+
 using I18Next.Net.Backends;
 using I18Next.Net.Extensions;
 using I18Next.Net.Extensions.Builder;
 using I18Next.Net.Formatters;
 using I18Next.Net.Logging;
 using I18Next.Net.Plugins;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
+
 using Shouldly;
+
 using Xunit;
 
 namespace I18Next.Net.Tests.Extensions;
@@ -94,7 +98,7 @@ public class ServiceCollectionExtensionsFixture
         provider.GetRequiredService<IInterpolator>().ShouldBeOfType<HtmlInterpolator>();
         provider.GetRequiredService<II18Next>().DetectLanguageOnEachTranslation.ShouldBeTrue();
 
-        var translator = (DefaultTranslator) provider.GetRequiredService<ITranslator>();
+        var translator = (DefaultTranslator)provider.GetRequiredService<ITranslator>();
         translator.PostProcessors.ShouldHaveSingleItem().ShouldBeOfType<SprintfPostProcessor>();
         translator.MissingKeyHandlers.ShouldHaveSingleItem();
     }
@@ -124,7 +128,7 @@ public class ServiceCollectionExtensionsFixture
         provider.GetRequiredService<ILogger>().ShouldBeSameAs(logger);
         provider.GetRequiredService<ILanguageDetector>().GetLanguage().ShouldBe("de");
 
-        var translator = (DefaultTranslator) provider.GetRequiredService<ITranslator>();
+        var translator = (DefaultTranslator)provider.GetRequiredService<ITranslator>();
         translator.PostProcessors.Count().ShouldBe(2);
         translator.MissingKeyHandlers.Count().ShouldBe(2);
 

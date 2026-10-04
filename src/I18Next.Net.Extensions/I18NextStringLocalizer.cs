@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+
 using Microsoft.Extensions.Localization;
 
 namespace I18Next.Net.Extensions;
@@ -33,10 +34,7 @@ public class I18NextStringLocalizer : IStringLocalizer
         var result = _instance.Backend.LoadNamespaceAsync(language, _defaultNamespace)
             .ConfigureAwait(false).GetAwaiter().GetResult();
 
-        if (result == null)
-            return Enumerable.Empty<LocalizedString>();
-
-        return result.GetAllValues().Select(t => new LocalizedString(t.Key, t.Value));
+        return result == null ? [] : result.GetAllValues().Select(t => new LocalizedString(t.Key, t.Value));
     }
 
     public LocalizedString this[string name] => Translate(name);

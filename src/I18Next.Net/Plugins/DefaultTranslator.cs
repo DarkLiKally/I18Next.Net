@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+
 using I18Next.Net.Backends;
 using I18Next.Net.Internal;
 using I18Next.Net.Logging;
@@ -54,11 +55,11 @@ public class DefaultTranslator : ITranslator
 
     public string NamespaceSeparator { get; set; } = ":";
 
-    public List<IMissingKeyHandler> MissingKeyHandlers { get; } = new();
+    public List<IMissingKeyHandler> MissingKeyHandlers { get; } = [];
 
     public event EventHandler<MissingKeyEventArgs> MissingKey;
 
-    public List<IPostProcessor> PostProcessors { get; } = new();
+    public List<IPostProcessor> PostProcessors { get; } = [];
 
     public virtual async Task<string> TranslateAsync(string language, string key, IDictionary<string, object> args, TranslationOptions options)
     {
@@ -105,7 +106,7 @@ public class DefaultTranslator : ITranslator
 
         if (groupValues == null)
         {
-            await OnMissingKey(language, actualNamespace, key, new List<string> { key }).ConfigureAwait(false);
+            await OnMissingKey(language, actualNamespace, key, [key]).ConfigureAwait(false);
 
             return null;
         }
@@ -294,7 +295,7 @@ public class DefaultTranslator : ITranslator
 
     private PluralSuffixes GetPluralSuffixes(string language, IDictionary<string, object> args)
     {
-        var count = (int) Convert.ChangeType(args["count"], typeof(int));
+        var count = (int)Convert.ChangeType(args["count"], typeof(int));
 
         if (_pluralResolver is not DefaultPluralResolver { JsonFormatVersion: JsonFormat.Version4 } pluralResolver)
             return new PluralSuffixes(_pluralResolver.GetPluralSuffix(language, count), null, null);
@@ -353,21 +354,15 @@ public class DefaultTranslator : ITranslator
 
     private static bool IsEnabledByArg(IDictionary<string, object> args, string key)
     {
-        if (args == null || !args.TryGetValue(key, out var value))
-            return true;
-
-        return value is true;
+        return args == null || !args.TryGetValue(key, out var value) || value is true;
     }
 
     private async Task<string> ExtendTranslationAsync(string result, string key, string language, IDictionary<string, object> args,
         TranslationOptions options)
     {
-        IDictionary<string, object> replaceArgs;
-
-        if (args != null && args.TryGetValue("replace", out var replace) && replace != null && replace.GetType().IsClass)
-            replaceArgs = replace.ToDictionary();
-        else
-            replaceArgs = args;
+        IDictionary<string, object> replaceArgs = args != null && args.TryGetValue("replace", out var replace) && replace != null && replace.GetType().IsClass
+            ? replace.ToDictionary()
+            : args;
 
         if (AllowInterpolation && IsEnabledByArg(args, "interpolate"))
             result = await _interpolator.InterpolateAsync(result, key, language, replaceArgs).ConfigureAwait(false);
@@ -392,10 +387,9 @@ public class DefaultTranslator : ITranslator
 
         if (localArgs is string postProcessorStr)
         {
-            if (postProcessorStr.IndexOf(',') > -1)
-                return postProcessorStr.Split(",", StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).ToArray();
-            
-            return new[] { postProcessorStr };
+            return postProcessorStr.IndexOf(',') > -1
+                ? [.. postProcessorStr.Split(",", StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim())]
+                : [postProcessorStr];
         }
 
         return localArgs as string[];
@@ -425,11 +419,11 @@ public class DefaultTranslator : ITranslator
     {
         if (_logger.IsEnabled(LogLevel.Information))
             _logger.LogInformation("Missing translation for {namespace}:{key} in language {language}.", @namespace, key, language);
-        
+
         if (MissingKey == null && MissingKeyHandlers.Count == 0)
             return;
 
-        var args = new MissingKeyEventArgs(language, @namespace, key, possibleKeys.ToArray());
+        var args = new MissingKeyEventArgs(language, @namespace, key, [.. possibleKeys]);
 
         MissingKey?.Invoke(this, args);
 
@@ -477,7 +471,7 @@ public class DefaultTranslator : ITranslator
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug("Translation {ns}:{key} needs context handling.", ns, key);
 
-            var contextKey = $"{key}{ContextSeparator}{(string) args["context"]}";
+            var contextKey = $"{key}{ContextSeparator}{(string)args["context"]}";
             possibleKeys.Add(contextKey);
 
             if (needsPluralHandling)
@@ -508,13 +502,13 @@ public class DefaultTranslator : ITranslator
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug("Unable to resolve a translation for {currentKey} from the translation tree.", currentKey);
         }
-        
+
         if (result == null && notifyMissingKey && !foundGroup)
             await OnMissingKey(language, ns, key, possibleKeys).ConfigureAwait(false);
 
         if (_logger.IsEnabled(LogLevel.Information))
             _logger.LogInformation("The resolved translation for {ns}:{key} on language {language} was \"{result}\"", ns, key, language, result);
-        
+
         return result;
     }
 
@@ -561,19 +555,12 @@ public class DefaultTranslator : ITranslator
         return _treeCache.GetOrAdd(cacheKey, tree);
     }
 
-    private readonly struct PluralSuffixes
+    private readonly struct PluralSuffixes(string suffix, string zeroSuffix, string ordinalFallbackSuffix)
     {
-        public PluralSuffixes(string suffix, string zeroSuffix, string ordinalFallbackSuffix)
-        {
-            Suffix = suffix;
-            ZeroSuffix = zeroSuffix;
-            OrdinalFallbackSuffix = ordinalFallbackSuffix;
-        }
+        public string Suffix { get; } = suffix;
 
-        public string Suffix { get; }
+        public string ZeroSuffix { get; } = zeroSuffix;
 
-        public string ZeroSuffix { get; }
-
-        public string OrdinalFallbackSuffix { get; }
+        public string OrdinalFallbackSuffix { get; } = ordinalFallbackSuffix;
     }
 }

@@ -2,21 +2,13 @@ using System;
 
 namespace I18Next.Net;
 
-public class MissingKeyEventArgs : EventArgs
+public class MissingKeyEventArgs(string language, string ns, string key, string[] possibleKeys) : EventArgs
 {
-    public MissingKeyEventArgs(string language, string ns, string key, string[] possibleKeys)
-    {
-        Language = language;
-        Namespace = ns;
-        Key = key;
-        PossibleKeys = possibleKeys;
-    }
+    public string Key { get; } = key;
 
-    public string Key { get; }
+    public string Language { get; } = language;
 
-    public string Language { get; }
+    public string Namespace { get; } = ns;
 
-    public string Namespace { get; }
-
-    public string[] PossibleKeys { get; }
+    public string[] PossibleKeys { get; } = possibleKeys;
 }

@@ -4,9 +4,9 @@ namespace I18Next.Net.TranslationTrees;
 
 public class HierarchicalTranslationTreeBuilder : ITranslationTreeBuilder
 {
-    private readonly Dictionary<string, Dictionary<string, object>> _groups = new();
+    private readonly Dictionary<string, Dictionary<string, object>> _groups = [];
 
-    private readonly Dictionary<string, object> _root = new();
+    private readonly Dictionary<string, object> _root = [];
 
     public void AddTranslation(string key, string text)
     {
@@ -73,6 +73,6 @@ public class HierarchicalTranslationTreeBuilder : ITranslationTreeBuilder
             }
         }
 
-        return new TranslationGroup(name, nodes.ToArray());
+        return new TranslationGroup(name, [.. nodes]);
     }
 }

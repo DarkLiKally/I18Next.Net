@@ -65,7 +65,7 @@ internal sealed class DateFnsData
 
         var root = document.RootElement;
         var ordinalTables = root.GetProperty("ordinals").EnumerateArray().Select(t => new OrdinalTable(
-            t.GetProperty("values").EnumerateArray().Select(v => v.GetString()).ToArray(),
+            [.. t.GetProperty("values").EnumerateArray().Select(v => v.GetString())],
             t.TryGetProperty("thousand", out var thousand) ? thousand.GetString() : null)).ToArray();
 
         var locales = new Dictionary<string, DateFnsLocale>(StringComparer.OrdinalIgnoreCase);
@@ -100,59 +100,38 @@ internal sealed class DateFnsData
         return element.EnumerateObject().ToDictionary(e => e.Name, e => e.Value.EnumerateArray().Select(v => v.GetString()).ToArray());
     }
 
-    internal sealed class OrdinalTable
+    internal sealed class OrdinalTable(string[] values, string thousand)
     {
-        public OrdinalTable(string[] values, string thousand)
-        {
-            Values = values;
-            Thousand = thousand;
-        }
+        public string Thousand { get; } = thousand;
 
-        public string Thousand { get; }
-
-        public string[] Values { get; }
+        public string[] Values { get; } = values;
     }
 
-    internal sealed class DateFnsLocale
+    internal sealed class DateFnsLocale(int weekStartsOn, int firstWeekContainsDate, Dictionary<string, string> formatLong, Dictionary<string, string[]> months,
+        Dictionary<string, string[]> days, Dictionary<string, string[]> quarters, Dictionary<string, string[]> eras,
+        Dictionary<string, string> dayPeriods, string digits, bool removeDayOrdinalWithLongMonth, Dictionary<string, DateFnsData.OrdinalTable> ordinals)
     {
-        public DateFnsLocale(int weekStartsOn, int firstWeekContainsDate, Dictionary<string, string> formatLong, Dictionary<string, string[]> months,
-            Dictionary<string, string[]> days, Dictionary<string, string[]> quarters, Dictionary<string, string[]> eras,
-            Dictionary<string, string> dayPeriods, string digits, bool removeDayOrdinalWithLongMonth, Dictionary<string, OrdinalTable> ordinals)
-        {
-            RemoveDayOrdinalWithLongMonth = removeDayOrdinalWithLongMonth;
-            WeekStartsOn = weekStartsOn;
-            FirstWeekContainsDate = firstWeekContainsDate;
-            FormatLong = formatLong;
-            Months = months;
-            Days = days;
-            Quarters = quarters;
-            Eras = eras;
-            DayPeriods = dayPeriods;
-            Digits = digits;
-            Ordinals = ordinals;
-        }
+        public Dictionary<string, string> DayPeriods { get; } = dayPeriods;
 
-        public Dictionary<string, string> DayPeriods { get; }
+        public Dictionary<string, string[]> Days { get; } = days;
 
-        public Dictionary<string, string[]> Days { get; }
+        public string Digits { get; } = digits;
 
-        public string Digits { get; }
+        public Dictionary<string, string[]> Eras { get; } = eras;
 
-        public Dictionary<string, string[]> Eras { get; }
+        public int FirstWeekContainsDate { get; } = firstWeekContainsDate;
 
-        public int FirstWeekContainsDate { get; }
+        public Dictionary<string, string> FormatLong { get; } = formatLong;
 
-        public Dictionary<string, string> FormatLong { get; }
+        public Dictionary<string, string[]> Months { get; } = months;
 
-        public Dictionary<string, string[]> Months { get; }
+        public Dictionary<string, OrdinalTable> Ordinals { get; } = ordinals;
 
-        public Dictionary<string, OrdinalTable> Ordinals { get; }
+        public bool RemoveDayOrdinalWithLongMonth { get; } = removeDayOrdinalWithLongMonth;
 
-        public bool RemoveDayOrdinalWithLongMonth { get; }
+        public Dictionary<string, string[]> Quarters { get; } = quarters;
 
-        public Dictionary<string, string[]> Quarters { get; }
-
-        public int WeekStartsOn { get; }
+        public int WeekStartsOn { get; } = weekStartsOn;
 
         public string Ordinal(long number, string unit)
         {
@@ -167,7 +146,7 @@ internal sealed class DateFnsData
             var text = number.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
             if (Digits != null)
-                text = new string(text.Select(c => c is >= '0' and <= '9' ? Digits[c - '0'] : c).ToArray());
+                text = new string([.. text.Select(c => c is >= '0' and <= '9' ? Digits[c - '0'] : c)]);
 
             return entry.Replace("{0}", text);
         }

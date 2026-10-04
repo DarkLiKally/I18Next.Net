@@ -1,16 +1,12 @@
 using System;
+
 using Microsoft.Extensions.Localization;
 
 namespace I18Next.Net.Extensions;
 
-public class I18NextStringLocalizerFactory : IStringLocalizerFactory
+public class I18NextStringLocalizerFactory(II18Next i18NextNet) : IStringLocalizerFactory
 {
-    private readonly II18Next _i18NextNet;
-
-    public I18NextStringLocalizerFactory(II18Next i18NextNet)
-    {
-        _i18NextNet = i18NextNet;
-    }
+    private readonly II18Next _i18NextNet = i18NextNet;
 
     public IStringLocalizer Create(Type resourceSource)
     {

@@ -1,10 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using I18Next.Net.Logging;
 using I18Next.Net.Plugins;
+
 using NSubstitute;
+
 using Shouldly;
+
 using Xunit;
 
 namespace I18Next.Net.Tests.Plugins;
@@ -16,7 +20,7 @@ public class DefaultInterpolator_DelimitersFixture
     {
         _interpolator = new HtmlInterpolator(Substitute.For<ILogger>());
     }
-    private DefaultInterpolator _interpolator;
+    private readonly DefaultInterpolator _interpolator;
 
 
     [Fact]

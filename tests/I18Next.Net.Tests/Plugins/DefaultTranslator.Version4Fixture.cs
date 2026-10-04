@@ -1,8 +1,11 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using I18Next.Net.Backends;
 using I18Next.Net.Plugins;
+
 using Shouldly;
+
 using Xunit;
 
 namespace I18Next.Net.Tests.Plugins;
@@ -33,8 +36,8 @@ public class DefaultTranslatorVersion4Fixture
         _translator = new DefaultTranslator(backend, logger, pluralResolver, new DefaultInterpolator(logger));
         _options = new TranslationOptions { DefaultNamespace = "translation" };
     }
-    private DefaultTranslator _translator;
-    private TranslationOptions _options;
+    private readonly DefaultTranslator _translator;
+    private readonly TranslationOptions _options;
 
 
     private Task<string> TranslateAsync(string language, string key, IDictionary<string, object> args)
@@ -104,7 +107,7 @@ public class DefaultTranslatorVersion4Fixture
         var result = await TranslateAsync("en", "missing", new Dictionary<string, object> { ["count"] = 0, ["context"] = "ctx" });
 
         result.ShouldBe("missing");
-        possibleKeys.ShouldBe(new[] { "missing", "missing_other", "missing_zero", "missing_ctx", "missing_ctx_other", "missing_ctx_zero" });
+        possibleKeys.ShouldBe(["missing", "missing_other", "missing_zero", "missing_ctx", "missing_ctx_other", "missing_ctx_zero"]);
     }
 
     [Fact]

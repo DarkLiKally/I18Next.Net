@@ -1,8 +1,11 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using I18Next.Net.Backends;
 using I18Next.Net.Plugins;
+
 using Shouldly;
+
 using Xunit;
 
 namespace I18Next.Net.Tests;
@@ -30,15 +33,15 @@ public class I18NextFeaturesFixture
         var logger = new TraceLogger();
 
         _translator = new DefaultTranslator(_backend, logger, pluralResolver, new DefaultInterpolator(logger));
-        _missingKeys = new List<string>();
+        _missingKeys = [];
         _translator.MissingKey += (_, args) => _missingKeys.Add(args.Key);
 
         _i18Next = new I18NextNet(_backend, _translator) { Language = "en" };
     }
-    private InMemoryBackend _backend;
-    private DefaultTranslator _translator;
-    private I18NextNet _i18Next;
-    private List<string> _missingKeys;
+    private readonly InMemoryBackend _backend;
+    private readonly DefaultTranslator _translator;
+    private readonly I18NextNet _i18Next;
+    private readonly List<string> _missingKeys;
 
 
     [Theory]
@@ -111,23 +114,23 @@ public class I18NextFeaturesFixture
     [Fact]
     public void T_MultipleKeys_ShouldUseFirstExistingKey()
     {
-        _i18Next.T(new[] { "missing", "exampleKey" }).ShouldBe("My English text.");
-        _i18Next.T(new[] { "greeting", "exampleKey" }, new { name = "World" }).ShouldBe("Hello World");
-        _i18Next.T(new[] { "missing", "alsoMissing" }).ShouldBe("alsoMissing");
-        _i18Next.T(new[] { "missing", "alsoMissing" }, new { defaultValue = "Default" }).ShouldBe("Default");
+        _i18Next.T(["missing", "exampleKey"]).ShouldBe("My English text.");
+        _i18Next.T(["greeting", "exampleKey"], new { name = "World" }).ShouldBe("Hello World");
+        _i18Next.T(["missing", "alsoMissing"]).ShouldBe("alsoMissing");
+        _i18Next.T(["missing", "alsoMissing"], new { defaultValue = "Default" }).ShouldBe("Default");
         _missingKeys.ShouldBe(new[] { "alsoMissing", "alsoMissing" });
     }
 
     [Fact]
     public async Task Ta_MultipleKeys_ShouldUseFirstExistingKey()
     {
-        (await _i18Next.Ta(new[] { "missing", "other:otherKey" })).ShouldBe("Other namespace text.");
+        (await _i18Next.Ta(["missing", "other:otherKey"])).ShouldBe("Other namespace text.");
     }
 
     [Fact]
     public void T_NoKeys_ShouldThrow()
     {
-        Should.Throw<System.ArgumentNullException>(() => _i18Next.T(new string[0]));
+        Should.Throw<System.ArgumentNullException>(() => _i18Next.T([]));
     }
 
     [Fact]

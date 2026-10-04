@@ -41,13 +41,10 @@ public static class ObjectExtensions
         var propertyInfos = type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
             .Where(prop =>
             {
-                if (prop.GetIndexParameters().Length == 0)
-                    return prop.GetMethod != (MethodInfo) null;
-
-                return false;
+                return prop.GetIndexParameters().Length == 0 && prop.GetMethod != null;
             });
 
-        array = propertyInfos.ToArray();
+        array = [.. propertyInfos];
 
         ReflectionCache.TryAdd(type, array);
 

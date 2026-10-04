@@ -2,11 +2,12 @@
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+
 using I18Next.Net.TranslationTrees;
 
 namespace I18Next.Net.Backends;
 
-public class JsonFileBackend : ITranslationBackend
+public class JsonFileBackend(string basePath, ITranslationTreeBuilderFactory treeBuilderFactory) : ITranslationBackend
 {
     private static readonly JsonDocumentOptions DocumentOptions = new()
     {
@@ -14,17 +15,11 @@ public class JsonFileBackend : ITranslationBackend
         CommentHandling = JsonCommentHandling.Skip
     };
 
-    private readonly ITranslationTreeBuilderFactory _treeBuilderFactory;
+    private readonly ITranslationTreeBuilderFactory _treeBuilderFactory = treeBuilderFactory;
 
     public JsonFileBackend(string basePath)
         : this(basePath, new GenericTranslationTreeBuilderFactory<HierarchicalTranslationTreeBuilder>())
     {
-    }
-
-    public JsonFileBackend(string basePath, ITranslationTreeBuilderFactory treeBuilderFactory)
-    {
-        BasePath = basePath;
-        _treeBuilderFactory = treeBuilderFactory;
     }
 
     public JsonFileBackend(ITranslationTreeBuilderFactory treeBuilderFactory)
@@ -37,7 +32,7 @@ public class JsonFileBackend : ITranslationBackend
     {
     }
 
-    protected string BasePath { get; }
+    protected string BasePath { get; } = basePath;
 
     public Encoding Encoding { get; set; } = Encoding.UTF8;
 
@@ -75,8 +70,8 @@ public class JsonFileBackend : ITranslationBackend
     {
         if (Encoding.CodePage == Encoding.UTF8.CodePage)
         {
-            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true))
-                return await JsonDocument.ParseAsync(stream, DocumentOptions).ConfigureAwait(false);
+            using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true);
+            return await JsonDocument.ParseAsync(stream, DocumentOptions).ConfigureAwait(false);
         }
 
         string content;
@@ -90,7 +85,7 @@ public class JsonFileBackend : ITranslationBackend
     private static void PopulateTreeBuilder(string path, JsonElement node, ITranslationTreeBuilder builder)
     {
         if (path != string.Empty)
-            path = path + ".";
+            path += ".";
 
         foreach (var childNode in node.EnumerateObject())
             AddValue(path + childNode.Name, childNode.Value, builder);

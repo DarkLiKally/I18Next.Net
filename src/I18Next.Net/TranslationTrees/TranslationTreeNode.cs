@@ -1,11 +1,6 @@
 ﻿namespace I18Next.Net.TranslationTrees;
 
-public abstract class TranslationTreeNode
+public abstract class TranslationTreeNode(string name)
 {
-    protected TranslationTreeNode(string name)
-    {
-        Name = name;
-    }
-
-    public string Name { get; set; }
+    public string Name { get; set; } = name;
 }

@@ -8,7 +8,7 @@ namespace I18Next.Net.Internal;
 public class TimeZoneData
 {
     public static TimeZoneData[] DefaultTimeZones =
-    {
+    [
         new("A", "Alpha Time Zone", "Military", +1, 0),
         new("ACDT", "Australian Central Daylight Time", "Australia", +10, 30),
         new("ACST", "Australian Central Standard Time", "Australia", +9, 30),
@@ -252,7 +252,7 @@ public class TimeZoneData
         new("YEKST", "Yekaterinburg Summer Time", "Asia", +6, 0),
         new("YEKT", "Yekaterinburg Time", "Asia", +5, 0),
         new("Z", "Zulu Time Zone", "Military", +0, 0)
-    };
+    ];
 
 
     public TimeZoneData(string abbr, string name, string continent, int hourOffset, int minuteOffset)

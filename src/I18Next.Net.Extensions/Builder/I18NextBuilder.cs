@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using I18Next.Net.Backends;
 using I18Next.Net.Extensions.Configuration;
 using I18Next.Net.Logging;
 using I18Next.Net.Plugins;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Localization;
@@ -756,10 +758,7 @@ public class I18NextBuilder
     {
         var msLogger = c.GetService<Microsoft.Extensions.Logging.ILogger>();
 
-        if (msLogger != null)
-            return new DefaultExtensionsLogger(msLogger);
-
-        return new TraceLogger();
+        return msLogger != null ? new DefaultExtensionsLogger(msLogger) : new TraceLogger();
     }
 
     private static DefaultTranslator DefaultTranslatorFactory(IServiceProvider c)

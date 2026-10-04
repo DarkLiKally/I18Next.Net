@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using I18Next.Net.TranslationTrees;
 
 namespace I18Next.Net.Backends;
 
 public class InMemoryBackend : ITranslationBackend
 {
-    private readonly Dictionary<string, DictionaryTranslationTree> _namespaces = new();
+    private readonly Dictionary<string, DictionaryTranslationTree> _namespaces = [];
 
     public Task<ITranslationTree> LoadNamespaceAsync(string language, string @namespace)
     {
@@ -18,10 +19,9 @@ public class InMemoryBackend : ITranslationBackend
 
         treeKey = BackendUtilities.GetLanguagePart(language) + "_" + @namespace;
 
-        if (!_namespaces.TryGetValue(treeKey, out tree))
-            return Task.FromResult(default(ITranslationTree));
-
-        return Task.FromResult(tree as ITranslationTree);
+        return !_namespaces.TryGetValue(treeKey, out tree)
+            ? Task.FromResult(default(ITranslationTree))
+            : Task.FromResult(tree as ITranslationTree);
     }
 
     public void AddTranslation(string language, string @namespace, string key, string value)
@@ -32,9 +32,6 @@ public class InMemoryBackend : ITranslationBackend
             throw new ArgumentException("Namespace cannot be null, empty or whitespace string.", nameof(@namespace));
         if (string.IsNullOrWhiteSpace(key))
             throw new ArgumentException("Key cannot be null, empty or whitespace string.", nameof(key));
-        if (value == null)
-            throw new ArgumentNullException(nameof(value));
-
         var treeKey = language + "_" + @namespace;
 
         if (!_namespaces.TryGetValue(treeKey, out var nsDict))
@@ -43,7 +40,7 @@ public class InMemoryBackend : ITranslationBackend
             _namespaces.Add(treeKey, nsDict);
         }
 
-        nsDict[key] = value;
+        nsDict[key] = value ?? throw new ArgumentNullException(nameof(value));
     }
 
     public void AddTranslations(string language, string @namespace, IDictionary<string, string> translations)

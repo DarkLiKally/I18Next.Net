@@ -1,0 +1,22 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".github/workflows/build.yml" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Build.targets" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="samples/Example.ConsoleApp.NetCore/Example.ConsoleApp.NetCore.csproj" />
+  <Project Path="samples/Example.ConsoleApp.NetFramework/Example.ConsoleApp.NetFramework.csproj" />
+  <Project Path="samples/Example.WebApp/Example.WebApp.csproj" />
+  <Project Path="src/I18Next.Net.Abstractions/I18Next.Net.Abstractions.csproj" />
+  <Project Path="src/I18Next.Net.AspNetCore/I18Next.Net.AspNetCore.csproj" />
+  <Project Path="src/I18Next.Net.Extensions/I18Next.Net.Extensions.csproj" />
+  <Project Path="src/I18Next.Net.Gettext/I18Next.Net.Gettext.csproj" />
+  <Project Path="src/I18Next.Net.ICU/I18Next.Net.ICU.csproj" />
+  <Project Path="src/I18Next.Net.PolyglotJs/I18Next.Net.PolyglotJs.csproj" />
+  <Project Path="src/I18Next.Net.Serilog/I18Next.Net.Serilog.csproj" />
+  <Project Path="src/I18Next.Net/I18Next.Net.csproj" />
+  <Project Path="tests/I18Next.Net.Benchmarks/I18Next.Net.Benchmarks.csproj" />
+  <Project Path="tests/I18Next.Net.Tests/I18Next.Net.Tests.csproj" />
+</Solution>

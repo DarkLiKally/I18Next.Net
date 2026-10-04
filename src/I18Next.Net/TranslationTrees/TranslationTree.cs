@@ -4,7 +4,6 @@ namespace I18Next.Net.TranslationTrees;
 
 public class TranslationTree : IHierarchicalTranslationTree
 {
-    private TranslationTreeNode _root;
     private Dictionary<string, Translation> _translations;
 
     public TranslationTree(TranslationGroup rootNode)
@@ -14,10 +13,10 @@ public class TranslationTree : IHierarchicalTranslationTree
 
     public TranslationTreeNode Root
     {
-        get => _root;
+        get;
         set
         {
-            _root = value;
+            field = value;
             _translations = BuildTranslationIndex(value);
         }
     }
@@ -63,7 +62,7 @@ public class TranslationTree : IHierarchicalTranslationTree
             throw new TranslationKeyInvalidException(key,
                 $"The key `{key}` leads to a group of translations. Unable to resolve a final value for the given key. Please check the key you've provided.");
 
-        var translation = (Translation) node;
+        var translation = (Translation)node;
 
         return translation.Value;
     }

@@ -1,9 +1,13 @@
 using System;
+
 using I18Next.Net.Formatters;
 using I18Next.Net.Logging;
 using I18Next.Net.Plugins;
+
 using NSubstitute;
+
 using Shouldly;
+
 using Xunit;
 
 namespace I18Next.Net.Tests.Formatters;
@@ -15,8 +19,8 @@ public class DefaultFormatterFixture
         _logger = Substitute.For<ILogger>();
         _formatter = new DefaultFormatter(_logger);
     }
-    private ILogger _logger;
-    private DefaultFormatter _formatter;
+    private readonly ILogger _logger;
+    private readonly DefaultFormatter _formatter;
 
 
     [Fact]
@@ -47,7 +51,7 @@ public class DefaultFormatterFixture
     {
         _formatter.Format(12, "{", "en-US").ShouldBe("12");
 
-        _logger.Received(1).Log(LogLevel.Warning, Arg.Any<FormatException>(), Arg.Any<string>(), Arg.Is<object[]>(a => (string) a[0] == "{"));
+        _logger.Received(1).Log(LogLevel.Warning, Arg.Any<FormatException>(), Arg.Any<string>(), Arg.Is<object[]>(a => (string)a[0] == "{"));
     }
 
     [Fact]

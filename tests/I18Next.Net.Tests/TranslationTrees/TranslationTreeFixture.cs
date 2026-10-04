@@ -1,7 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
+
 using I18Next.Net.TranslationTrees;
+
 using Shouldly;
+
 using Xunit;
 
 namespace I18Next.Net.Tests.TranslationTrees;
@@ -18,7 +21,7 @@ public class TranslationTreeFixture
 
         _tree = builder.Build();
     }
-    private ITranslationTree _tree;
+    private readonly ITranslationTree _tree;
 
 
     [Fact]
@@ -65,8 +68,8 @@ public class TranslationTreeFixture
     [Fact]
     public void GetValue_ChangedTranslationValue_ShouldReturnNewValue()
     {
-        var tree = (TranslationTree) _tree;
-        var translation = (Translation) ((TranslationGroup) tree.Root).Children[0];
+        var tree = (TranslationTree)_tree;
+        var translation = (Translation)((TranslationGroup)tree.Root).Children[0];
 
         translation.Value = "changed";
 
@@ -76,9 +79,9 @@ public class TranslationTreeFixture
     [Fact]
     public void Root_Replaced_ShouldUseNewRoot()
     {
-        var tree = (TranslationTree) _tree;
+        var tree = (TranslationTree)_tree;
 
-        tree.Root = new TranslationGroup("", new TranslationTreeNode[] { new Translation("other", "other value") });
+        tree.Root = new TranslationGroup("", [new Translation("other", "other value")]);
 
         tree.GetValue("other", null).ShouldBe("other value");
         tree.GetValue("key", null).ShouldBeNull();
@@ -88,10 +91,10 @@ public class TranslationTreeFixture
     [Fact]
     public void TryGetChild_DuplicateNames_ShouldReturnFirstChild()
     {
-        var group = new TranslationGroup("", new TranslationTreeNode[] { new Translation("a", "first"), new Translation("a", "second") });
+        var group = new TranslationGroup("", [new Translation("a", "first"), new Translation("a", "second")]);
 
         group.TryGetChild("a", out var child).ShouldBeTrue();
-        ((Translation) child).Value.ShouldBe("first");
+        ((Translation)child).Value.ShouldBe("first");
         group.TryGetChild("b", out _).ShouldBeFalse();
     }
 
@@ -113,7 +116,7 @@ public class TranslationTreeFixture
     [Fact]
     public void GetGroupValues_ShouldReturnRelativeValues()
     {
-        var tree = (IHierarchicalTranslationTree) _tree;
+        var tree = (IHierarchicalTranslationTree)_tree;
 
         tree.GetGroupValues("look").ShouldBeEquivalentTo(new Dictionary<string, string>
         {

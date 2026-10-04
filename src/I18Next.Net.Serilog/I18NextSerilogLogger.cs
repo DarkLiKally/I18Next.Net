@@ -1,6 +1,9 @@
 using System;
+
 using I18Next.Net.Logging;
+
 using Serilog.Events;
+
 using II18NextLogger = I18Next.Net.Logging.ILogger;
 using ILogger = Serilog.ILogger;
 
@@ -50,15 +53,15 @@ public class I18NextSerilogLogger : Logging.ILogger
 
     private LogEventLevel ConvertLogLevel(LogLevel logLevel)
     {
-        switch (logLevel)
+        return logLevel switch
         {
-            case LogLevel.Trace:       return LogEventLevel.Verbose;
-            case LogLevel.Debug:       return LogEventLevel.Debug;
-            case LogLevel.Information: return LogEventLevel.Information;
-            case LogLevel.Warning:     return LogEventLevel.Warning;
-            case LogLevel.Error:       return LogEventLevel.Error;
-            case LogLevel.Critical:    return LogEventLevel.Fatal;
-            default:                   return LogEventLevel.Fatal;
-        }
+            LogLevel.Trace => LogEventLevel.Verbose,
+            LogLevel.Debug => LogEventLevel.Debug,
+            LogLevel.Information => LogEventLevel.Information,
+            LogLevel.Warning => LogEventLevel.Warning,
+            LogLevel.Error => LogEventLevel.Error,
+            LogLevel.Critical => LogEventLevel.Fatal,
+            _ => LogEventLevel.Fatal,
+        };
     }
 }

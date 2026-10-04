@@ -1,6 +1,8 @@
 using I18Next.Net.Backends;
 using I18Next.Net.Plugins;
+
 using Shouldly;
+
 using Xunit;
 
 namespace I18Next.Net.Tests;
@@ -16,7 +18,7 @@ public class I18NextFixture
     }
 
     private InMemoryBackend _backend;
-    private I18NextNet _i18Next;
+    private readonly I18NextNet _i18Next;
 
     private void SetupBackend()
     {

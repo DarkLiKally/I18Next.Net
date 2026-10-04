@@ -1,5 +1,6 @@
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
+
 using I18Next.Net.Backends;
 using I18Next.Net.Plugins;
 
@@ -12,7 +13,7 @@ namespace I18Next.Net.Benchmarks;
 public class I18NextBenchmark
 {
     private InMemoryBackend _backend;
-    private I18NextNet _i18Next;
+    private readonly I18NextNet _i18Next;
 
     public I18NextBenchmark()
     {
@@ -34,17 +35,17 @@ public class I18NextBenchmark
         _i18Next.Language = "en";
         _i18Next.T("exampleKey1", new { arg1 = "Simple Placeholder" });
     }
-    
+
     private void SetupBackend()
     {
         var backend = new InMemoryBackend();
 
         for (var i = 0; i < 1000; i++)
         {
-            backend.AddTranslation("en", "translation", $"exampleKey{i}", $"NS 1 My English text {i}."); 
-            backend.AddTranslation("de", "translation", $"exampleKey{i}", $"NS 1 Mein deutscher text {i}."); 
-            backend.AddTranslation("en", "translation2", $"exampleKey{i}", $"NS 2 My English text {i} {{{{arg1}}}}."); 
-            backend.AddTranslation("de", "translation2", $"exampleKey{i}", $"NS 2 Mein deutscher text {i} {{{{arg1}}}}."); 
+            backend.AddTranslation("en", "translation", $"exampleKey{i}", $"NS 1 My English text {i}.");
+            backend.AddTranslation("de", "translation", $"exampleKey{i}", $"NS 1 Mein deutscher text {i}.");
+            backend.AddTranslation("en", "translation2", $"exampleKey{i}", $"NS 2 My English text {i} {{{{arg1}}}}.");
+            backend.AddTranslation("de", "translation2", $"exampleKey{i}", $"NS 2 Mein deutscher text {i} {{{{arg1}}}}.");
         }
 
         _backend = backend;

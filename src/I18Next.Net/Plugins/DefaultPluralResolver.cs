@@ -49,91 +49,91 @@ public class DefaultPluralResolver : IPluralResolver
     };
 
     private static readonly PluralizationSet[] PluralizationSets =
-    {
+    [
         new()
         {
-            Languages = new[]
-            {
+            Languages =
+            [
                 "ach", "ak", "am", "arn", "br", "fil", "gun", "ln", "mfe", "mg", "mi", "oc", "pt", "pt-BR",
                 "tg", "ti", "tr", "uz", "wa"
-            },
-            Numbers = new[] { 1, 2 },
+            ],
+            Numbers = [1, 2],
             Fc = 1
         },
         new()
         {
-            Languages = new[]
-            {
+            Languages =
+            [
                 "af", "an", "ast", "az", "bg", "bn", "ca", "da", "de", "dev", "el", "en",
                 "eo", "es", "et", "eu", "fi", "fo", "fur", "fy", "gl", "gu", "ha", "he", "hi",
                 "hu", "hy", "ia", "it", "kn", "ku", "lb", "mai", "ml", "mn", "mr", "nah", "nap", "nb",
                 "ne", "nl", "nn", "no", "nso", "pa", "pap", "pms", "ps", "pt-PT", "rm", "sco",
                 "se", "si", "so", "son", "sq", "sv", "sw", "ta", "te", "tk", "ur", "yo"
-            },
-            Numbers = new[] { 1, 2 },
+            ],
+            Numbers = [1, 2],
             Fc = 2
         },
         new()
         {
-            Languages = new[]
-            {
+            Languages =
+            [
                 "ay", "bo", "cgg", "fa", "id", "ja", "jbo", "ka", "kk", "km", "ko", "ky", "lo",
                 "ms", "sah", "su", "th", "tt", "ug", "vi", "wo", "zh"
-            },
-            Numbers = new[] { 1 },
+            ],
+            Numbers = [1],
             Fc = 3
         },
         new()
         {
-            Languages = new[] { "be", "bs", "dz", "hr", "ru", "sr", "uk" },
-            Numbers = new[] { 1, 2, 5 },
+            Languages = ["be", "bs", "dz", "hr", "ru", "sr", "uk"],
+            Numbers = [1, 2, 5],
             Fc = 4
         },
-        new() { Languages = new[] { "ar" }, Numbers = new[] { 0, 1, 2, 3, 11, 100 }, Fc = 5 },
-        new() { Languages = new[] { "cs", "sk" }, Numbers = new[] { 1, 2, 5 }, Fc = 6 },
-        new() { Languages = new[] { "csb", "pl" }, Numbers = new[] { 1, 2, 5 }, Fc = 7 },
-        new() { Languages = new[] { "cy" }, Numbers = new[] { 1, 2, 3, 8 }, Fc = 8 },
-        new() { Languages = new[] { "fr" }, Numbers = new[] { 1, 2 }, Fc = 9 },
-        new() { Languages = new[] { "ga" }, Numbers = new[] { 1, 2, 3, 7, 11 }, Fc = 10 },
-        new() { Languages = new[] { "gd" }, Numbers = new[] { 1, 2, 3, 20 }, Fc = 11 },
-        new() { Languages = new[] { "is" }, Numbers = new[] { 1, 2 }, Fc = 12 },
-        new() { Languages = new[] { "jv" }, Numbers = new[] { 0, 1 }, Fc = 13 },
-        new() { Languages = new[] { "kw" }, Numbers = new[] { 1, 2, 3, 4 }, Fc = 14 },
-        new() { Languages = new[] { "lt" }, Numbers = new[] { 1, 2, 10 }, Fc = 15 },
-        new() { Languages = new[] { "lv" }, Numbers = new[] { 1, 2, 0 }, Fc = 16 },
-        new() { Languages = new[] { "mk" }, Numbers = new[] { 1, 2 }, Fc = 17 },
-        new() { Languages = new[] { "mnk" }, Numbers = new[] { 0, 1, 2 }, Fc = 18 },
-        new() { Languages = new[] { "mt" }, Numbers = new[] { 1, 2, 11, 20 }, Fc = 19 },
-        new() { Languages = new[] { "or" }, Numbers = new[] { 2, 1 }, Fc = 2 },
-        new() { Languages = new[] { "ro" }, Numbers = new[] { 1, 2, 20 }, Fc = 20 },
-        new() { Languages = new[] { "sl" }, Numbers = new[] { 5, 1, 2, 3 }, Fc = 21 }
-    };
+        new() { Languages = ["ar"], Numbers = [0, 1, 2, 3, 11, 100], Fc = 5 },
+        new() { Languages = ["cs", "sk"], Numbers = [1, 2, 5], Fc = 6 },
+        new() { Languages = ["csb", "pl"], Numbers = [1, 2, 5], Fc = 7 },
+        new() { Languages = ["cy"], Numbers = [1, 2, 3, 8], Fc = 8 },
+        new() { Languages = ["fr"], Numbers = [1, 2], Fc = 9 },
+        new() { Languages = ["ga"], Numbers = [1, 2, 3, 7, 11], Fc = 10 },
+        new() { Languages = ["gd"], Numbers = [1, 2, 3, 20], Fc = 11 },
+        new() { Languages = ["is"], Numbers = [1, 2], Fc = 12 },
+        new() { Languages = ["jv"], Numbers = [0, 1], Fc = 13 },
+        new() { Languages = ["kw"], Numbers = [1, 2, 3, 4], Fc = 14 },
+        new() { Languages = ["lt"], Numbers = [1, 2, 10], Fc = 15 },
+        new() { Languages = ["lv"], Numbers = [1, 2, 0], Fc = 16 },
+        new() { Languages = ["mk"], Numbers = [1, 2], Fc = 17 },
+        new() { Languages = ["mnk"], Numbers = [0, 1, 2], Fc = 18 },
+        new() { Languages = ["mt"], Numbers = [1, 2, 11, 20], Fc = 19 },
+        new() { Languages = ["or"], Numbers = [2, 1], Fc = 2 },
+        new() { Languages = ["ro"], Numbers = [1, 2, 20], Fc = 20 },
+        new() { Languages = ["sl"], Numbers = [5, 1, 2, 3], Fc = 21 }
+    ];
 
     private static readonly PluralCategorySet[] PluralCategorySets =
-    {
+    [
         // @formatter:off
         new()
         {
-            Languages = new[]
-            {
+            Languages =
+            [
                 "bm", "bo", "dz", "hnj", "id", "ig", "ii", "in", "ja", "jbo", "jv", "jw", "kde", "kea", "km", "ko", "lkt",
                 "lo", "ms", "my", "nqo", "osa", "sah", "ses", "sg", "su", "th", "to", "tpi", "vi", "wo", "yo", "yue", "zh"
-            },
+            ],
             Filter = n => Other
         },
         new()
         {
-            Languages = new[]
-            {
+            Languages =
+            [
                 "ak", "am", "as", "bho", "bn", "csw", "doi", "fa", "ff", "gu", "guw", "hi", "hy", "kab", "kn", "kok", "kok-Latn", "ln",
                 "mg", "nso", "pa", "pcm", "si", "ti", "wa", "zu"
-            },
+            ],
             Filter = n => n <= 1 ? One : Other
         },
         new()
         {
-            Languages = new[]
-            {
+            Languages =
+            [
                 "af", "an", "asa", "ast", "az", "bal", "bem", "bez", "bg", "brx", "ce", "cgg", "chr", "ckb", "da", "de",
                 "dev", "dv", "ee", "el", "en", "eo", "et", "eu", "fi", "fo", "fur", "fy", "gl", "gsw", "ha", "haw", "hu",
                 "ia", "ie", "io", "ji", "jgo", "jmc", "ka", "kaj", "kcg", "kk", "kkj", "kl", "ks", "ksb", "ku", "ky", "lb", "lg",
@@ -141,40 +141,40 @@ public class DefaultPluralResolver : IPluralResolver
                 "om", "or", "os", "pap", "ps", "rm", "rof", "rwk", "saq", "sc", "sd", "sdh", "seh", "sn", "so", "sq", "ss",
                 "ssy", "st", "sv", "sw", "syr", "ta", "te", "teo", "tig", "tk", "tn", "tr", "ts", "ug", "ur", "uz", "ve",
                 "vo", "vun", "wae", "xh", "xog", "yi"
-            },
+            ],
             Filter = n => n == 1 ? One : Other
         },
-        new() { Languages = new[] { "tzm" }, Filter = n => n <= 1 || n >= 11 && n <= 99 ? One : Other },
-        new() { Languages = new[] { "is", "mk" }, Filter = n => n % 10 == 1 && n % 100 != 11 ? One : Other },
-        new() { Languages = new[] { "ceb", "fil", "tl" }, Filter = n => n % 10 != 4 && n % 10 != 6 && n % 10 != 9 ? One : Other },
-        new() { Languages = new[] { "lv", "prg" }, Filter = n => n % 10 == 0 || n % 100 >= 11 && n % 100 <= 19 ? Zero : n % 10 == 1 && n % 100 != 11 ? One : Other },
-        new() { Languages = new[] { "blo", "cv", "ksh", "lag" }, Filter = n => n == 0 ? Zero : n == 1 ? One : Other },
-        new() { Languages = new[] { "sgs" }, Filter = n => n % 10 == 1 && n % 100 != 11 ? One : n == 2 ? Two : n % 10 >= 2 && (n % 100 < 11 || n % 100 > 19) ? Few : Other },
-        new() { Languages = new[] { "he", "iu", "naq", "sat", "se", "sma", "smi", "smj", "smn", "sms" }, Filter = n => n == 1 ? One : n == 2 ? Two : Other },
-        new() { Languages = new[] { "shi" }, Filter = n => n <= 1 ? One : n <= 10 ? Few : Other },
-        new() { Languages = new[] { "mo", "ro" }, Filter = n => n == 1 ? One : n == 0 || n % 100 >= 1 && n % 100 <= 19 ? Few : Other },
-        new() { Languages = new[] { "bs", "hr", "sh", "sr" }, Filter = n => n % 10 == 1 && n % 100 != 11 ? One : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? Few : Other },
-        new() { Languages = new[] { "gd" }, Filter = n => n == 1 || n == 11 ? One : n == 2 || n == 12 ? Two : n >= 3 && n <= 10 || n >= 13 && n <= 19 ? Few : Other },
-        new() { Languages = new[] { "dsb", "hsb", "sl" }, Filter = n => n % 100 == 1 ? One : n % 100 == 2 ? Two : n % 100 == 3 || n % 100 == 4 ? Few : Other },
-        new() { Languages = new[] { "cs", "sk" }, Filter = n => n == 1 ? One : n >= 2 && n <= 4 ? Few : Other },
-        new() { Languages = new[] { "pl" }, Filter = n => n == 1 ? One : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? Few : Many },
-        new() { Languages = new[] { "be", "ru", "uk" }, Filter = n => n % 10 == 1 && n % 100 != 11 ? One : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? Few : Many },
-        new() { Languages = new[] { "lt" }, Filter = n => n % 10 == 1 && (n % 100 < 11 || n % 100 > 19) ? One : n % 10 >= 2 && (n % 100 < 11 || n % 100 > 19) ? Few : Other },
+        new() { Languages = ["tzm"], Filter = n => n <= 1 || n >= 11 && n <= 99 ? One : Other },
+        new() { Languages = ["is", "mk"], Filter = n => n % 10 == 1 && n % 100 != 11 ? One : Other },
+        new() { Languages = ["ceb", "fil", "tl"], Filter = n => n % 10 != 4 && n % 10 != 6 && n % 10 != 9 ? One : Other },
+        new() { Languages = ["lv", "prg"], Filter = n => n % 10 == 0 || n % 100 >= 11 && n % 100 <= 19 ? Zero : n % 10 == 1 && n % 100 != 11 ? One : Other },
+        new() { Languages = ["blo", "cv", "ksh", "lag"], Filter = n => n == 0 ? Zero : n == 1 ? One : Other },
+        new() { Languages = ["sgs"], Filter = n => n % 10 == 1 && n % 100 != 11 ? One : n == 2 ? Two : n % 10 >= 2 && (n % 100 < 11 || n % 100 > 19) ? Few : Other },
+        new() { Languages = ["he", "iu", "naq", "sat", "se", "sma", "smi", "smj", "smn", "sms"], Filter = n => n == 1 ? One : n == 2 ? Two : Other },
+        new() { Languages = ["shi"], Filter = n => n <= 1 ? One : n <= 10 ? Few : Other },
+        new() { Languages = ["mo", "ro"], Filter = n => n == 1 ? One : n == 0 || n % 100 >= 1 && n % 100 <= 19 ? Few : Other },
+        new() { Languages = ["bs", "hr", "sh", "sr"], Filter = n => n % 10 == 1 && n % 100 != 11 ? One : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? Few : Other },
+        new() { Languages = ["gd"], Filter = n => n == 1 || n == 11 ? One : n == 2 || n == 12 ? Two : n >= 3 && n <= 10 || n >= 13 && n <= 19 ? Few : Other },
+        new() { Languages = ["dsb", "hsb", "sl"], Filter = n => n % 100 == 1 ? One : n % 100 == 2 ? Two : n % 100 == 3 || n % 100 == 4 ? Few : Other },
+        new() { Languages = ["cs", "sk"], Filter = n => n == 1 ? One : n >= 2 && n <= 4 ? Few : Other },
+        new() { Languages = ["pl"], Filter = n => n == 1 ? One : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? Few : Many },
+        new() { Languages = ["be", "ru", "uk"], Filter = n => n % 10 == 1 && n % 100 != 11 ? One : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? Few : Many },
+        new() { Languages = ["lt"], Filter = n => n % 10 == 1 && (n % 100 < 11 || n % 100 > 19) ? One : n % 10 >= 2 && (n % 100 < 11 || n % 100 > 19) ? Few : Other },
         new()
         {
-            Languages = new[] { "br" },
+            Languages = ["br"],
             Filter = n => n % 10 == 1 && n % 100 != 11 && n % 100 != 71 && n % 100 != 91 ? One
                 : n % 10 == 2 && n % 100 != 12 && n % 100 != 72 && n % 100 != 92 ? Two
                 : (n % 10 == 3 || n % 10 == 4 || n % 10 == 9) && (n % 100 < 10 || n % 100 > 19) && (n % 100 < 70 || n % 100 > 79) && (n % 100 < 90 || n % 100 > 99) ? Few
                 : n != 0 && n % 1000000 == 0 ? Many
                 : Other
         },
-        new() { Languages = new[] { "mt" }, Filter = n => n == 1 ? One : n == 2 ? Two : n == 0 || n % 100 >= 3 && n % 100 <= 10 ? Few : n % 100 >= 11 && n % 100 <= 19 ? Many : Other },
-        new() { Languages = new[] { "ga" }, Filter = n => n == 1 ? One : n == 2 ? Two : n >= 3 && n <= 6 ? Few : n >= 7 && n <= 10 ? Many : Other },
-        new() { Languages = new[] { "gv" }, Filter = n => n % 10 == 1 ? One : n % 10 == 2 ? Two : n % 20 == 0 ? Few : Other },
+        new() { Languages = ["mt"], Filter = n => n == 1 ? One : n == 2 ? Two : n == 0 || n % 100 >= 3 && n % 100 <= 10 ? Few : n % 100 >= 11 && n % 100 <= 19 ? Many : Other },
+        new() { Languages = ["ga"], Filter = n => n == 1 ? One : n == 2 ? Two : n >= 3 && n <= 6 ? Few : n >= 7 && n <= 10 ? Many : Other },
+        new() { Languages = ["gv"], Filter = n => n % 10 == 1 ? One : n % 10 == 2 ? Two : n % 20 == 0 ? Few : Other },
         new()
         {
-            Languages = new[] { "kw" },
+            Languages = ["kw"],
             Filter = n => n == 0 ? Zero
                 : n == 1 ? One
                 : n % 100 == 2 || n % 100 == 22 || n % 100 == 42 || n % 100 == 62 || n % 100 == 82
@@ -184,56 +184,56 @@ public class DefaultPluralResolver : IPluralResolver
                 : n % 100 == 1 || n % 100 == 21 || n % 100 == 41 || n % 100 == 61 || n % 100 == 81 ? Many
                 : Other
         },
-        new() { Languages = new[] { "ar", "ars" }, Filter = n => n == 0 ? Zero : n == 1 ? One : n == 2 ? Two : n % 100 >= 3 && n % 100 <= 10 ? Few : n % 100 >= 11 ? Many : Other },
-        new() { Languages = new[] { "cy" }, Filter = n => n == 0 ? Zero : n == 1 ? One : n == 2 ? Two : n == 3 ? Few : n == 6 ? Many : Other },
-        new() { Languages = new[] { "fr", "pt" }, Filter = n => n <= 1 ? One : n % 1000000 == 0 ? Many : Other },
-        new() { Languages = new[] { "ca", "es", "it", "lld", "pt-PT", "scn", "vec" }, Filter = n => n == 1 ? One : n != 0 && n % 1000000 == 0 ? Many : Other }
+        new() { Languages = ["ar", "ars"], Filter = n => n == 0 ? Zero : n == 1 ? One : n == 2 ? Two : n % 100 >= 3 && n % 100 <= 10 ? Few : n % 100 >= 11 ? Many : Other },
+        new() { Languages = ["cy"], Filter = n => n == 0 ? Zero : n == 1 ? One : n == 2 ? Two : n == 3 ? Few : n == 6 ? Many : Other },
+        new() { Languages = ["fr", "pt"], Filter = n => n <= 1 ? One : n % 1000000 == 0 ? Many : Other },
+        new() { Languages = ["ca", "es", "it", "lld", "pt-PT", "scn", "vec"], Filter = n => n == 1 ? One : n != 0 && n % 1000000 == 0 ? Many : Other }
         // @formatter:on
-    };
+    ];
 
     private static readonly PluralCategorySet[] OrdinalCategorySets =
-    {
+    [
         // @formatter:off
-        new() { Languages = new[] { "en", "dev" }, Filter = n => n % 10 == 1 && n % 100 != 11 ? One : n % 10 == 2 && n % 100 != 12 ? Two : n % 10 == 3 && n % 100 != 13 ? Few : Other },
-        new() { Languages = new[] { "bal", "fil", "fr", "ga", "hy", "lo", "mo", "ms", "ro", "tl", "vi" }, Filter = n => n == 1 ? One : Other },
-        new() { Languages = new[] { "hu" }, Filter = n => n == 1 || n == 5 ? One : Other },
-        new() { Languages = new[] { "ne" }, Filter = n => n >= 1 && n <= 4 ? One : Other },
-        new() { Languages = new[] { "sv" }, Filter = n => (n % 10 == 1 || n % 10 == 2) && n % 100 != 11 && n % 100 != 12 ? One : Other },
-        new() { Languages = new[] { "it", "lld", "sc", "vec" }, Filter = n => n == 11 || n == 8 || n == 80 || n == 800 ? Many : Other },
-        new() { Languages = new[] { "lij", "scn" }, Filter = n => n == 11 || n == 8 || n >= 80 && n <= 89 || n >= 800 && n <= 899 ? Many : Other },
-        new() { Languages = new[] { "blo" }, Filter = n => n == 0 ? Zero : n == 1 ? One : n >= 2 && n <= 6 ? Few : Other },
+        new() { Languages = ["en", "dev"], Filter = n => n % 10 == 1 && n % 100 != 11 ? One : n % 10 == 2 && n % 100 != 12 ? Two : n % 10 == 3 && n % 100 != 13 ? Few : Other },
+        new() { Languages = ["bal", "fil", "fr", "ga", "hy", "lo", "mo", "ms", "ro", "tl", "vi"], Filter = n => n == 1 ? One : Other },
+        new() { Languages = ["hu"], Filter = n => n == 1 || n == 5 ? One : Other },
+        new() { Languages = ["ne"], Filter = n => n >= 1 && n <= 4 ? One : Other },
+        new() { Languages = ["sv"], Filter = n => (n % 10 == 1 || n % 10 == 2) && n % 100 != 11 && n % 100 != 12 ? One : Other },
+        new() { Languages = ["it", "lld", "sc", "vec"], Filter = n => n == 11 || n == 8 || n == 80 || n == 800 ? Many : Other },
+        new() { Languages = ["lij", "scn"], Filter = n => n == 11 || n == 8 || n >= 80 && n <= 89 || n >= 800 && n <= 899 ? Many : Other },
+        new() { Languages = ["blo"], Filter = n => n == 0 ? Zero : n == 1 ? One : n >= 2 && n <= 6 ? Few : Other },
         new()
         {
-            Languages = new[] { "kw" },
+            Languages = ["kw"],
             Filter = n => n >= 1 && n <= 4 || n % 100 >= 1 && n % 100 <= 4 || n % 100 >= 21 && n % 100 <= 24 || n % 100 >= 41 && n % 100 <= 44 ||
                           n % 100 >= 61 && n % 100 <= 64 || n % 100 >= 81 && n % 100 <= 84 ? One
                 : n == 5 || n % 100 == 5 ? Many
                 : Other
         },
-        new() { Languages = new[] { "kk" }, Filter = n => n % 10 == 6 || n % 10 == 9 || n % 10 == 0 && n != 0 ? Many : Other },
-        new() { Languages = new[] { "ka" }, Filter = n => n == 1 ? One : n == 0 || n % 100 >= 2 && n % 100 <= 20 || n % 100 == 40 || n % 100 == 60 || n % 100 == 80 ? Many : Other },
-        new() { Languages = new[] { "sq" }, Filter = n => n == 1 ? One : n % 10 == 4 && n % 100 != 14 ? Many : Other },
-        new() { Languages = new[] { "uk" }, Filter = n => n % 10 == 3 && n % 100 != 13 ? Few : Other },
-        new() { Languages = new[] { "be" }, Filter = n => (n % 10 == 2 || n % 10 == 3) && n % 100 != 12 && n % 100 != 13 ? Few : Other },
-        new() { Languages = new[] { "tk" }, Filter = n => n % 10 == 6 || n % 10 == 9 || n == 10 ? Few : Other },
-        new() { Languages = new[] { "mk" }, Filter = n => n % 10 == 1 && n % 100 != 11 ? One : n % 10 == 2 && n % 100 != 12 ? Two : (n % 10 == 7 || n % 10 == 8) && n % 100 != 17 && n % 100 != 18 ? Many : Other },
-        new() { Languages = new[] { "ca" }, Filter = n => n == 1 || n == 3 ? One : n == 2 ? Two : n == 4 ? Few : Other },
-        new() { Languages = new[] { "kok", "kok-Latn", "mr" }, Filter = n => n == 1 ? One : n == 2 || n == 3 ? Two : n == 4 ? Few : Other },
-        new() { Languages = new[] { "gu", "hi" }, Filter = n => n == 1 ? One : n == 2 || n == 3 ? Two : n == 4 ? Few : n == 6 ? Many : Other },
-        new() { Languages = new[] { "as", "bn" }, Filter = n => n == 1 || n == 5 || n >= 7 && n <= 10 ? One : n == 2 || n == 3 ? Two : n == 4 ? Few : n == 6 ? Many : Other },
-        new() { Languages = new[] { "or" }, Filter = n => n == 1 || n == 5 || n >= 7 && n <= 9 ? One : n == 2 || n == 3 ? Two : n == 4 ? Few : n == 6 ? Many : Other },
-        new() { Languages = new[] { "gd" }, Filter = n => n == 1 || n == 11 ? One : n == 2 || n == 12 ? Two : n == 3 || n == 13 ? Few : Other },
-        new() { Languages = new[] { "cy" }, Filter = n => n == 0 || n == 7 || n == 8 || n == 9 ? Zero : n == 1 ? One : n == 2 ? Two : n == 3 || n == 4 ? Few : n == 5 || n == 6 ? Many : Other },
+        new() { Languages = ["kk"], Filter = n => n % 10 == 6 || n % 10 == 9 || n % 10 == 0 && n != 0 ? Many : Other },
+        new() { Languages = ["ka"], Filter = n => n == 1 ? One : n == 0 || n % 100 >= 2 && n % 100 <= 20 || n % 100 == 40 || n % 100 == 60 || n % 100 == 80 ? Many : Other },
+        new() { Languages = ["sq"], Filter = n => n == 1 ? One : n % 10 == 4 && n % 100 != 14 ? Many : Other },
+        new() { Languages = ["uk"], Filter = n => n % 10 == 3 && n % 100 != 13 ? Few : Other },
+        new() { Languages = ["be"], Filter = n => (n % 10 == 2 || n % 10 == 3) && n % 100 != 12 && n % 100 != 13 ? Few : Other },
+        new() { Languages = ["tk"], Filter = n => n % 10 == 6 || n % 10 == 9 || n == 10 ? Few : Other },
+        new() { Languages = ["mk"], Filter = n => n % 10 == 1 && n % 100 != 11 ? One : n % 10 == 2 && n % 100 != 12 ? Two : (n % 10 == 7 || n % 10 == 8) && n % 100 != 17 && n % 100 != 18 ? Many : Other },
+        new() { Languages = ["ca"], Filter = n => n == 1 || n == 3 ? One : n == 2 ? Two : n == 4 ? Few : Other },
+        new() { Languages = ["kok", "kok-Latn", "mr"], Filter = n => n == 1 ? One : n == 2 || n == 3 ? Two : n == 4 ? Few : Other },
+        new() { Languages = ["gu", "hi"], Filter = n => n == 1 ? One : n == 2 || n == 3 ? Two : n == 4 ? Few : n == 6 ? Many : Other },
+        new() { Languages = ["as", "bn"], Filter = n => n == 1 || n == 5 || n >= 7 && n <= 10 ? One : n == 2 || n == 3 ? Two : n == 4 ? Few : n == 6 ? Many : Other },
+        new() { Languages = ["or"], Filter = n => n == 1 || n == 5 || n >= 7 && n <= 9 ? One : n == 2 || n == 3 ? Two : n == 4 ? Few : n == 6 ? Many : Other },
+        new() { Languages = ["gd"], Filter = n => n == 1 || n == 11 ? One : n == 2 || n == 12 ? Two : n == 3 || n == 13 ? Few : Other },
+        new() { Languages = ["cy"], Filter = n => n == 0 || n == 7 || n == 8 || n == 9 ? Zero : n == 1 ? One : n == 2 ? Two : n == 3 || n == 4 ? Few : n == 5 || n == 6 ? Many : Other },
         new()
         {
-            Languages = new[] { "az" },
+            Languages = ["az"],
             Filter = n => n % 10 == 1 || n % 10 == 2 || n % 10 == 5 || n % 10 == 7 || n % 10 == 8 || n % 100 == 20 || n % 100 == 50 || n % 100 == 70 || n % 100 == 80 ? One
                 : n % 10 == 3 || n % 10 == 4 || n % 1000 >= 100 && n % 1000 <= 900 && n % 100 == 0 ? Few
                 : n == 0 || n % 10 == 6 || n % 100 == 40 || n % 100 == 60 || n % 100 == 90 ? Many
                 : Other
         }
         // @formatter:on
-    };
+    ];
 
     private static readonly ConcurrentDictionary<string, PluralizationRule> Rules;
 
@@ -262,7 +262,7 @@ public class DefaultPluralResolver : IPluralResolver
                 }
             }
 
-            CategoryRules = new Dictionary<string, Func<long, string>>();
+            CategoryRules = [];
 
             foreach (var set in PluralCategorySets)
             {
@@ -270,7 +270,7 @@ public class DefaultPluralResolver : IPluralResolver
                     CategoryRules[language] = set.Filter;
             }
 
-            OrdinalCategoryRules = new Dictionary<string, Func<long, string>>();
+            OrdinalCategoryRules = [];
 
             foreach (var set in OrdinalCategorySets)
             {
@@ -304,10 +304,7 @@ public class DefaultPluralResolver : IPluralResolver
         {
             if (suffixNumber == 2)
                 suffix = "plural";
-            else if (suffixNumber == 1)
-                suffix = null;
-            else
-                suffix = suffixNumber.ToString();
+            else suffix = suffixNumber == 1 ? null : suffixNumber.ToString();
         }
         else
         {
@@ -323,19 +320,18 @@ public class DefaultPluralResolver : IPluralResolver
                 if (suffix == "plural")
                     return "_plural";
 
-                return $"_plural_{suffixNumber.ToString()}";
+                return $"_plural_{suffixNumber}";
 
             case JsonFormat.Version2:
                 if (rule.Numbers.Length == 1 || suffix == null)
                     return string.Empty;
 
-                return $"{PluralSeparator}{suffix}";    
+                return $"{PluralSeparator}{suffix}";
 
             default:
-                if (UseSimplePluralSuffixIfPossible && rule.Numbers.Length == 2 && rule.Numbers[0] == 1)
-                    return suffix == null ? string.Empty : $"{PluralSeparator}{suffix}";
-                else
-                    return $"{PluralSeparator}{numberIndex}";
+                return UseSimplePluralSuffixIfPossible && rule.Numbers.Length == 2 && rule.Numbers[0] == 1
+                    ? suffix == null ? string.Empty : $"{PluralSeparator}{suffix}"
+                    : $"{PluralSeparator}{numberIndex}";
         }
     }
 
@@ -357,12 +353,11 @@ public class DefaultPluralResolver : IPluralResolver
     /// <returns>The plural category. Falls back to "other" for unknown languages.</returns>
     public static string GetPluralCategory(string language, int count)
     {
-        var n = Math.Abs((long) count);
+        var n = Math.Abs((long)count);
 
-        if (CategoryRules.TryGetValue(language, out var rule) || CategoryRules.TryGetValue(GetLanguagePart(language), out rule))
-            return rule(n);
-
-        return Other;
+        return CategoryRules.TryGetValue(language, out var rule) || CategoryRules.TryGetValue(GetLanguagePart(language), out rule)
+            ? rule(n)
+            : Other;
     }
 
     /// <summary>
@@ -384,22 +379,18 @@ public class DefaultPluralResolver : IPluralResolver
     /// <returns>The ordinal plural category. Falls back to "other" for unknown languages.</returns>
     public static string GetOrdinalPluralCategory(string language, int count)
     {
-        var n = Math.Abs((long) count);
+        var n = Math.Abs((long)count);
 
-        if (OrdinalCategoryRules.TryGetValue(language, out var rule) || OrdinalCategoryRules.TryGetValue(GetLanguagePart(language), out rule))
-            return rule(n);
-
-        return Other;
+        return OrdinalCategoryRules.TryGetValue(language, out var rule) || OrdinalCategoryRules.TryGetValue(GetLanguagePart(language), out rule)
+            ? rule(n)
+            : Other;
     }
 
     private static string GetLanguagePart(string language)
     {
         var index = language.IndexOf('-');
 
-        if (index == -1)
-            return language;
-
-        return language.Substring(0, index);
+        return index == -1 ? language : language.Substring(0, index);
     }
 
     private static PluralizationRule GetRule(string language)
@@ -409,10 +400,7 @@ public class DefaultPluralResolver : IPluralResolver
 
         var languagePart = GetLanguagePart(language);
 
-        if (Rules.TryGetValue(languagePart, out rule))
-            return rule;
-
-        return null;
+        return Rules.TryGetValue(languagePart, out rule) ? rule : null;
     }
 
     private class PluralizationRule

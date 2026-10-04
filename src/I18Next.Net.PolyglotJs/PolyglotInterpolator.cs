@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+
 using I18Next.Net.Internal;
 using I18Next.Net.Plugins;
 
@@ -19,11 +20,7 @@ public class PolyglotInterpolator : IInterpolator
                 // http://www.arabeyes.org/Plural_Forms
                 if (n < 3)
                     return n;
-                if (n % 100 >= 3 && n % 100 <= 10)
-                    return 3;
-
-                return n % 100 >= 11 ? 4 : 5;
-            }
+                return n % 100 >= 3 && n % 100 <= 10 ? 3 : n % 100 >= 11 ? 4 : 5; }
         },
         { "chinese", n => 0 },
         { "german", n => n != 1 ? 1 : 0 },
@@ -31,29 +28,17 @@ public class PolyglotInterpolator : IInterpolator
         {
             "russian", n =>
             {
-                if (n % 10 == 1 && n % 100 != 11)
-                    return 0;
-
-                return n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 1 : 2;
-            }
+                return n % 10 == 1 && n % 100 != 11 ? 0 : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 1 : 2; }
         },
         {
             "czech", n =>
             {
-                if (n == 1)
-                    return 0;
-
-                return n >= 2 && n <= 4 ? 1 : 2;
-            }
+                return n == 1 ? 0 : n >= 2 && n <= 4 ? 1 : 2; }
         },
         {
             "polish", n =>
             {
-                if (n == 1)
-                    return 0;
-
-                return n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 1 : 2;
-            }
+                return n == 1 ? 0 : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 1 : 2; }
         },
         { "icelandic", n => n % 10 != 1 || n % 100 == 11 ? 1 : 0 }
     };
@@ -77,7 +62,7 @@ public class PolyglotInterpolator : IInterpolator
         if (LanguageToTypeMap != null)
             return;
 
-        LanguageToTypeMap = new Dictionary<string, Func<int, int>>();
+        LanguageToTypeMap = [];
 
         lock (LanguageToTypeMap)
         {
@@ -96,7 +81,7 @@ public class PolyglotInterpolator : IInterpolator
         return false;
     }
 
-    public List<IFormatter> Formatters { get; } = new();
+    public List<IFormatter> Formatters { get; } = [];
 
     /// <summary>
     ///     <para>
@@ -135,10 +120,9 @@ public class PolyglotInterpolator : IInterpolator
     public Task<string> InterpolateAsync(string source, string key, string language, IDictionary<string, object> args)
     {
         if (source == null)
-            return Task.FromResult((string) null);
+            return Task.FromResult((string)null);
 
-        if (language == null)
-            language = "en";
+        language ??= "en";
 
         var result = source;
         var languagePart = GetLanguagePart(language);
@@ -154,10 +138,7 @@ public class PolyglotInterpolator : IInterpolator
             {
                 var pluralIndex = pluralTypeFunc(smartCount);
 
-                if (pluralIndex < pluralForms.Length)
-                    result = pluralForms[pluralTypeFunc(smartCount)].Trim();
-                else
-                    result = pluralForms[0];
+                result = pluralIndex < pluralForms.Length ? pluralForms[pluralTypeFunc(smartCount)].Trim() : pluralForms[0];
             }
             else
             {
@@ -191,8 +172,7 @@ public class PolyglotInterpolator : IInterpolator
                     resultValue = formatter.Format(value, format, language);
             }
 
-            if (resultValue == null)
-                resultValue = value.ToString();
+            resultValue ??= value.ToString();
 
             result = result.ReplaceFirst(match.Value, resultValue);
         }
@@ -209,9 +189,6 @@ public class PolyglotInterpolator : IInterpolator
     {
         var index = language.IndexOf('-');
 
-        if (index == -1)
-            return language;
-
-        return language.Substring(0, index);
+        return index == -1 ? language : language.Substring(0, index);
     }
 }

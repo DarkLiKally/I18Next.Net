@@ -1,5 +1,7 @@
 ﻿using I18Next.Net.Formatters;
+
 using Shouldly;
+
 using Xunit;
 
 namespace I18Next.Net.Tests.Formatters;
@@ -10,7 +12,7 @@ public class UppercaseFormatterFixture
     {
         _formatter = new UppercaseFormatter();
     }
-    private UppercaseFormatter _formatter;
+    private readonly UppercaseFormatter _formatter;
 
 
     [Fact]

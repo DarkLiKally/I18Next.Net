@@ -1,20 +1,17 @@
 ﻿using System;
 using System.Diagnostics;
+
 using Example.WebApp.Models;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 
 namespace Example.WebApp.Controllers;
 
 [Route("[controller]/[action]")]
-public class HomeController : Controller
+public class HomeController(IStringLocalizer<HomeController> localizer) : Controller
 {
-    private readonly IStringLocalizer<HomeController> _localizer;
-
-    public HomeController(IStringLocalizer<HomeController> localizer)
-    {
-        _localizer = localizer;
-    }
+    private readonly IStringLocalizer<HomeController> _localizer = localizer;
 
     [HttpGet]
     public IActionResult About()

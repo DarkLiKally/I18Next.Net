@@ -15,9 +15,6 @@ public static class BackendUtilities
     {
         var index = language.IndexOf('-');
 
-        if (index == -1)
-            return language;
-
-        return language.Substring(0, index);
+        return index == -1 ? language : language.Substring(0, index);
     }
 }

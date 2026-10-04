@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
+
 using I18Next.Net.Backends;
 using I18Next.Net.Internal;
 using I18Next.Net.TranslationTrees;
+
 using Shouldly;
+
 using Xunit;
 
 namespace I18Next.Net.Tests.Internal;
@@ -15,10 +18,10 @@ public class InternalExtensionsFixture
     {
         "a-b-a".ReplaceFirst("a", "c").ShouldBe("c-b-a");
         "a-b".ReplaceFirst("x", "c").ShouldBe("a-b");
-        "a::b::c".Split("::").ShouldBe(new[] { "a", "b", "c" });
-        "a::b::c".Split("::", 2).ShouldBe(new[] { "a", "b::c" });
-        "a::::c".Split("::", StringSplitOptions.RemoveEmptyEntries).ShouldBe(new[] { "a", "c" });
-        "a::b::c".Split("::", 2, StringSplitOptions.RemoveEmptyEntries).ShouldBe(new[] { "a", "b::c" });
+        "a::b::c".Split("::").ShouldBe(["a", "b", "c"]);
+        "a::b::c".Split("::", 2).ShouldBe(["a", "b::c"]);
+        "a::::c".Split("::", StringSplitOptions.RemoveEmptyEntries).ShouldBe(["a", "c"]);
+        "a::b::c".Split("::", 2, StringSplitOptions.RemoveEmptyEntries).ShouldBe(["a", "b::c"]);
     }
 
     [Fact]
@@ -26,7 +29,7 @@ public class InternalExtensionsFixture
     {
         var dictionary = new Dictionary<string, object> { ["a"] = 1 };
 
-        ((object) null).ToDictionary().ShouldBeEmpty();
+        ((object)null).ToDictionary().ShouldBeEmpty();
         dictionary.ToDictionary().ShouldBeSameAs(dictionary);
         new { a = 1, b = "x" }.ToDictionary().ShouldBeEquivalentTo(new Dictionary<string, object> { ["a"] = 1, ["b"] = "x" });
     }

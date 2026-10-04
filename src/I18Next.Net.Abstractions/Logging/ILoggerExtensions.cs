@@ -171,7 +171,7 @@ public static class ILoggerExtensions
         logger.Log(LogLevel.Warning, exception, message, args);
     }
 
-    #if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER
     public static void Log(
         this ILogger logger,
         LogLevel logLevel,
@@ -348,5 +348,5 @@ public static class ILoggerExtensions
             logger.Log(LogLevel.Trace, exception, template, arguments);
         }
     }
-    #endif
+#endif
 }

@@ -1,7 +1,9 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
+
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Running;
+
 using I18Next.Net.Benchmarks;
 
 var assembly = typeof(I18NextBenchmark).Assembly;

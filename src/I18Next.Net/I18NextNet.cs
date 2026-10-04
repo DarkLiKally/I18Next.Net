@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+
 using I18Next.Net.Backends;
 using I18Next.Net.Internal;
 using I18Next.Net.Logging;
@@ -19,9 +20,6 @@ public class I18NextNet : II18Next
         "pbu", "pst", "prp", "prd", "ug", "ur", "ydd", "yds", "yih", "ji", "yi", "hbo", "men", "xmn", "fa", "jpr", "peo", "pes", "prs", "dv", "sam",
         "ckb"
     };
-
-    private string _language;
-
     private static readonly JsonSerializerOptions ObjectSerializerOptions = new()
     {
         PropertyNameCaseInsensitive = true,
@@ -80,19 +78,19 @@ public class I18NextNet : II18Next
 
     public string Language
     {
-        get => _language;
+        get;
         set
         {
             if (string.IsNullOrWhiteSpace(value))
                 throw new ArgumentNullException(nameof(value));
 
-            if (value == _language)
+            if (value == field)
                 return;
 
-            var oldLang = _language;
-            _language = value;
+            var oldLang = field;
+            field = value;
 
-            OnLanguageChanged(new LanguageChangedEventArgs(oldLang, _language));
+            OnLanguageChanged(new LanguageChangedEventArgs(oldLang, field));
         }
     }
 
@@ -221,7 +219,7 @@ public class I18NextNet : II18Next
         if (string.IsNullOrEmpty(language))
             return "ltr";
 
-        var separatorIndex = language.IndexOfAny(new[] { '-', '_' });
+        var separatorIndex = language.IndexOfAny(['-', '_']);
         var languagePart = separatorIndex > -1 ? language.Substring(0, separatorIndex) : language;
 
         return RightToLeftLanguages.Contains(languagePart) || language.IndexOf("-Arab", StringComparison.OrdinalIgnoreCase) > -1 ? "rtl" : "ltr";
@@ -255,32 +253,29 @@ public class I18NextNet : II18Next
 
     private TranslationOptions CreateTranslationOptions(string defaultNamespace = null)
     {
-        if (_options != null)
-        {
-            return new TranslationOptions
+        return _options != null
+            ? new TranslationOptions
             {
                 FallbackLanguages = _options.FallbackLanguages,
                 FallbackNamespaces = _options.FallbackNamespaces,
                 LanguageFallbacks = _options.LanguageFallbacks,
                 DefaultNamespace = defaultNamespace ?? _options.DefaultNamespace
+            }
+            : new TranslationOptions
+            {
+                FallbackLanguages = [],
+                DefaultNamespace = defaultNamespace ?? "translation"
             };
-        }
-        
-        return new TranslationOptions
-        {
-            FallbackLanguages = Array.Empty<string>(),
-            DefaultNamespace = defaultNamespace ?? "translation"
-        };
     }
 
     private string GetCurrentLanguage()
     {
         if (!DetectLanguageOnEachTranslation || LanguageDetector == null)
-            return _language;
+            return Language;
 
         var detectedLanguage = LanguageDetector.GetLanguage();
 
-        return string.IsNullOrWhiteSpace(detectedLanguage) ? _language : detectedLanguage;
+        return string.IsNullOrWhiteSpace(detectedLanguage) ? Language : detectedLanguage;
     }
 
     private void OnLanguageChanged(LanguageChangedEventArgs e)

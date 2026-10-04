@@ -1,11 +1,15 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+
 using I18Next.Net.Extensions;
 using I18Next.Net.Logging;
 using I18Next.Net.Plugins;
+
 using NSubstitute;
+
 using Shouldly;
+
 using Xunit;
 
 namespace I18Next.Net.Tests;
@@ -17,7 +21,7 @@ public class LoggingFixture
         _logger = Substitute.For<ILogger>();
         _logger.IsEnabled(Arg.Any<LogLevel>()).Returns(true);
     }
-    private ILogger _logger;
+    private readonly ILogger _logger;
 
 
     [Fact]
@@ -79,7 +83,7 @@ public class LoggingFixture
         _logger.LogError(exception, $"error {value}");
         _logger.LogCritical(exception, $"critical {value}");
 
-        _logger.Received(1).Log(LogLevel.Trace, "trace {@value}", Arg.Is<object[]>(a => (int) a[0] == 42));
+        _logger.Received(1).Log(LogLevel.Trace, "trace {@value}", Arg.Is<object[]>(a => (int)a[0] == 42));
         _logger.Received(1).Log(LogLevel.Debug, "debug {@value}", Arg.Any<object[]>());
         _logger.Received(1).Log(LogLevel.Information, "information {@value}", Arg.Any<object[]>());
         _logger.Received(1).Log(LogLevel.Warning, "warning {@value}", Arg.Any<object[]>());

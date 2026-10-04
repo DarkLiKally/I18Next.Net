@@ -1,9 +1,12 @@
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+
 using I18Next.Net.Backends;
 using I18Next.Net.TranslationTrees;
+
 using Shouldly;
+
 using Xunit;
 
 namespace I18Next.Net.Tests.Backends;
@@ -81,13 +84,8 @@ public class FileBackendsFixture
         tree.GetValue("Value1", null).ShouldBe("Custom value 1");
     }
 
-    private class CustomJsonFileBackend : JsonFileBackend
+    private class CustomJsonFileBackend(string basePath) : JsonFileBackend(basePath)
     {
-        public CustomJsonFileBackend(string basePath)
-            : base(basePath)
-        {
-        }
-
         protected override string FindFile(string language, string @namespace)
         {
             var path = Path.Combine(BasePath, $"{@namespace}_{language}.json");

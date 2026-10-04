@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+
 using I18Next.Net.Formatters;
 using I18Next.Net.Internal;
 using I18Next.Net.Logging;
@@ -35,61 +36,56 @@ public class DefaultInterpolator : IInterpolator
     private Regex _expressionRegex = DefaultExpressionRegex;
     private Regex _unescapedExpressionRegex = DefaultUnescapedExpressionRegex;
     private Regex _nestingRegex = DefaultNestingRegex;
-    private string _prefix = DefaultPrefix;
-    private string _suffix = DefaultSuffix;
-    private string _unescapePrefix = DefaultUnescapePrefix;
-    private string _nestingPrefix = DefaultNestingPrefix;
-    private string _nestingSuffix = DefaultNestingSuffix;
 
     public string Prefix
     {
-        get => _prefix;
+        get;
         set
         {
-            _prefix = ValidateDelimiter(value);
+            field = ValidateDelimiter(value);
             UpdateExpressionRegexes();
         }
-    }
+    } = DefaultPrefix;
 
     public string Suffix
     {
-        get => _suffix;
+        get;
         set
         {
-            _suffix = ValidateDelimiter(value);
+            field = ValidateDelimiter(value);
             UpdateExpressionRegexes();
         }
-    }
+    } = DefaultSuffix;
 
     public string UnescapePrefix
     {
-        get => _unescapePrefix;
+        get;
         set
         {
-            _unescapePrefix = ValidateDelimiter(value);
+            field = ValidateDelimiter(value);
             UpdateExpressionRegexes();
         }
-    }
+    } = DefaultUnescapePrefix;
 
     public string NestingPrefix
     {
-        get => _nestingPrefix;
+        get;
         set
         {
-            _nestingPrefix = ValidateDelimiter(value);
-            _nestingRegex = CreateExpressionRegex(_nestingPrefix, _nestingSuffix);
+            field = ValidateDelimiter(value);
+            _nestingRegex = CreateExpressionRegex(field, NestingSuffix);
         }
-    }
+    } = DefaultNestingPrefix;
 
     public string NestingSuffix
     {
-        get => _nestingSuffix;
+        get;
         set
         {
-            _nestingSuffix = ValidateDelimiter(value);
-            _nestingRegex = CreateExpressionRegex(_nestingPrefix, _nestingSuffix);
+            field = ValidateDelimiter(value);
+            _nestingRegex = CreateExpressionRegex(NestingPrefix, field);
         }
-    }
+    } = DefaultNestingSuffix;
 
     public IFormatter DefaultFormatter { get; set; }
 
@@ -116,14 +112,14 @@ public class DefaultInterpolator : IInterpolator
 
     public virtual bool CanNest(string source)
     {
-        return UseFastNestingMatch ? source.Contains(_nestingPrefix) : _nestingRegex.IsMatch(source);
+        return UseFastNestingMatch ? source.Contains(NestingPrefix) : _nestingRegex.IsMatch(source);
     }
 
-    public List<IFormatter> Formatters => _formatters ?? (_formatters = new List<IFormatter>());
+    public List<IFormatter> Formatters => _formatters ??= [];
 
     public virtual Task<string> InterpolateAsync(string source, string key, string language, IDictionary<string, object> args)
     {
-        if (!source.Contains(_prefix))
+        if (!source.Contains(Prefix))
             return Task.FromResult(source);
 
         var matches = _expressionRegex.Matches(source);
@@ -131,7 +127,7 @@ public class DefaultInterpolator : IInterpolator
         var result = source;
         var replaces = 0;
 
-        if (source.Contains(_prefix + _unescapePrefix))
+        if (source.Contains(Prefix + UnescapePrefix))
         {
             var unescapeMatches = _unescapedExpressionRegex.Matches(source);
 
@@ -187,16 +183,13 @@ public class DefaultInterpolator : IInterpolator
 
     private static string ValidateDelimiter(string value)
     {
-        if (string.IsNullOrEmpty(value))
-            throw new ArgumentNullException(nameof(value));
-
-        return value;
+        return string.IsNullOrEmpty(value) ? throw new ArgumentNullException(nameof(value)) : value;
     }
 
     private void UpdateExpressionRegexes()
     {
-        _expressionRegex = CreateExpressionRegex(_prefix, _suffix);
-        _unescapedExpressionRegex = CreateExpressionRegex(_prefix + _unescapePrefix, _suffix);
+        _expressionRegex = CreateExpressionRegex(Prefix, Suffix);
+        _unescapedExpressionRegex = CreateExpressionRegex(Prefix + UnescapePrefix, Suffix);
     }
 
     protected virtual string EscapeValue(string value)
@@ -351,10 +344,7 @@ public class DefaultInterpolator : IInterpolator
         if (value == null)
             return source;
 
-        if (value.Contains(match.Value))
-            return source;
-
-        return source.ReplaceFirst(match.Value, value);
+        return value.Contains(match.Value) ? source : source.ReplaceFirst(match.Value, value);
     }
 
     protected virtual string HandleRegexMatch(string source, string language, IDictionary<string, object> args, Match match)
@@ -362,11 +352,7 @@ public class DefaultInterpolator : IInterpolator
         var expression = match.Groups[1];
         var value = GetValueForExpression(expression.Value, language, args);
 
-        if (value == null)
-            if (MissingValueHandler != null)
-                value = MissingValueHandler(source, match);
-            else
-                value = string.Empty;
+        value ??= MissingValueHandler != null ? MissingValueHandler(source, match) : string.Empty;
 
         if (EscapeValues)
             value = EscapeValue(value);
@@ -380,11 +366,7 @@ public class DefaultInterpolator : IInterpolator
         var expression = match.Groups[1];
         var value = GetValueForExpression(expression.Value, language, args);
 
-        if (value == null)
-            if (MissingValueHandler != null)
-                value = MissingValueHandler(source, match);
-            else
-                value = string.Empty;
+        value ??= MissingValueHandler != null ? MissingValueHandler(source, match) : string.Empty;
 
         source = source.ReplaceFirst(match.Value, value);
         return source;

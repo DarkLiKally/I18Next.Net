@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text.RegularExpressions;
+
 using I18Next.Net.Internal;
 using I18Next.Net.Plugins;
 
@@ -111,10 +112,7 @@ public class MomentJsFormatter : IFormatter
         if (value is DateTime dt)
             return ReplaceTokens(dt, format, culture);
 
-        if (value is DateTimeOffset dto)
-            return ReplaceTokens(dto, format, culture);
-
-        return value.ToString();
+        return value is DateTimeOffset dto ? ReplaceTokens(dto, format, culture) : value.ToString();
     }
 
     private static string AddOrdinal(int num)
@@ -130,13 +128,13 @@ public class MomentJsFormatter : IFormatter
                 return num + "th";
         }
 
-        switch (num % 10)
+        return (num % 10) switch
         {
-            case 1:  return num + "st";
-            case 2:  return num + "nd";
-            case 3:  return num + "rd";
-            default: return num + "th";
-        }
+            1 => num + "st",
+            2 => num + "nd",
+            3 => num + "rd",
+            _ => num + "th",
+        };
     }
 
     private static int GetQuarter(int month)
@@ -146,40 +144,31 @@ public class MomentJsFormatter : IFormatter
 
     private string GetSpecialTokenValue(DateTimeOffset value, string token, CultureInfo culture)
     {
-        switch (token)
+        return token switch
         {
-            case "Mo":   return AddOrdinal(value.Month);
-            case "Q":    return GetQuarter(value.Month).ToString();
-            case "Qo":   return AddOrdinal(GetQuarter(value.Month));
-            case "Do":   return AddOrdinal(value.Day);
-            case "DDD":  return value.DayOfYear.ToString();
-            case "DDDo": return AddOrdinal(value.DayOfYear);
-            case "DDDD": return value.DayOfYear.ToString("000");
-            case "d":    return ((int) value.DayOfWeek).ToString();
-            case "do":   return AddOrdinal((int) value.DayOfWeek);
-            case "e":    return ((int) value.DayOfWeek).ToString();
-            case "E":    return ((int) value.DayOfWeek + 1).ToString();
-            case "w":
-            case "wo":
-            case "ww":
-            case "W":
-            case "Wo":
-            case "WW":
-                return GetWeekTokenValue(value, token, culture);
-            case "a":         return value.ToString("tt", culture).ToLower();
-            case "k":         return (value.Hour + 1).ToString();
-            case "kk":        return (value.Hour + 1).ToString("00");
-            case "SSSSSSSS":  return value.ToString("fffffff00", culture);
-            case "SSSSSSSSS": return value.ToString("fffffff000", culture);
-            case "z":
-            case "zz":
-                return TimeZoneData.GetFirstForOffset(value.Offset).Abbreviation;
-            case "ZZ": return value.ToString("zzz", culture).Replace(":", "");
-            case "X":  return value.ToUnixTimeSeconds().ToString();
-            case "x":  return value.ToUnixTimeMilliseconds().ToString();
-        }
-
-        return token;
+            "Mo" => AddOrdinal(value.Month),
+            "Q" => GetQuarter(value.Month).ToString(),
+            "Qo" => AddOrdinal(GetQuarter(value.Month)),
+            "Do" => AddOrdinal(value.Day),
+            "DDD" => value.DayOfYear.ToString(),
+            "DDDo" => AddOrdinal(value.DayOfYear),
+            "DDDD" => value.DayOfYear.ToString("000"),
+            "d" => ((int)value.DayOfWeek).ToString(),
+            "do" => AddOrdinal((int)value.DayOfWeek),
+            "e" => ((int)value.DayOfWeek).ToString(),
+            "E" => ((int)value.DayOfWeek + 1).ToString(),
+            "w" or "wo" or "ww" or "W" or "Wo" or "WW" => GetWeekTokenValue(value, token, culture),
+            "a" => value.ToString("tt", culture).ToLower(),
+            "k" => (value.Hour + 1).ToString(),
+            "kk" => (value.Hour + 1).ToString("00"),
+            "SSSSSSSS" => value.ToString("fffffff00", culture),
+            "SSSSSSSSS" => value.ToString("fffffff000", culture),
+            "z" or "zz" => TimeZoneData.GetFirstForOffset(value.Offset).Abbreviation,
+            "ZZ" => value.ToString("zzz", culture).Replace(":", ""),
+            "X" => value.ToUnixTimeSeconds().ToString(),
+            "x" => value.ToUnixTimeMilliseconds().ToString(),
+            _ => token,
+        };
     }
 
     private string GetWeekTokenValue(DateTimeOffset value, string token, CultureInfo culture)
@@ -191,25 +180,24 @@ public class MomentJsFormatter : IFormatter
             case "ww":
                 var week = culture.Calendar.GetWeekOfYear(value.DateTime, CalendarWeekRule.FirstDay, culture.DateTimeFormat.FirstDayOfWeek);
 
-                switch (token)
+                return token switch
                 {
-                    case "ww": return week.ToString("00");
-                    case "wo": return AddOrdinal(week);
-                    default:   return week.ToString();
-                }
-
+                    "ww" => week.ToString("00"),
+                    "wo" => AddOrdinal(week),
+                    _ => week.ToString(),
+                };
             case "W":
             case "Wo":
             case "WW":
                 var weekIso = culture.Calendar.GetWeekOfYear(value.DateTime, culture.DateTimeFormat.CalendarWeekRule,
                     culture.DateTimeFormat.FirstDayOfWeek);
 
-                switch (token)
+                return token switch
                 {
-                    case "WW": return weekIso.ToString("00");
-                    case "Wo": return AddOrdinal(weekIso);
-                    default:   return weekIso.ToString();
-                }
+                    "WW" => weekIso.ToString("00"),
+                    "Wo" => AddOrdinal(weekIso),
+                    _ => weekIso.ToString(),
+                };
         }
 
         return token;

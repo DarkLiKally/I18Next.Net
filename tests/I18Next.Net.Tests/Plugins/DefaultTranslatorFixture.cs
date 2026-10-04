@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using I18Next.Net.Backends;
 using I18Next.Net.Internal;
 using I18Next.Net.Logging;
 using I18Next.Net.Plugins;
 using I18Next.Net.TranslationTrees;
+
 using NSubstitute;
 using NSubstitute.ClearExtensions;
+
 using Shouldly;
+
 using Xunit;
 
 namespace I18Next.Net.Tests.Plugins;
@@ -40,7 +44,7 @@ public class DefaultTranslatorFixture : IDisposable
         _backend.LoadNamespaceAsync("ja-JP", "test2").Returns((ITranslationTree)null);
         _interpolator.InterpolateAsync(null, null, null, null).ReturnsForAnyArgs(c => c.ArgAt<string>(0));
         _interpolator.NestAsync(null, null, null, null).ReturnsForAnyArgs(c => c.ArgAt<string>(0));
-    
+
         _translator = new DefaultTranslator(_backend, _logger, _pluralResolver, _interpolator);
         _options = new TranslationOptions { DefaultNamespace = "test" };
     }
@@ -51,17 +55,17 @@ public class DefaultTranslatorFixture : IDisposable
         _pluralResolver.ClearReceivedCalls();
         _interpolator.ClearReceivedCalls();
         _translationTree.ClearSubstitute();
-    
+
     }
 
 
-    private ITranslationBackend _backend;
-    private IPluralResolver _pluralResolver;
-    private IInterpolator _interpolator;
-    private DefaultTranslator _translator;
-    private ITranslationTree _translationTree;
-    private TranslationOptions _options;
-    private ILogger _logger;
+    private readonly ITranslationBackend _backend;
+    private readonly IPluralResolver _pluralResolver;
+    private readonly IInterpolator _interpolator;
+    private readonly DefaultTranslator _translator;
+    private readonly ITranslationTree _translationTree;
+    private readonly TranslationOptions _options;
+    private readonly ILogger _logger;
 
 
     [Fact]
@@ -414,7 +418,7 @@ public class DefaultTranslatorFixture : IDisposable
     [Fact]
     public async Task TranslateAsync_NoTranslation_ShouldUseFallbackLanguage()
     {
-        _options.FallbackLanguages = new[] { "en-US" };
+        _options.FallbackLanguages = ["en-US"];
         _translationTree.GetValue("test", Arg.Any<IDictionary<string, object>>()).Returns("translated");
 
         var result = await _translator.TranslateAsync("ja-JP", "test", null, _options);
@@ -434,7 +438,7 @@ public class DefaultTranslatorFixture : IDisposable
     [Fact]
     public async Task TranslateAsync_NoTranslation_ShouldUseFallbackNamespace()
     {
-        _options.FallbackNamespaces = new[] { "test" };
+        _options.FallbackNamespaces = ["test"];
         _translationTree.GetValue("test", Arg.Any<IDictionary<string, object>>()).Returns("translated");
 
         var result = await _translator.TranslateAsync("en-US", "test2:test", null, _options);
@@ -453,8 +457,8 @@ public class DefaultTranslatorFixture : IDisposable
     [Fact]
     public async Task TranslateAsync_NoTranslation_ShouldUseFallbackNamespaceAndFallbackLanguage()
     {
-        _options.FallbackLanguages = new[] { "en-US" };
-        _options.FallbackNamespaces = new[] { "test" };
+        _options.FallbackLanguages = ["en-US"];
+        _options.FallbackNamespaces = ["test"];
         _translationTree.GetValue("test", Arg.Any<IDictionary<string, object>>()).Returns("translated");
 
         var result = await _translator.TranslateAsync("ja-JP", "test2:test", null, _options);
@@ -613,7 +617,7 @@ public class DefaultTranslatorFixture : IDisposable
         jpTranslationTree.GetValue(null, null).ReturnsForAnyArgs((string)null);
         _translationTree.GetValue("test_2", Arg.Any<IDictionary<string, object>>()).Returns("translated");
 
-        _options.FallbackLanguages = new[] { "en-US" };
+        _options.FallbackLanguages = ["en-US"];
         var args = new { count = 2 };
         var result = await _translator.TranslateAsync("ja-JP", "test", args.ToDictionary(), _options);
 

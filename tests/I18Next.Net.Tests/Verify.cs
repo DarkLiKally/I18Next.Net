@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+
 using NSubstitute.Core.Arguments;
 
 namespace I18Next.Net.Tests;
@@ -11,14 +12,9 @@ public static class Verify
         return ArgumentMatcher.Enqueue(new Matcher<T>(action));
     }
 
-    private class Matcher<T> : IArgumentMatcher<T>
+    private class Matcher<T>(Action<T> assertion) : IArgumentMatcher<T>
     {
-        private readonly Action<T> _assertion;
-
-        public Matcher(Action<T> assertion)
-        {
-            _assertion = assertion;
-        }
+        private readonly Action<T> _assertion = assertion;
 
         public bool IsSatisfiedBy(T argument)
         {

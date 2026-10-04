@@ -1,6 +1,9 @@
 using System.Text.Json;
+
 using I18Next.Net.Internal;
+
 using Shouldly;
+
 using Xunit;
 
 namespace I18Next.Net.Tests.Internal;

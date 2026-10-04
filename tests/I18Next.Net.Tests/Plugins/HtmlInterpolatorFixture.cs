@@ -1,9 +1,13 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using I18Next.Net.Logging;
 using I18Next.Net.Plugins;
+
 using NSubstitute;
+
 using Shouldly;
+
 using Xunit;
 
 namespace I18Next.Net.Tests.Plugins;
@@ -14,7 +18,7 @@ public class HtmlInterpolatorFixture
     {
         _interpolator = new HtmlInterpolator(Substitute.For<ILogger>());
     }
-    private HtmlInterpolator _interpolator;
+    private readonly HtmlInterpolator _interpolator;
 
 
     [Fact]

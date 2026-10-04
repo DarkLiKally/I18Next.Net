@@ -2,23 +2,18 @@
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
 using I18Next.Net.TranslationTrees;
 
 namespace I18Next.Net.Backends;
 
-public class IniFileBackend : ITranslationBackend
+public class IniFileBackend(string basePath, ITranslationTreeBuilderFactory treeBuilderFactory) : ITranslationBackend
 {
-    private readonly ITranslationTreeBuilderFactory _treeBuilderFactory;
+    private readonly ITranslationTreeBuilderFactory _treeBuilderFactory = treeBuilderFactory;
 
     public IniFileBackend(string basePath)
         : this(basePath, new GenericTranslationTreeBuilderFactory<HierarchicalTranslationTreeBuilder>())
     {
-    }
-
-    public IniFileBackend(string basePath, ITranslationTreeBuilderFactory treeBuilderFactory)
-    {
-        BasePath = basePath;
-        _treeBuilderFactory = treeBuilderFactory;
     }
 
     public IniFileBackend(ITranslationTreeBuilderFactory treeBuilderFactory)
@@ -31,7 +26,7 @@ public class IniFileBackend : ITranslationBackend
     {
     }
 
-    protected string BasePath { get; }
+    protected string BasePath { get; } = basePath;
 
     public Encoding Encoding { get; set; } = Encoding.UTF8;
 
@@ -77,7 +72,7 @@ public class IniFileBackend : ITranslationBackend
             var section = iniSection;
 
             if (section != string.Empty)
-                section = section + ".";
+                section += ".";
 
             foreach (var iniKey in iniReader.GetKeys(iniSection))
             {

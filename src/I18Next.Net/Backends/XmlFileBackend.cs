@@ -2,23 +2,18 @@
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+
 using I18Next.Net.TranslationTrees;
 
 namespace I18Next.Net.Backends;
 
-public class XmlFileBackend : ITranslationBackend
+public class XmlFileBackend(string basePath, ITranslationTreeBuilderFactory treeBuilderFactory) : ITranslationBackend
 {
-    private readonly ITranslationTreeBuilderFactory _treeBuilderFactory;
+    private readonly ITranslationTreeBuilderFactory _treeBuilderFactory = treeBuilderFactory;
 
     public XmlFileBackend(string basePath)
         : this(basePath, new GenericTranslationTreeBuilderFactory<HierarchicalTranslationTreeBuilder>())
     {
-    }
-
-    public XmlFileBackend(string basePath, ITranslationTreeBuilderFactory treeBuilderFactory)
-    {
-        BasePath = basePath;
-        _treeBuilderFactory = treeBuilderFactory;
     }
 
     public XmlFileBackend(ITranslationTreeBuilderFactory treeBuilderFactory)
@@ -31,7 +26,7 @@ public class XmlFileBackend : ITranslationBackend
     {
     }
 
-    protected string BasePath { get; }
+    protected string BasePath { get; } = basePath;
 
     public Encoding Encoding { get; set; } = Encoding.UTF8;
 
@@ -73,7 +68,7 @@ public class XmlFileBackend : ITranslationBackend
     private static void PopulateTreeBuilder(string path, XContainer node, ITranslationTreeBuilder builder)
     {
         if (path != string.Empty)
-            path = path + ".";
+            path += ".";
 
         foreach (var childNode in node.Elements())
         {

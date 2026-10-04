@@ -25,10 +25,7 @@ public class SprintfPostProcessor : IPostProcessor
         if (!sprintfArgs.GetType().IsArray)
             return value;
 
-        if (sprintfArgs is not IEnumerable enumerable)
-            return value;
-
-        return SprintfFormatProxy(value, enumerable.Cast<object>().ToArray());
+        return sprintfArgs is not IEnumerable enumerable ? value : SprintfFormatProxy(value, [.. enumerable.Cast<object>()]);
     }
 
     private static string SprintfFormatProxy(string input, params object[] args)
@@ -38,7 +35,7 @@ public class SprintfPostProcessor : IPostProcessor
         // TODO Add processing of property path
         // 'Hello %(users[0].name)s, %(users[1].name)s and %(users[2].name)s'
         input = input.Replace("{", "{{").Replace("}", "}}");
-        input = Regex.Replace(input, "%.", m => $"{{{(i++).ToString()}}}");
+        input = Regex.Replace(input, "%.", m => $"{{{i++}}}");
 
         return string.Format(input, args);
     }

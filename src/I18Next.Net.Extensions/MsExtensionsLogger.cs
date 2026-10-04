@@ -1,5 +1,7 @@
 using System;
+
 using Microsoft.Extensions.Logging;
+
 using LogLevel = I18Next.Net.Logging.LogLevel;
 
 namespace I18Next.Net.Extensions;
@@ -7,14 +9,9 @@ namespace I18Next.Net.Extensions;
 /// <summary>
 ///     Logger implementation which forwards the logging method calls to a Microsoft.Extensions.Logging.ILogger.
 /// </summary>
-public class DefaultExtensionsLogger : Logging.ILogger
+public class DefaultExtensionsLogger(ILogger logger) : Logging.ILogger
 {
-    private readonly ILogger _logger;
-
-    public DefaultExtensionsLogger(ILogger logger)
-    {
-        _logger = logger;
-    }
+    private readonly ILogger _logger = logger;
 
     public bool IsEnabled(LogLevel logLevel)
     {

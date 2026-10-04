@@ -1,8 +1,10 @@
 ﻿using System;
+
 using I18Next.Net;
 using I18Next.Net.Backends;
 using I18Next.Net.Extensions;
 using I18Next.Net.Plugins;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 
@@ -51,54 +53,52 @@ internal class Program
         // Register I18Next.Net
         services.AddI18NextLocalization(builder => builder.AddBackend(_backend).UseFallbackLanguage("en"));
 
-        using (var serviceProvider = services.BuildServiceProvider())
-        using (var scope = serviceProvider.CreateScope())
-        {
-            var scopeProvider = scope.ServiceProvider;
+        using var serviceProvider = services.BuildServiceProvider();
+        using var scope = serviceProvider.CreateScope();
+        var scopeProvider = scope.ServiceProvider;
 
-            Console.WriteLine("The first example uses the II18Next interface for direct access to I18Next");
+        Console.WriteLine("The first example uses the II18Next interface for direct access to I18Next");
 
-            var i18Next = scopeProvider.GetService<II18Next>();
+        var i18Next = scopeProvider.GetService<II18Next>();
 
-            Console.WriteLine("English translation:");
-            i18Next.Language = "en";
-            Console.WriteLine(i18Next.T("exampleKey"));
+        Console.WriteLine("English translation:");
+        i18Next.Language = "en";
+        Console.WriteLine(i18Next.T("exampleKey"));
 
-            Console.WriteLine("German translation:");
-            i18Next.Language = "de";
-            Console.WriteLine(i18Next.T("exampleKey"));
-
-
-            Console.WriteLine();
-            Console.WriteLine("The second example uses Microsofts IStringLocalizer interface for translations.");
-
-            var localizer = scopeProvider.GetService<IStringLocalizer>();
-
-            Console.WriteLine("English translation:");
-            i18Next.Language = "en";
-            Console.WriteLine(localizer["exampleKey"]);
-
-            Console.WriteLine("German translation:");
-            i18Next.Language = "de";
-            Console.WriteLine(localizer["exampleKey"]);
+        Console.WriteLine("German translation:");
+        i18Next.Language = "de";
+        Console.WriteLine(i18Next.T("exampleKey"));
 
 
-            Console.WriteLine();
-            Console.WriteLine("It is also possible to use Microsofts IStringLocalizer<T> interface for translations.");
+        Console.WriteLine();
+        Console.WriteLine("The second example uses Microsofts IStringLocalizer interface for translations.");
 
-            var localizerGeneric = scopeProvider.GetService<IStringLocalizer<Program>>();
+        var localizer = scopeProvider.GetService<IStringLocalizer>();
 
-            Console.WriteLine("English translation:");
-            i18Next.Language = "en";
-            Console.WriteLine(localizerGeneric["exampleKey"]);
+        Console.WriteLine("English translation:");
+        i18Next.Language = "en";
+        Console.WriteLine(localizer["exampleKey"]);
 
-            Console.WriteLine("German translation:");
-            i18Next.Language = "de";
-            Console.WriteLine(localizerGeneric["exampleKey"]);
-            Console.WriteLine(localizerGeneric["exampleKey2"]);
+        Console.WriteLine("German translation:");
+        i18Next.Language = "de";
+        Console.WriteLine(localizer["exampleKey"]);
 
-            Console.WriteLine();
-        }
+
+        Console.WriteLine();
+        Console.WriteLine("It is also possible to use Microsofts IStringLocalizer<T> interface for translations.");
+
+        var localizerGeneric = scopeProvider.GetService<IStringLocalizer<Program>>();
+
+        Console.WriteLine("English translation:");
+        i18Next.Language = "en";
+        Console.WriteLine(localizerGeneric["exampleKey"]);
+
+        Console.WriteLine("German translation:");
+        i18Next.Language = "de";
+        Console.WriteLine(localizerGeneric["exampleKey"]);
+        Console.WriteLine(localizerGeneric["exampleKey2"]);
+
+        Console.WriteLine();
     }
 
     private static void SetupBackend()

@@ -1,8 +1,11 @@
 using System;
 using System.Threading.Tasks;
+
 using I18Next.Net.Backends;
 using I18Next.Net.Plugins;
+
 using Shouldly;
+
 using Xunit;
 
 namespace I18Next.Net.Tests;
@@ -20,8 +23,8 @@ public class I18NextLanguageDetectionFixture
         _languageDetector = new TestLanguageDetector { Language = "de" };
         _i18Next = new I18NextNet(backend, new DefaultTranslator(backend), _languageDetector) { Language = "en" };
     }
-    private I18NextNet _i18Next;
-    private TestLanguageDetector _languageDetector;
+    private readonly I18NextNet _i18Next;
+    private readonly TestLanguageDetector _languageDetector;
 
 
     [Fact]

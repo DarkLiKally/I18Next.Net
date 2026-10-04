@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+
 using I18Next.Net.Internal;
 using I18Next.Net.Plugins;
 
@@ -38,7 +39,7 @@ public class DateFnsFormatter : IFormatter
 
     public string Format(object value, string format, string language)
     {
-        var date = value is DateTimeOffset dateTimeOffset ? dateTimeOffset : ToDateTimeOffset((DateTime) value);
+        var date = value is DateTimeOffset dateTimeOffset ? dateTimeOffset : ToDateTimeOffset((DateTime)value);
         var locale = DateFnsData.Default.GetLocale(language);
         var weekStartsOn = WeekStartsOn ?? locale.WeekStartsOn;
         var firstWeekContainsDate = FirstWeekContainsDate ?? locale.FirstWeekContainsDate;
@@ -48,7 +49,7 @@ public class DateFnsFormatter : IFormatter
         var tokens = FormattingTokensRegex.Matches(expanded).Cast<Match>().Select(m => m.Value).ToList();
 
         if (locale.RemoveDayOrdinalWithLongMonth && date.Day != 1 && tokens.Any(t => t is "MMM" or "MMMM"))
-            tokens = tokens.Select(t => t == "do" ? "d" : t).ToList();
+            tokens = [.. tokens.Select(t => t == "do" ? "d" : t)];
 
         foreach (var token in tokens)
         {
@@ -116,7 +117,7 @@ public class DateFnsFormatter : IFormatter
     {
         var length = token.Length;
         var ordinal = length == 2 && token[1] == 'o';
-        var dayOfWeek = (int) date.DayOfWeek;
+        var dayOfWeek = (int)date.DayOfWeek;
         var hours = date.Hour;
 
         switch (token[0])
@@ -220,7 +221,7 @@ public class DateFnsFormatter : IFormatter
             case 's':
                 return ordinal ? locale.Ordinal(date.Second, "second") : Pad(date.Second, length);
             case 'S':
-                var fraction = (long) Math.Truncate(date.Millisecond * Math.Pow(10, length - 3));
+                var fraction = (long)Math.Truncate(date.Millisecond * Math.Pow(10, length - 3));
 
                 return Pad(fraction, length);
             case 'X':
@@ -244,32 +245,23 @@ public class DateFnsFormatter : IFormatter
 
     private static string FormatDayPeriod(DateFnsData.DateFnsLocale locale, string period, int length)
     {
-        switch (length)
+        return length switch
         {
-            case 1:
-            case 2:
-                return locale.DayPeriods[$"abbreviated-{period}"];
-            case 3:
-                return locale.DayPeriods[$"abbreviated-{period}"].ToLowerInvariant();
-            case 5:
-                return locale.DayPeriods[$"narrow-{period}"];
-            default:
-                return locale.DayPeriods[$"wide-{period}"];
-        }
+            1 or 2 => locale.DayPeriods[$"abbreviated-{period}"],
+            3 => locale.DayPeriods[$"abbreviated-{period}"].ToLowerInvariant(),
+            5 => locale.DayPeriods[$"narrow-{period}"],
+            _ => locale.DayPeriods[$"wide-{period}"],
+        };
     }
 
     private static string FormatIsoTimezone(TimeSpan offset, int length)
     {
-        switch (length)
+        return length switch
         {
-            case 1:
-                return offset.Minutes == 0 ? Sign(offset) + Pad(Math.Abs(offset.Hours), 2) : FormatTimezone(offset, "");
-            case 2:
-            case 4:
-                return FormatTimezone(offset, "");
-            default:
-                return FormatTimezone(offset, ":");
-        }
+            1 => offset.Minutes == 0 ? Sign(offset) + Pad(Math.Abs(offset.Hours), 2) : FormatTimezone(offset, ""),
+            2 or 4 => FormatTimezone(offset, ""),
+            _ => FormatTimezone(offset, ":"),
+        };
     }
 
     private static string FormatTimezone(TimeSpan offset, string delimiter)
@@ -294,10 +286,7 @@ public class DateFnsFormatter : IFormatter
 
     private static string GetWidth(int length, int abbreviated, int wide, int narrow)
     {
-        if (length == narrow)
-            return "narrow";
-
-        return length == wide || length > narrow ? "wide" : "abbreviated";
+        return length == narrow ? "narrow" : length == wide || length > narrow ? "wide" : "abbreviated";
     }
 
     private static string GetDayWidth(int length)
@@ -320,7 +309,7 @@ public class DateFnsFormatter : IFormatter
 
     private static DateTime StartOfWeek(DateTime date, int weekStartsOn)
     {
-        var day = (int) date.DayOfWeek;
+        var day = (int)date.DayOfWeek;
         var difference = (day < weekStartsOn ? 7 : 0) + day - weekStartsOn;
 
         return date.Date.AddDays(-difference);
@@ -332,10 +321,7 @@ public class DateFnsFormatter : IFormatter
         var firstWeekOfNextYear = StartOfWeek(new DateTime(year + 1, 1, firstWeekContainsDate), weekStartsOn);
         var firstWeekOfThisYear = StartOfWeek(new DateTime(year, 1, firstWeekContainsDate), weekStartsOn);
 
-        if (date >= firstWeekOfNextYear)
-            return year + 1;
-
-        return date >= firstWeekOfThisYear ? year : year - 1;
+        return date >= firstWeekOfNextYear ? year + 1 : date >= firstWeekOfThisYear ? year : year - 1;
     }
 
     private static int GetWeek(DateTime date, int weekStartsOn, int firstWeekContainsDate)
@@ -343,14 +329,13 @@ public class DateFnsFormatter : IFormatter
         var weekYear = GetWeekYear(date, weekStartsOn, firstWeekContainsDate);
         var startOfWeekYear = StartOfWeek(new DateTime(weekYear, 1, firstWeekContainsDate), weekStartsOn);
 
-        return (int) Math.Round((StartOfWeek(date, weekStartsOn) - startOfWeekYear).TotalDays / 7) + 1;
+        return (int)Math.Round((StartOfWeek(date, weekStartsOn) - startOfWeekYear).TotalDays / 7) + 1;
     }
 
     private static DateTimeOffset ToDateTimeOffset(DateTime value)
     {
-        if (value.Kind == DateTimeKind.Utc)
-            return new DateTimeOffset(value, TimeSpan.Zero);
-
-        return new DateTimeOffset(DateTime.SpecifyKind(value, DateTimeKind.Unspecified), TimeZoneInfo.Local.GetUtcOffset(value));
+        return value.Kind == DateTimeKind.Utc
+            ? new DateTimeOffset(value, TimeSpan.Zero)
+            : new DateTimeOffset(DateTime.SpecifyKind(value, DateTimeKind.Unspecified), TimeZoneInfo.Local.GetUtcOffset(value));
     }
 }
