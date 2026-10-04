@@ -1,0 +1,27 @@
+# Comments are allowed
+welcome: Hello {{name}}!
+item_one: "{{count}} item"
+item_other: "{{count}} items"
+menu:
+  title: Menu
+  items:
+    - Home
+    - About {{name}}
+  links:
+    - label: Privacy
+      url: /privacy
+multiline: |
+  First line
+  Second line
+folded: >
+  Folded
+  text
+quoted: 'It''s quoted'
+number: 42
+flag: true
+empty: ~
+nothing: null
+quotedNull: "null"
+defaults: &defaults
+  color: Red
+copy: *defaults

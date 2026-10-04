@@ -1,0 +1,3 @@
+welcome: Hallo {{name}}!
+item_one: "{{count}} Element"
+item_other: "{{count}} Elemente"

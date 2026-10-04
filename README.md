@@ -30,7 +30,8 @@ localization.
 | `I18Next.Net.AspNetCore` | ASP.NET Core integration including view localization |
 | `I18Next.Net.ICU` | Interpolator for ICU message format strings |
 | `I18Next.Net.PolyglotJs` | Interpolator for Polyglot.js style translations |
-| `I18Next.Net.Gettext` | Backend for gettext `.po` and `.mo` files |
+| `I18Next.Net.Gettext` | Backend for gettext `.mo` files |
+| `I18Next.Net.Yaml` | Backend and reader for YAML translation files |
 | `I18Next.Net.Serilog` | Logger forwarding I18Next.Net log messages to Serilog |
 | `I18Next.Net.Generators` | Source generator for typed keys and translation methods, plus analyzers for the translation files |
 
@@ -441,6 +442,14 @@ to the language part of a regional language (`de` for `de-CH`).
 | `InMemoryBackend` | `I18Next.Net` | Translations added in code |
 | `ChainedBackend` | `I18Next.Net` | Asks several backends in order, with optional caching and expiry |
 | `GettextBackend` | `I18Next.Net.Gettext` | Compiled gettext `.mo` files from `{basePath}/{lng}/{ns}.mo` |
+| `YamlFileBackend` | `I18Next.Net.Yaml` | YAML files from `{basePath}/{lng}/{ns}.yaml` or `.yml`, mappings and sequences like the JSON backend |
+
+`YamlTranslationReader` parses YAML for the other backends:
+
+```csharp
+var http = new HttpBackend(httpClient, "locales/{{lng}}/{{ns}}.yaml") { Parse = YamlTranslationReader.Read };
+var func = new FuncBackend((lng, ns) => YamlTranslationReader.Read(LoadYaml(lng, ns), ns));
+```
 
 `CompositeBackend` is the former name of `ChainedBackend` and still works, but is marked obsolete.
 
@@ -785,7 +794,7 @@ public class HomeController : Controller
 | Missing key handling | ✅ | `MissingKey` event, `IMissingKeyHandler` |
 | `saveMissing` to backend | ❌ | Implement an `IMissingKeyHandler` |
 | Post processors | ✅ | sprintf, interval, pseudo localization, custom `IPostProcessor` |
-| Backends | ✅ | JSON, XML, INI, gettext, in-memory, custom `ITranslationBackend` |
+| Backends | ✅ | JSON, YAML, XML, INI, gettext, in-memory, custom `ITranslationBackend` |
 | i18next-http-backend | ✅ | `HttpBackend`, `AddHttpBackend` with `IHttpClientFactory` |
 | i18next-chained-backend | ✅ | `ChainedBackend` with in-memory caching and expiry |
 | i18next-resources-to-backend | ✅ | `FuncBackend` |
