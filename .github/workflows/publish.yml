@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release, e.g. 2.0.0 or 2.0.0-beta.1'
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -27,13 +33,21 @@ jobs:
             10.0.x
       - name: Version
         id: version
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
         run: |
-          version="${GITHUB_REF_NAME#v}"
+          version="${INPUT_VERSION:-$GITHUB_REF_NAME}"
+          version="${version#v}"
           if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
-            echo "The tag $GITHUB_REF_NAME is not a valid version (v1.2.3 or v1.2.3-beta.1)"
+            echo "$version is not a valid version (1.2.3 or 1.2.3-beta.1)"
+            exit 1
+          fi
+          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]] && git ls-remote --exit-code --tags origin "refs/tags/v$version" > /dev/null; then
+            echo "The tag v$version already exists"
             exit 1
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
       - name: Test
         run: >-
           for project in tests/I18Next.Net.Tests tests/I18Next.Net.Generators.Tests; do
@@ -46,6 +60,11 @@ jobs:
           -p:Version=${{ steps.version.outputs.version }}
           -p:ContinuousIntegrationBuild=true || exit 1;
           done
+      - name: Create tag
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api "repos/$GITHUB_REPOSITORY/git/refs" -f ref="refs/tags/${{ steps.version.outputs.tag }}" -f sha="$GITHUB_SHA"
       - name: NuGet login
         id: login
         uses: NuGet/login@v1
@@ -63,7 +82,7 @@ jobs:
         run: |
           prerelease=""
           if [[ "${{ steps.version.outputs.version }}" == *-* ]]; then prerelease="--prerelease"; fi
-          gh release create "$GITHUB_REF_NAME" artifacts/packages/*.nupkg --verify-tag --generate-notes $prerelease
+          gh release create "${{ steps.version.outputs.tag }}" artifacts/packages/*.nupkg --verify-tag --generate-notes $prerelease
       - uses: actions/upload-artifact@v4
         with:
           name: packages

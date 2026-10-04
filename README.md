@@ -934,7 +934,8 @@ git tag v2.0.0
 git push origin v2.0.0
 ```
 
-Tags with a suffix like `v2.0.0-beta.1` are published as prereleases.
+Tags with a suffix like `v2.0.0-beta.1` are published as prereleases. The workflow can also be started manually with a
+version (Actions → publish → Run workflow), it then creates the tag itself.
 
 ## License
 
