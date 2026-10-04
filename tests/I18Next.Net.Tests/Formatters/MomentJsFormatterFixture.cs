@@ -158,6 +158,13 @@ public class MomentJsFormatterFixture
 
     private static string NormalizeSpaces(string value)
     {
-        return value.Replace('\u202F', ' ').Replace('\u00A0', ' ');
+        value = value.Replace('\u202F', ' ').Replace('\u00A0', ' ');
+
+#if NET6_0
+        // .NET 6 drops the U+202F separator of the time patterns of newer ICU versions.
+        value = System.Text.RegularExpressions.Regex.Replace(value, @"(\d) ?([AP]M)", "$1 $2");
+#endif
+
+        return value;
     }
 }
