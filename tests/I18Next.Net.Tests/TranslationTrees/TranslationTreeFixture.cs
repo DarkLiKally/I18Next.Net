@@ -110,4 +110,32 @@ public class TranslationTreeFixture
         tree["c"].Should().Be("d");
         tree.GetAllValues().Should().HaveCount(3);
     }
+
+    [Test]
+    public void GetGroupValues_ShouldReturnRelativeValues()
+    {
+        var tree = (IHierarchicalTranslationTree) _tree;
+
+        tree.GetGroupValues("look").Should().BeEquivalentTo(new Dictionary<string, string>
+        {
+            ["deep"] = "value of look deep",
+            ["deeper.down"] = "value of look deeper down"
+        });
+        tree.GetGroupValues("look.deeper").Should().ContainKey("down");
+        tree.GetGroupValues(null).Should().HaveCount(3);
+        tree.GetGroupValues("key").Should().BeNull();
+        tree.GetGroupValues("missing").Should().BeNull();
+        tree.GetGroupValues("key.sub").Should().BeNull();
+    }
+
+    [Test]
+    public void DictionaryTranslationTree_GetGroupValues_ShouldFilterByPrefix()
+    {
+        var tree = new DictionaryTranslationTree("ns", new Dictionary<string, string> { ["a.b"] = "1", ["a.c.d"] = "2", ["ab"] = "3" });
+
+        tree.GetGroupValues("a").Should().BeEquivalentTo(new Dictionary<string, string> { ["b"] = "1", ["c.d"] = "2" });
+        tree.GetGroupValues("").Should().HaveCount(3);
+        tree.GetGroupValues("missing").Should().BeNull();
+        new DictionaryTranslationTree("ns").GetGroupValues(null).Should().BeNull();
+    }
 }

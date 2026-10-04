@@ -2,7 +2,7 @@
 
 namespace I18Next.Net.TranslationTrees;
 
-public class TranslationTree : ITranslationTree
+public class TranslationTree : IHierarchicalTranslationTree
 {
     private TranslationTreeNode _root;
     private Dictionary<string, Translation> _translations;
@@ -68,6 +68,29 @@ public class TranslationTree : ITranslationTree
         return translation.Value;
     }
 
+    public IDictionary<string, string> GetGroupValues(string key)
+    {
+        var node = Root;
+
+        if (!string.IsNullOrEmpty(key))
+        {
+            foreach (var part in key.Split('.'))
+            {
+                if (node is not TranslationGroup group || !group.TryGetChild(part, out node))
+                    return null;
+            }
+        }
+
+        if (node is not TranslationGroup targetGroup)
+            return null;
+
+        var result = new Dictionary<string, string>();
+
+        MapGroupValues(result, null, targetGroup);
+
+        return result;
+    }
+
     public string Namespace { get; set; }
 
     private static Dictionary<string, Translation> BuildTranslationIndex(TranslationTreeNode root)
@@ -78,6 +101,19 @@ public class TranslationTree : ITranslationTree
             MapTranslationGroup(result, null, group);
 
         return result;
+    }
+
+    private static void MapGroupValues(IDictionary<string, string> result, string path, TranslationGroup group)
+    {
+        foreach (var node in group.Children)
+        {
+            var key = path == null ? node.Name : path + "." + node.Name;
+
+            if (node is TranslationGroup subGroup)
+                MapGroupValues(result, key, subGroup);
+            else if (node is Translation translation && !result.ContainsKey(key))
+                result.Add(key, translation.Value);
+        }
     }
 
     private static void MapTranslationGroup(IDictionary<string, Translation> result, string path, TranslationGroup group)

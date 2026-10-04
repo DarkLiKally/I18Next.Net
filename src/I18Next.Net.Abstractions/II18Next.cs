@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using I18Next.Net.Backends;
 using I18Next.Net.Plugins;
@@ -115,6 +116,80 @@ public interface II18Next
     /// <param name="args">Additional arguments used to translate the key.</param>
     /// <returns>Translation value.</returns>
     Task<string> Ta(string[] keys, object args = null);
+
+    /// <summary>
+    ///     Translates all values below the given key into the default language. Nested groups are returned as dictionaries,
+    ///     arrays as object arrays.
+    /// </summary>
+    /// <param name="key">Key of the group to be translated.</param>
+    /// <param name="args">Additional arguments used to translate the values.</param>
+    /// <returns>The translated values or null if the key does not lead to a group.</returns>
+    IDictionary<string, object> TObject(string key, object args = null);
+
+    /// <summary>
+    ///     Translates all values below the given key into the provided language. Nested groups are returned as dictionaries,
+    ///     arrays as object arrays.
+    /// </summary>
+    /// <param name="language">Target language override.</param>
+    /// <param name="key">Key of the group to be translated.</param>
+    /// <param name="args">Additional arguments used to translate the values.</param>
+    /// <returns>The translated values or null if the key does not lead to a group.</returns>
+    IDictionary<string, object> TObject(string language, string key, object args = null);
+
+    /// <summary>
+    ///     Translates all values below the given key into the default language.
+    /// </summary>
+    /// <param name="key">Key of the group to be translated.</param>
+    /// <param name="args">Additional arguments used to translate the values.</param>
+    /// <returns>The translated values or null if the key does not lead to a group.</returns>
+    Task<IDictionary<string, object>> TaObject(string key, object args = null);
+
+    /// <summary>
+    ///     Translates all values below the given key into the provided language.
+    /// </summary>
+    /// <param name="language">Target language override.</param>
+    /// <param name="key">Key of the group to be translated.</param>
+    /// <param name="args">Additional arguments used to translate the values.</param>
+    /// <returns>The translated values or null if the key does not lead to a group.</returns>
+    Task<IDictionary<string, object>> TaObject(string language, string key, object args = null);
+
+    /// <summary>
+    ///     Translates all values below the given key into the default language and maps them to the given type.
+    /// </summary>
+    /// <param name="key">Key of the group to be translated.</param>
+    /// <param name="args">Additional arguments used to translate the values.</param>
+    /// <typeparam name="TModel">The type the translated values are mapped to.</typeparam>
+    /// <returns>The mapped translations or the default value if the key does not lead to a group.</returns>
+    TModel T<TModel>(string key, object args = null);
+
+    /// <summary>
+    ///     Translates all values below the given key into the provided language and maps them to the given type.
+    /// </summary>
+    /// <param name="language">Target language override.</param>
+    /// <param name="key">Key of the group to be translated.</param>
+    /// <param name="args">Additional arguments used to translate the values.</param>
+    /// <typeparam name="TModel">The type the translated values are mapped to.</typeparam>
+    /// <returns>The mapped translations or the default value if the key does not lead to a group.</returns>
+    TModel T<TModel>(string language, string key, object args = null);
+
+    /// <summary>
+    ///     Translates all values below the given key into the default language and maps them to the given type.
+    /// </summary>
+    /// <param name="key">Key of the group to be translated.</param>
+    /// <param name="args">Additional arguments used to translate the values.</param>
+    /// <typeparam name="TModel">The type the translated values are mapped to.</typeparam>
+    /// <returns>The mapped translations or the default value if the key does not lead to a group.</returns>
+    Task<TModel> Ta<TModel>(string key, object args = null);
+
+    /// <summary>
+    ///     Translates all values below the given key into the provided language and maps them to the given type.
+    /// </summary>
+    /// <param name="language">Target language override.</param>
+    /// <param name="key">Key of the group to be translated.</param>
+    /// <param name="args">Additional arguments used to translate the values.</param>
+    /// <typeparam name="TModel">The type the translated values are mapped to.</typeparam>
+    /// <returns>The mapped translations or the default value if the key does not lead to a group.</returns>
+    Task<TModel> Ta<TModel>(string language, string key, object args = null);
 
     /// <summary>
     ///     Checks whether a translation exists for the given key in the default language.

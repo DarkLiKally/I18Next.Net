@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using I18Next.Net.Backends;
 using I18Next.Net.Internal;
@@ -19,6 +21,12 @@ public class I18NextNet : II18Next
     };
 
     private string _language;
+
+    private static readonly JsonSerializerOptions ObjectSerializerOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString
+    };
 
     private readonly TranslationOptions _options;
 
@@ -144,6 +152,56 @@ public class I18NextNet : II18Next
         }
 
         return await Translator.TranslateAsync(language, keys[keys.Length - 1], argsDict, _options).ConfigureAwait(false);
+    }
+
+    public IDictionary<string, object> TObject(string key, object args = null)
+    {
+        return TaObject(key, args).ConfigureAwait(false).GetAwaiter().GetResult();
+    }
+
+    public IDictionary<string, object> TObject(string language, string key, object args = null)
+    {
+        return TaObject(language, key, args).ConfigureAwait(false).GetAwaiter().GetResult();
+    }
+
+    public Task<IDictionary<string, object>> TaObject(string key, object args = null)
+    {
+        return TaObject(GetCurrentLanguage(), key, args);
+    }
+
+    public Task<IDictionary<string, object>> TaObject(string language, string key, object args = null)
+    {
+        return Translator.TranslateObjectAsync(language, key, args.ToDictionary(), _options);
+    }
+
+    public TModel T<TModel>(string key, object args = null)
+    {
+        return Ta<TModel>(key, args).ConfigureAwait(false).GetAwaiter().GetResult();
+    }
+
+    public TModel T<TModel>(string language, string key, object args = null)
+    {
+        return Ta<TModel>(language, key, args).ConfigureAwait(false).GetAwaiter().GetResult();
+    }
+
+    public Task<TModel> Ta<TModel>(string key, object args = null)
+    {
+        return Ta<TModel>(GetCurrentLanguage(), key, args);
+    }
+
+    public async Task<TModel> Ta<TModel>(string language, string key, object args = null)
+    {
+        var values = await TaObject(language, key, args).ConfigureAwait(false);
+
+        if (values == null)
+            return default;
+
+        object root = values;
+
+        if (values.Count > 0 && Enumerable.Range(0, values.Count).All(i => values.ContainsKey(i.ToString())))
+            root = Enumerable.Range(0, values.Count).Select(i => values[i.ToString()]).ToArray();
+
+        return JsonSerializer.Deserialize<TModel>(JsonSerializer.Serialize(root), ObjectSerializerOptions);
     }
 
     public bool Exists(string key, object args = null)

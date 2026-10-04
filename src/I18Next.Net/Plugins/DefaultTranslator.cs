@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using I18Next.Net.Backends;
@@ -71,10 +72,57 @@ public class DefaultTranslator : ITranslator
         var result = await ResolveTranslationAsync(language, actualNamespace, key, args, options, true).ConfigureAwait(false)
                      ?? GetDefaultValue(language, args);
 
-        if (result == null)
+        if (result != null)
+            return await ExtendTranslationAsync(result, key, language, args, options).ConfigureAwait(false);
+
+        var groupValues = await ResolveGroupValuesAsync(language, actualNamespace, key, options).ConfigureAwait(false);
+
+        if (groupValues == null)
             return key;
 
-        return await ExtendTranslationAsync(result, key, language, args, options).ConfigureAwait(false);
+        if (args != null && args.TryGetValue("joinArrays", out var joinArrays) && joinArrays is string separator &&
+            groupValues.Keys.All(k => k.IndexOf('.') < 0) && IsArray(groupValues))
+        {
+            var items = new List<string>(groupValues.Count);
+
+            for (var i = 0; i < groupValues.Count; i++)
+                items.Add(await ExtendTranslationAsync(groupValues[i.ToString(CultureInfo.InvariantCulture)], $"{key}.{i}", language, args, options)
+                    .ConfigureAwait(false));
+
+            return string.Join(separator, items);
+        }
+
+        return $"key '{actualNamespace}{NamespaceSeparator}{key} ({language})' returned an object instead of string.";
+    }
+
+    public virtual async Task<IDictionary<string, object>> TranslateObjectAsync(string language, string key, IDictionary<string, object> args,
+        TranslationOptions options)
+    {
+        ValidateArguments(language, key, options);
+
+        var actualNamespace = SplitNamespace(ref key, options);
+        var groupValues = await ResolveGroupValuesAsync(language, actualNamespace, key, options).ConfigureAwait(false);
+
+        if (groupValues == null)
+        {
+            await OnMissingKey(language, actualNamespace, key, new List<string> { key }).ConfigureAwait(false);
+
+            return null;
+        }
+
+        var result = new Dictionary<string, object>();
+
+        foreach (var entry in groupValues)
+        {
+            var value = await ExtendTranslationAsync(entry.Value, $"{key}.{entry.Key}", language, args, options).ConfigureAwait(false);
+
+            AddNestedValue(result, entry.Key.Split('.'), value);
+        }
+
+        foreach (var entry in result.ToList())
+            result[entry.Key] = ConvertArrays(entry.Value);
+
+        return result;
     }
 
     public virtual async Task<bool> ExistsAsync(string language, string key, IDictionary<string, object> args, TranslationOptions options)
@@ -94,6 +142,100 @@ public class DefaultTranslator : ITranslator
     public void ClearCache(string language, string @namespace)
     {
         _treeCache.TryRemove((language, @namespace), out _);
+    }
+
+    private static void AddNestedValue(IDictionary<string, object> target, string[] path, string value)
+    {
+        for (var i = 0; i < path.Length - 1; i++)
+        {
+            if (!target.TryGetValue(path[i], out var child) || child is not IDictionary<string, object> childDictionary)
+            {
+                childDictionary = new Dictionary<string, object>();
+                target[path[i]] = childDictionary;
+            }
+
+            target = childDictionary;
+        }
+
+        target[path[path.Length - 1]] = value;
+    }
+
+    private static object ConvertArrays(object value)
+    {
+        if (value is not IDictionary<string, object> dictionary)
+            return value;
+
+        foreach (var entry in dictionary.ToList())
+            dictionary[entry.Key] = ConvertArrays(entry.Value);
+
+        if (!IsArray(dictionary))
+            return dictionary;
+
+        var array = new object[dictionary.Count];
+
+        for (var i = 0; i < array.Length; i++)
+            array[i] = dictionary[i.ToString(CultureInfo.InvariantCulture)];
+
+        return array;
+    }
+
+    private static bool IsArray<TValue>(IDictionary<string, TValue> dictionary)
+    {
+        if (dictionary.Count == 0)
+            return false;
+
+        for (var i = 0; i < dictionary.Count; i++)
+        {
+            if (!dictionary.ContainsKey(i.ToString(CultureInfo.InvariantCulture)))
+                return false;
+        }
+
+        return true;
+    }
+
+    private async Task<IDictionary<string, string>> ResolveGroupValuesAsync(string language, string ns, string key, TranslationOptions options)
+    {
+        foreach (var (lookupLanguage, lookupNamespace) in GetLookupOrder(language, ns, options))
+        {
+            var tree = await ResolveTranslationTreeAsync(lookupLanguage, lookupNamespace).ConfigureAwait(false);
+
+            if (tree is not IHierarchicalTranslationTree hierarchicalTree)
+                continue;
+
+            var values = hierarchicalTree.GetGroupValues(key);
+
+            if (values != null)
+                return values;
+        }
+
+        return null;
+    }
+
+    private static IEnumerable<(string Language, string Namespace)> GetLookupOrder(string language, string ns, TranslationOptions options)
+    {
+        yield return (language, ns);
+
+        if (options?.FallbackNamespaces != null)
+        {
+            foreach (var fallbackNamespace in options.FallbackNamespaces)
+                yield return (language, fallbackNamespace);
+        }
+
+        var fallbackLanguages = GetFallbackLanguages(language, options);
+
+        if (fallbackLanguages == null)
+            yield break;
+
+        foreach (var fallbackLanguage in fallbackLanguages)
+        {
+            yield return (fallbackLanguage, ns);
+
+            if (options.FallbackNamespaces == null)
+                continue;
+
+            foreach (var fallbackNamespace in options.FallbackNamespaces)
+                yield return (fallbackLanguage, fallbackNamespace);
+        }
     }
 
     private static void ValidateArguments(string language, string key, TranslationOptions options)
@@ -343,12 +485,22 @@ public class DefaultTranslator : ITranslator
         }
 
         string result = null;
+        var foundGroup = false;
 
         // Iterate over the possible keys starting with most specific pluralkey (-> contextkey only) -> singularkey only
         for (var i = possibleKeys.Count - 1; i >= 0; i--)
         {
             var currentKey = possibleKeys[i];
-            result = translationTree.GetValue(currentKey, args);
+
+            try
+            {
+                result = translationTree.GetValue(currentKey, args);
+            }
+            catch (TranslationKeyInvalidException) when (translationTree is IHierarchicalTranslationTree hierarchicalTree &&
+                                                         hierarchicalTree.GetGroupValues(currentKey) != null)
+            {
+                foundGroup = true;
+            }
 
             if (result != null)
                 break;
@@ -357,7 +509,7 @@ public class DefaultTranslator : ITranslator
                 _logger.LogDebug("Unable to resolve a translation for {currentKey} from the translation tree.", currentKey);
         }
         
-        if (result == null && notifyMissingKey)
+        if (result == null && notifyMissingKey && !foundGroup)
             await OnMissingKey(language, ns, key, possibleKeys).ConfigureAwait(false);
 
         if (_logger.IsEnabled(LogLevel.Information))
@@ -369,42 +521,15 @@ public class DefaultTranslator : ITranslator
     private async Task<string> ResolveTranslationAsync(string language, string ns, string key, IDictionary<string, object> args, TranslationOptions options,
         bool notifyMissingKey)
     {
-        var result = await ResolveTranslationNoFallbackAsync(language, ns, key, args, notifyMissingKey).ConfigureAwait(false);
-
-        if (result == null && options?.FallbackNamespaces?.Length > 0)
+        foreach (var (lookupLanguage, lookupNamespace) in GetLookupOrder(language, ns, options))
         {
-            foreach (var fallbackNamespace in options.FallbackNamespaces)
-            {
-                var fallbackResult = await ResolveTranslationNoFallbackAsync(language, fallbackNamespace, key, args, notifyMissingKey).ConfigureAwait(false);
-                if (fallbackResult != null)
-                    return fallbackResult;
-            }
+            var result = await ResolveTranslationNoFallbackAsync(lookupLanguage, lookupNamespace, key, args, notifyMissingKey).ConfigureAwait(false);
+
+            if (result != null)
+                return result;
         }
 
-        var fallbackLanguages = GetFallbackLanguages(language, options);
-
-        if (result == null && fallbackLanguages?.Length > 0)
-        {
-            foreach (var fallbackLanguage in fallbackLanguages)
-            {
-                var fallbackResult = await ResolveTranslationNoFallbackAsync(fallbackLanguage, ns, key, args, notifyMissingKey).ConfigureAwait(false);
-                if (fallbackResult != null)
-                    return fallbackResult;
-                
-                if (options.FallbackNamespaces?.Length > 0)
-                {
-                    foreach (var fallbackNamespace in options.FallbackNamespaces)
-                    {
-                        fallbackResult = await ResolveTranslationNoFallbackAsync(fallbackLanguage, fallbackNamespace, key, args, notifyMissingKey)
-                            .ConfigureAwait(false);
-                        if (fallbackResult != null)
-                            return fallbackResult;
-                    }
-                }
-            }
-        }
-
-        return result;
+        return null;
     }
 
     private static string[] GetFallbackLanguages(string language, TranslationOptions options)

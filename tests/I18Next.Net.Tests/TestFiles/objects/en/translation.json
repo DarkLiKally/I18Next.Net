@@ -1,0 +1,18 @@
+{
+    "menu": {
+        "title": "Hello {{name}}",
+        "items": [ "Home", "About {{name}}", "Contact" ],
+        "footer": {
+            "copyright": "© {{year}}",
+            "links": [
+                { "label": "Privacy", "url": "/privacy" },
+                { "label": "Imprint", "url": "/imprint" }
+            ]
+        },
+        "count": 3
+    },
+    "list": [ "first", "second", "third" ],
+    "onlyEnglish": {
+        "value": "English fallback"
+    }
+}

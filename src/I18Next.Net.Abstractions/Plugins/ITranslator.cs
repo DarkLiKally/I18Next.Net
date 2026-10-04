@@ -12,5 +12,7 @@ public interface ITranslator
 
     Task<string> TranslateAsync(string language, string key, IDictionary<string, object> args, TranslationOptions options);
 
+    Task<IDictionary<string, object>> TranslateObjectAsync(string language, string key, IDictionary<string, object> args, TranslationOptions options);
+
     Task<bool> ExistsAsync(string language, string key, IDictionary<string, object> args, TranslationOptions options);
 }

@@ -1,0 +1,6 @@
+{
+    "menu": {
+        "title": "Hallo {{name}}",
+        "items": [ "Start", "Über {{name}}" ]
+    }
+}
