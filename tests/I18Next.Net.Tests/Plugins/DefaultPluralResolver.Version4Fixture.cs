@@ -1,98 +1,98 @@
-using FluentAssertions;
 using I18Next.Net.Plugins;
-using NUnit.Framework;
+using Shouldly;
+using Xunit;
 
 namespace I18Next.Net.Tests.Plugins;
 
-[TestFixture]
 public class DefaultPluralResolverVersion4Fixture
 {
-    private DefaultPluralResolver _pluralResolver;
-
-    [SetUp]
-    public void SetUp()
+    public DefaultPluralResolverVersion4Fixture()
     {
         _pluralResolver = new DefaultPluralResolver { JsonFormatVersion = JsonFormat.Version4 };
     }
+    private DefaultPluralResolver _pluralResolver;
 
-    [TestCase("en", 0, ExpectedResult = "_other")]
-    [TestCase("en", 1, ExpectedResult = "_one")]
-    [TestCase("en", 2, ExpectedResult = "_other")]
-    [TestCase("en-US", 1, ExpectedResult = "_one")]
-    [TestCase("de-DE", 5, ExpectedResult = "_other")]
-    [TestCase("dev", 1, ExpectedResult = "_one")]
-    [TestCase("fr", 0, ExpectedResult = "_one")]
-    [TestCase("fr", 1, ExpectedResult = "_one")]
-    [TestCase("fr", 2, ExpectedResult = "_other")]
-    [TestCase("fr", 1000000, ExpectedResult = "_many")]
-    [TestCase("es", 1, ExpectedResult = "_one")]
-    [TestCase("es", 2000000, ExpectedResult = "_many")]
-    [TestCase("pt-PT", 0, ExpectedResult = "_other")]
-    [TestCase("pt-BR", 0, ExpectedResult = "_one")]
-    [TestCase("ja", 1, ExpectedResult = "_other")]
-    [TestCase("zh", 5, ExpectedResult = "_other")]
-    [TestCase("ru", 1, ExpectedResult = "_one")]
-    [TestCase("ru", 2, ExpectedResult = "_few")]
-    [TestCase("ru", 5, ExpectedResult = "_many")]
-    [TestCase("ru", 11, ExpectedResult = "_many")]
-    [TestCase("ru", 21, ExpectedResult = "_one")]
-    [TestCase("ru", 22, ExpectedResult = "_few")]
-    [TestCase("pl", 1, ExpectedResult = "_one")]
-    [TestCase("pl", 3, ExpectedResult = "_few")]
-    [TestCase("pl", 13, ExpectedResult = "_many")]
-    [TestCase("pl", 21, ExpectedResult = "_many")]
-    [TestCase("cs", 3, ExpectedResult = "_few")]
-    [TestCase("cs", 5, ExpectedResult = "_other")]
-    [TestCase("ar", 0, ExpectedResult = "_zero")]
-    [TestCase("ar", 1, ExpectedResult = "_one")]
-    [TestCase("ar", 2, ExpectedResult = "_two")]
-    [TestCase("ar", 3, ExpectedResult = "_few")]
-    [TestCase("ar", 11, ExpectedResult = "_many")]
-    [TestCase("ar", 100, ExpectedResult = "_other")]
-    [TestCase("cy", 3, ExpectedResult = "_few")]
-    [TestCase("cy", 6, ExpectedResult = "_many")]
-    [TestCase("lv", 0, ExpectedResult = "_zero")]
-    [TestCase("lv", 21, ExpectedResult = "_one")]
-    [TestCase("lv", 2, ExpectedResult = "_other")]
-    [TestCase("sl", 102, ExpectedResult = "_two")]
-    [TestCase("ga", 7, ExpectedResult = "_many")]
-    [TestCase("he", 2, ExpectedResult = "_two")]
-    [TestCase("ro", 0, ExpectedResult = "_few")]
-    [TestCase("ro", 20, ExpectedResult = "_other")]
-    [TestCase("lt", 11, ExpectedResult = "_other")]
-    [TestCase("lt", 2, ExpectedResult = "_few")]
-    [TestCase("mt", 0, ExpectedResult = "_few")]
-    [TestCase("mt", 15, ExpectedResult = "_many")]
-    [TestCase("br", 1000000, ExpectedResult = "_many")]
-    [TestCase("gv", 40, ExpectedResult = "_few")]
-    [TestCase("kw", 22, ExpectedResult = "_two")]
-    [TestCase("en", -1, ExpectedResult = "_one")]
-    [TestCase("unknown", 1, ExpectedResult = "_other")]
-    public string GetPluralSuffix_ShouldReturnCldrCategorySuffix(string language, int count)
+
+    [Theory]
+    [InlineData("en", 0, "_other")]
+    [InlineData("en", 1, "_one")]
+    [InlineData("en", 2, "_other")]
+    [InlineData("en-US", 1, "_one")]
+    [InlineData("de-DE", 5, "_other")]
+    [InlineData("dev", 1, "_one")]
+    [InlineData("fr", 0, "_one")]
+    [InlineData("fr", 1, "_one")]
+    [InlineData("fr", 2, "_other")]
+    [InlineData("fr", 1000000, "_many")]
+    [InlineData("es", 1, "_one")]
+    [InlineData("es", 2000000, "_many")]
+    [InlineData("pt-PT", 0, "_other")]
+    [InlineData("pt-BR", 0, "_one")]
+    [InlineData("ja", 1, "_other")]
+    [InlineData("zh", 5, "_other")]
+    [InlineData("ru", 1, "_one")]
+    [InlineData("ru", 2, "_few")]
+    [InlineData("ru", 5, "_many")]
+    [InlineData("ru", 11, "_many")]
+    [InlineData("ru", 21, "_one")]
+    [InlineData("ru", 22, "_few")]
+    [InlineData("pl", 1, "_one")]
+    [InlineData("pl", 3, "_few")]
+    [InlineData("pl", 13, "_many")]
+    [InlineData("pl", 21, "_many")]
+    [InlineData("cs", 3, "_few")]
+    [InlineData("cs", 5, "_other")]
+    [InlineData("ar", 0, "_zero")]
+    [InlineData("ar", 1, "_one")]
+    [InlineData("ar", 2, "_two")]
+    [InlineData("ar", 3, "_few")]
+    [InlineData("ar", 11, "_many")]
+    [InlineData("ar", 100, "_other")]
+    [InlineData("cy", 3, "_few")]
+    [InlineData("cy", 6, "_many")]
+    [InlineData("lv", 0, "_zero")]
+    [InlineData("lv", 21, "_one")]
+    [InlineData("lv", 2, "_other")]
+    [InlineData("sl", 102, "_two")]
+    [InlineData("ga", 7, "_many")]
+    [InlineData("he", 2, "_two")]
+    [InlineData("ro", 0, "_few")]
+    [InlineData("ro", 20, "_other")]
+    [InlineData("lt", 11, "_other")]
+    [InlineData("lt", 2, "_few")]
+    [InlineData("mt", 0, "_few")]
+    [InlineData("mt", 15, "_many")]
+    [InlineData("br", 1000000, "_many")]
+    [InlineData("gv", 40, "_few")]
+    [InlineData("kw", 22, "_two")]
+    [InlineData("en", -1, "_one")]
+    [InlineData("unknown", 1, "_other")]
+    public void GetPluralSuffix_ShouldReturnCldrCategorySuffix(string language, int count, string expected)
     {
-        return _pluralResolver.GetPluralSuffix(language, count);
+        _pluralResolver.GetPluralSuffix(language, count).ShouldBe(expected);
     }
 
-    [Test]
+    [Fact]
     public void GetPluralSuffix_CustomSeparator_ShouldUseSeparator()
     {
         _pluralResolver.PluralSeparator = "|";
 
-        _pluralResolver.GetPluralSuffix("en", 2).Should().Be("|other");
+        _pluralResolver.GetPluralSuffix("en", 2).ShouldBe("|other");
     }
 
-    [TestCase("en")]
-    [TestCase("ja")]
-    [TestCase("unknown")]
+    [Theory]
+    [InlineData("en")]
+    [InlineData("ja")]
+    [InlineData("unknown")]
     public void NeedsPlural_ShouldAlwaysBeTrue(string language)
     {
-        _pluralResolver.NeedsPlural(language).Should().BeTrue();
+        _pluralResolver.NeedsPlural(language).ShouldBeTrue();
     }
 
-    [Test]
+    [Fact]
     public void GetPluralCategory_ShouldReturnCategoryWithoutSeparator()
     {
-        DefaultPluralResolver.GetPluralCategory("en", 1).Should().Be("one");
-        DefaultPluralResolver.GetPluralCategory("en", int.MinValue).Should().Be("other");
+        DefaultPluralResolver.GetPluralCategory("en", 1).ShouldBe("one");
+        DefaultPluralResolver.GetPluralCategory("en", int.MinValue).ShouldBe("other");
     }
 }

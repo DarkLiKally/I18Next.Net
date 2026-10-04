@@ -1,15 +1,13 @@
 ﻿using System.Threading.Tasks;
-using FluentAssertions;
 using I18Next.Net.Backends;
-using NUnit.Framework;
+using Shouldly;
+using Xunit;
 
 namespace I18Next.Net.Tests.Backends;
 
-[TestFixture]
 public class InMemoryBackendFixture
 {
-    [SetUp]
-    public void SetUp()
+    public InMemoryBackendFixture()
     {
         _backend = new InMemoryBackend();
 
@@ -26,92 +24,92 @@ public class InMemoryBackendFixture
 
     private InMemoryBackend _backend;
 
-    [Test]
+    [Fact]
     public async Task AddTranslation_AlterExistingEntry_TranslationShouldBeAltered()
     {
         _backend.AddTranslation("de", "test", "Value2", "Altered translated value");
 
         var tree = await _backend.LoadNamespaceAsync("de", "test");
 
-        tree.Should().NotBeNull();
+        tree.ShouldNotBeNull();
 
         var value = tree.GetValue("Value2", null);
 
-        value.Should().Be("Altered translated value");
+        value.ShouldBe("Altered translated value");
     }
 
-    [Test]
+    [Fact]
     public async Task AddTranslation_AlterExistingNestedEntry_TranslationShouldBeAltered()
     {
         _backend.AddTranslation("de", "test", "SectionA.Value1", "Altered nested translated value");
 
         var tree = await _backend.LoadNamespaceAsync("de", "test");
 
-        tree.Should().NotBeNull();
+        tree.ShouldNotBeNull();
 
         var value = tree.GetValue("SectionA.Value1", null);
 
-        value.Should().Be("Altered nested translated value");
+        value.ShouldBe("Altered nested translated value");
     }
 
-    [Test]
+    [Fact]
     public async Task AddTranslation_NewNestedTranslation_TranslationShouldBeAdded()
     {
         _backend.AddTranslation("fr", "test", "SectionX.ValueX", "New nested translated value");
 
         var tree = await _backend.LoadNamespaceAsync("fr", "test");
 
-        tree.Should().NotBeNull();
+        tree.ShouldNotBeNull();
 
         var value = tree.GetValue("SectionX.ValueX", null);
 
-        value.Should().Be("New nested translated value");
+        value.ShouldBe("New nested translated value");
     }
 
-    [Test]
+    [Fact]
     public async Task AddTranslation_NewTranslation_TranslationShouldBeAdded()
     {
         _backend.AddTranslation("fr", "test", "ValueX", "New translated value");
 
         var tree = await _backend.LoadNamespaceAsync("fr", "test");
 
-        tree.Should().NotBeNull();
+        tree.ShouldNotBeNull();
 
         var value = tree.GetValue("ValueX", null);
 
-        value.Should().Be("New translated value");
+        value.ShouldBe("New translated value");
     }
 
-    [Test]
+    [Fact]
     public async Task LoadNamespaceAsync_ExtractLanguagePart_ShouldProvideTranslationsForOnlyTheLanguagePart()
     {
         var tree = await _backend.LoadNamespaceAsync("de-DE", "test");
 
-        tree.Should().NotBeNull();
+        tree.ShouldNotBeNull();
 
-        tree.GetValue("Value1", null).Should().Be("Translated value 1");
-        tree.GetValue("Value2", null).Should().Be("Translated value 2");
+        tree.GetValue("Value1", null).ShouldBe("Translated value 1");
+        tree.GetValue("Value2", null).ShouldBe("Translated value 2");
     }
 
-    [Test]
+    [Fact]
     public async Task LoadNamespaceAsync_NestedKeys_ShouldProvideCorrectTranslations()
     {
         var tree = await _backend.LoadNamespaceAsync("en-US", "test");
 
-        tree.Should().NotBeNull();
+        tree.ShouldNotBeNull();
 
-        tree.GetValue("SectionA.Value1", null).Should().Be("Translated section value 1");
-        tree.GetValue("SectionA.Value2", null).Should().Be("Translated section value 2");
+        tree.GetValue("SectionA.Value1", null).ShouldBe("Translated section value 1");
+        tree.GetValue("SectionA.Value2", null).ShouldBe("Translated section value 2");
     }
 
-    [Test]
+    [Fact]
     public async Task LoadNamespaceAsync_RootKeys_ShouldProvideCorrectTranslations()
     {
         var tree = await _backend.LoadNamespaceAsync("en-US", "test");
 
-        tree.Should().NotBeNull();
+        tree.ShouldNotBeNull();
 
-        tree.GetValue("Value1", null).Should().Be("Translated value 1");
-        tree.GetValue("Value2", null).Should().Be("Translated value 2");
+        tree.GetValue("Value1", null).ShouldBe("Translated value 1");
+        tree.GetValue("Value2", null).ShouldBe("Translated value 2");
     }
 }

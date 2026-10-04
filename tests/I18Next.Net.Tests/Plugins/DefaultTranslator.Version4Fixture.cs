@@ -1,20 +1,15 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using FluentAssertions;
 using I18Next.Net.Backends;
 using I18Next.Net.Plugins;
-using NUnit.Framework;
+using Shouldly;
+using Xunit;
 
 namespace I18Next.Net.Tests.Plugins;
 
-[TestFixture]
 public class DefaultTranslatorVersion4Fixture
 {
-    private DefaultTranslator _translator;
-    private TranslationOptions _options;
-
-    [SetUp]
-    public void SetUp()
+    public DefaultTranslatorVersion4Fixture()
     {
         var backend = new InMemoryBackend();
 
@@ -38,63 +33,69 @@ public class DefaultTranslatorVersion4Fixture
         _translator = new DefaultTranslator(backend, logger, pluralResolver, new DefaultInterpolator(logger));
         _options = new TranslationOptions { DefaultNamespace = "translation" };
     }
+    private DefaultTranslator _translator;
+    private TranslationOptions _options;
+
 
     private Task<string> TranslateAsync(string language, string key, IDictionary<string, object> args)
     {
         return _translator.TranslateAsync(language, key, args, _options);
     }
 
-    [TestCase(1, ExpectedResult = "1 item")]
-    [TestCase(2, ExpectedResult = "2 items")]
-    [TestCase(0, ExpectedResult = "No items")]
-    public async Task<string> TranslateAsync_English_ShouldUseCategorySuffix(int count)
+    [Theory]
+    [InlineData(1, "1 item")]
+    [InlineData(2, "2 items")]
+    [InlineData(0, "No items")]
+    public async Task TranslateAsync_English_ShouldUseCategorySuffix(int count, string expected)
     {
-        return await TranslateAsync("en", "item", new Dictionary<string, object> { ["count"] = count });
+        (await TranslateAsync("en", "item", new Dictionary<string, object> { ["count"] = count })).ShouldBe(expected);
     }
 
-    [Test]
+    [Fact]
     public async Task TranslateAsync_ZeroWithoutZeroKey_ShouldUseCategorySuffix()
     {
         var result = await TranslateAsync("en", "friend", new Dictionary<string, object> { ["count"] = 0 });
 
-        result.Should().Be("0 friends");
+        result.ShouldBe("0 friends");
     }
 
-    [Test]
+    [Fact]
     public async Task TranslateAsync_LongCount_ShouldUseCategorySuffix()
     {
         var result = await TranslateAsync("en", "item", new Dictionary<string, object> { ["count"] = 1L });
 
-        result.Should().Be("1 item");
+        result.ShouldBe("1 item");
     }
 
-    [TestCase(0, ExpectedResult = "No boyfriends")]
-    [TestCase(1, ExpectedResult = "A boyfriend")]
-    [TestCase(5, ExpectedResult = "5 boyfriends")]
-    public async Task<string> TranslateAsync_ContextAndPlural_ShouldPreferContextKeys(int count)
+    [Theory]
+    [InlineData(0, "No boyfriends")]
+    [InlineData(1, "A boyfriend")]
+    [InlineData(5, "5 boyfriends")]
+    public async Task TranslateAsync_ContextAndPlural_ShouldPreferContextKeys(int count, string expected)
     {
-        return await TranslateAsync("en", "friend", new Dictionary<string, object> { ["count"] = count, ["context"] = "male" });
+        (await TranslateAsync("en", "friend", new Dictionary<string, object> { ["count"] = count, ["context"] = "male" })).ShouldBe(expected);
     }
 
-    [Test]
+    [Fact]
     public async Task TranslateAsync_UnknownContext_ShouldFallBackToPluralKey()
     {
         var result = await TranslateAsync("en", "friend", new Dictionary<string, object> { ["count"] = 3, ["context"] = "female" });
 
-        result.Should().Be("3 friends");
+        result.ShouldBe("3 friends");
     }
 
-    [TestCase("ar", 0, ExpectedResult = "zero")]
-    [TestCase("ar", 5, ExpectedResult = "few")]
-    [TestCase("ru", 1, ExpectedResult = "one")]
-    [TestCase("ru", 3, ExpectedResult = "few")]
-    [TestCase("ru", 7, ExpectedResult = "many")]
-    public async Task<string> TranslateAsync_OtherLanguages_ShouldUseCategorySuffix(string language, int count)
+    [Theory]
+    [InlineData("ar", 0, "zero")]
+    [InlineData("ar", 5, "few")]
+    [InlineData("ru", 1, "one")]
+    [InlineData("ru", 3, "few")]
+    [InlineData("ru", 7, "many")]
+    public async Task TranslateAsync_OtherLanguages_ShouldUseCategorySuffix(string language, int count, string expected)
     {
-        return await TranslateAsync(language, "item", new Dictionary<string, object> { ["count"] = count });
+        (await TranslateAsync(language, "item", new Dictionary<string, object> { ["count"] = count })).ShouldBe(expected);
     }
 
-    [Test]
+    [Fact]
     public async Task TranslateAsync_MissingKey_ShouldReportAllPossibleKeys()
     {
         string[] possibleKeys = null;
@@ -102,23 +103,23 @@ public class DefaultTranslatorVersion4Fixture
 
         var result = await TranslateAsync("en", "missing", new Dictionary<string, object> { ["count"] = 0, ["context"] = "ctx" });
 
-        result.Should().Be("missing");
-        possibleKeys.Should().Equal("missing", "missing_other", "missing_zero", "missing_ctx", "missing_ctx_other", "missing_ctx_zero");
+        result.ShouldBe("missing");
+        possibleKeys.ShouldBe(new[] { "missing", "missing_other", "missing_zero", "missing_ctx", "missing_ctx_other", "missing_ctx_zero" });
     }
 
-    [Test]
+    [Fact]
     public async Task TranslateAsync_NullCount_ShouldIgnorePlural()
     {
         var result = await TranslateAsync("en", "item", new Dictionary<string, object> { ["count"] = null });
 
-        result.Should().Be("item");
+        result.ShouldBe("item");
     }
 
-    [Test]
+    [Fact]
     public async Task TranslateAsync_CiMode_ShouldReturnNamespaceAndKey()
     {
         var result = await TranslateAsync("CIMODE", "item", null);
 
-        result.Should().Be("translation:item");
+        result.ShouldBe("translation:item");
     }
 }

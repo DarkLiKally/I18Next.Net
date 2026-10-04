@@ -1,14 +1,13 @@
 using I18Next.Net.Backends;
 using I18Next.Net.Plugins;
-using NUnit.Framework;
+using Shouldly;
+using Xunit;
 
 namespace I18Next.Net.Tests;
 
-[TestFixture]
 public class I18NextFixture
 {
-    [SetUp]
-    public void Setup()
+    public I18NextFixture()
     {
         SetupBackend();
 
@@ -31,56 +30,56 @@ public class I18NextFixture
         _backend = backend;
     }
 
-    [Test]
+    [Fact]
     public void English()
     {
         _i18Next.Language = "en";
-        Assert.AreEqual("My English text.", _i18Next.T("exampleKey"));
+        _i18Next.T("exampleKey").ShouldBe("My English text.");
     }
 
-    [Test]
+    [Fact]
     public void FallbackLanguageIsSet_MissingTranslation_ReturnsFallback()
     {
         _i18Next.Language = "de";
         _i18Next.SetFallbackLanguages("en");
-        Assert.AreEqual("My English fallback.", _i18Next.T("exampleKey2"));
+        _i18Next.T("exampleKey2").ShouldBe("My English fallback.");
     }
 
-    [Test]
+    [Fact]
     public void German()
     {
         _i18Next.Language = "de";
-        Assert.AreEqual("Mein deutscher text.", _i18Next.T("exampleKey"));
+        _i18Next.T("exampleKey").ShouldBe("Mein deutscher text.");
     }
 
-    [Test]
+    [Fact]
     public void MissingLanguage_ReturnsFallback()
     {
         _i18Next.Language = "jp";
         _i18Next.SetFallbackLanguages("en");
-        Assert.AreEqual("My English fallback.", _i18Next.T("exampleKey2"));
+        _i18Next.T("exampleKey2").ShouldBe("My English fallback.");
     }
 
-    [Test]
+    [Fact]
     public void Pluralization_MissingLanguage_ReturnsFallback()
     {
         _i18Next.Language = "ja";
         _i18Next.SetFallbackLanguages("en");
-        Assert.AreEqual("My English plural fallback 2.", _i18Next.T("exampleKey2", new { count = 2 }));
+        _i18Next.T("exampleKey2", new { count = 2 }).ShouldBe("My English plural fallback 2.");
     }
 
-    [Test]
+    [Fact]
     public void MissingNamespace_ReturnsFallback()
     {
         _i18Next.Language = "en";
         _i18Next.SetFallbackNamespaces("translation");
-        Assert.AreEqual("My English plural fallback 2.", _i18Next.T("translation2:exampleKey2", new { count = 2 }));
+        _i18Next.T("translation2:exampleKey2", new { count = 2 }).ShouldBe("My English plural fallback 2.");
     }
 
-    [Test]
+    [Fact]
     public void NoFallbackLanguage_MissingTranslation_ReturnsKey()
     {
         _i18Next.Language = "de";
-        Assert.AreEqual("exampleKey2", _i18Next.T("exampleKey2"));
+        _i18Next.T("exampleKey2").ShouldBe("exampleKey2");
     }
 }

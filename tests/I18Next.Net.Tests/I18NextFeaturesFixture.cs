@@ -1,22 +1,15 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using FluentAssertions;
 using I18Next.Net.Backends;
 using I18Next.Net.Plugins;
-using NUnit.Framework;
+using Shouldly;
+using Xunit;
 
 namespace I18Next.Net.Tests;
 
-[TestFixture]
 public class I18NextFeaturesFixture
 {
-    private InMemoryBackend _backend;
-    private DefaultTranslator _translator;
-    private I18NextNet _i18Next;
-    private List<string> _missingKeys;
-
-    [SetUp]
-    public void SetUp()
+    public I18NextFeaturesFixture()
     {
         _backend = new InMemoryBackend();
 
@@ -42,40 +35,46 @@ public class I18NextFeaturesFixture
 
         _i18Next = new I18NextNet(_backend, _translator) { Language = "en" };
     }
+    private InMemoryBackend _backend;
+    private DefaultTranslator _translator;
+    private I18NextNet _i18Next;
+    private List<string> _missingKeys;
 
-    [TestCase(1, ExpectedResult = "1st place")]
-    [TestCase(2, ExpectedResult = "2nd place")]
-    [TestCase(3, ExpectedResult = "3rd place")]
-    [TestCase(4, ExpectedResult = "4th place")]
-    [TestCase(11, ExpectedResult = "11th place")]
-    [TestCase(21, ExpectedResult = "21st place")]
-    [TestCase(112, ExpectedResult = "112th place")]
-    public string T_Ordinal_ShouldUseOrdinalSuffix(int count)
+
+    [Theory]
+    [InlineData(1, "1st place")]
+    [InlineData(2, "2nd place")]
+    [InlineData(3, "3rd place")]
+    [InlineData(4, "4th place")]
+    [InlineData(11, "11th place")]
+    [InlineData(21, "21st place")]
+    [InlineData(112, "112th place")]
+    public void T_Ordinal_ShouldUseOrdinalSuffix(int count, string expected)
     {
-        return _i18Next.T("place", new { count, ordinal = true });
+        _i18Next.T("place", new { count, ordinal = true }).ShouldBe(expected);
     }
 
-    [Test]
+    [Fact]
     public void T_OrdinalWithoutOrdinalKeys_ShouldFallBackToCategoryKey()
     {
-        _i18Next.T("item", new { count = 1, ordinal = true }).Should().Be("1 item");
-        _i18Next.T("item", new { count = 4, ordinal = true }).Should().Be("4 items");
+        _i18Next.T("item", new { count = 1, ordinal = true }).ShouldBe("1 item");
+        _i18Next.T("item", new { count = 4, ordinal = true }).ShouldBe("4 items");
     }
 
-    [Test]
+    [Fact]
     public void T_DefaultValue_ShouldBeUsedForMissingKeys()
     {
-        _i18Next.T("missing", new { defaultValue = "Default for {{name}}", name = "you" }).Should().Be("Default for you");
-        _missingKeys.Should().Equal("missing");
+        _i18Next.T("missing", new { defaultValue = "Default for {{name}}", name = "you" }).ShouldBe("Default for you");
+        _missingKeys.ShouldBe(new[] { "missing" });
     }
 
-    [Test]
+    [Fact]
     public void T_DefaultValue_ShouldNotBeUsedForExistingKeys()
     {
-        _i18Next.T("exampleKey", new { defaultValue = "Default" }).Should().Be("My English text.");
+        _i18Next.T("exampleKey", new { defaultValue = "Default" }).ShouldBe("My English text.");
     }
 
-    [Test]
+    [Fact]
     public void T_PluralDefaultValues_ShouldUseMatchingPluralForm()
     {
         var args = new Dictionary<string, object>
@@ -87,175 +86,176 @@ public class I18NextFeaturesFixture
         };
 
         args["count"] = 1;
-        _i18Next.T("missing", args).Should().Be("1 default item");
+        _i18Next.T("missing", args).ShouldBe("1 default item");
 
         args["count"] = 5;
-        _i18Next.T("missing", args).Should().Be("5 default items");
+        _i18Next.T("missing", args).ShouldBe("5 default items");
 
         args["count"] = 0;
-        _i18Next.T("missing", args).Should().Be("no default items");
+        _i18Next.T("missing", args).ShouldBe("no default items");
 
         args.Remove("defaultValue_other");
         args["count"] = 7;
-        _i18Next.T("missing", args).Should().Be("fallback");
+        _i18Next.T("missing", args).ShouldBe("fallback");
     }
 
-    [Test]
+    [Fact]
     public void T_OrdinalDefaultValues_ShouldUseOrdinalForm()
     {
         _i18Next.T("missing", new Dictionary<string, object> { ["count"] = 2, ["ordinal"] = true, ["defaultValue_ordinal_two"] = "{{count}}nd" })
-            .Should().Be("2nd");
+            .ShouldBe("2nd");
         _i18Next.T("missing", new Dictionary<string, object> { ["count"] = 2, ["ordinal"] = true, ["defaultValue_two"] = "second" })
-            .Should().Be("second");
+            .ShouldBe("second");
     }
 
-    [Test]
+    [Fact]
     public void T_MultipleKeys_ShouldUseFirstExistingKey()
     {
-        _i18Next.T(new[] { "missing", "exampleKey" }).Should().Be("My English text.");
-        _i18Next.T(new[] { "greeting", "exampleKey" }, new { name = "World" }).Should().Be("Hello World");
-        _i18Next.T(new[] { "missing", "alsoMissing" }).Should().Be("alsoMissing");
-        _i18Next.T(new[] { "missing", "alsoMissing" }, new { defaultValue = "Default" }).Should().Be("Default");
-        _missingKeys.Should().Equal("alsoMissing", "alsoMissing");
+        _i18Next.T(new[] { "missing", "exampleKey" }).ShouldBe("My English text.");
+        _i18Next.T(new[] { "greeting", "exampleKey" }, new { name = "World" }).ShouldBe("Hello World");
+        _i18Next.T(new[] { "missing", "alsoMissing" }).ShouldBe("alsoMissing");
+        _i18Next.T(new[] { "missing", "alsoMissing" }, new { defaultValue = "Default" }).ShouldBe("Default");
+        _missingKeys.ShouldBe(new[] { "alsoMissing", "alsoMissing" });
     }
 
-    [Test]
+    [Fact]
     public async Task Ta_MultipleKeys_ShouldUseFirstExistingKey()
     {
-        (await _i18Next.Ta(new[] { "missing", "other:otherKey" })).Should().Be("Other namespace text.");
+        (await _i18Next.Ta(new[] { "missing", "other:otherKey" })).ShouldBe("Other namespace text.");
     }
 
-    [Test]
+    [Fact]
     public void T_NoKeys_ShouldThrow()
     {
-        _i18Next.Invoking(i => i.T(new string[0])).Should().Throw<System.ArgumentNullException>();
+        Should.Throw<System.ArgumentNullException>(() => _i18Next.T(new string[0]));
     }
 
-    [Test]
+    [Fact]
     public async Task Exists_ShouldCheckTranslationsWithoutRaisingMissingKey()
     {
-        _i18Next.Exists("exampleKey").Should().BeTrue();
-        _i18Next.Exists("other:otherKey").Should().BeTrue();
-        _i18Next.Exists("item", new { count = 3 }).Should().BeTrue();
-        _i18Next.Exists("missing").Should().BeFalse();
-        (await _i18Next.ExistsAsync("de", "exampleKey")).Should().BeTrue();
-        (await _i18Next.ExistsAsync("de", "greeting")).Should().BeFalse();
+        _i18Next.Exists("exampleKey").ShouldBeTrue();
+        _i18Next.Exists("other:otherKey").ShouldBeTrue();
+        _i18Next.Exists("item", new { count = 3 }).ShouldBeTrue();
+        _i18Next.Exists("missing").ShouldBeFalse();
+        (await _i18Next.ExistsAsync("de", "exampleKey")).ShouldBeTrue();
+        (await _i18Next.ExistsAsync("de", "greeting")).ShouldBeFalse();
 
-        _missingKeys.Should().BeEmpty();
+        _missingKeys.ShouldBeEmpty();
     }
 
-    [Test]
+    [Fact]
     public void Exists_FallbackLanguage_ShouldBeConsidered()
     {
         _i18Next.SetFallbackLanguages("fr");
 
-        _i18Next.Exists("frenchOnly").Should().BeTrue();
+        _i18Next.Exists("frenchOnly").ShouldBeTrue();
     }
 
-    [TestCase("ar", ExpectedResult = "rtl")]
-    [TestCase("ar-EG", ExpectedResult = "rtl")]
-    [TestCase("he", ExpectedResult = "rtl")]
-    [TestCase("fa_IR", ExpectedResult = "rtl")]
-    [TestCase("pa-Arab-PK", ExpectedResult = "rtl")]
-    [TestCase("en", ExpectedResult = "ltr")]
-    [TestCase("de-DE", ExpectedResult = "ltr")]
-    [TestCase("", ExpectedResult = "ltr")]
-    public string Dir_ShouldReturnTextDirection(string language)
+    [Theory]
+    [InlineData("ar", "rtl")]
+    [InlineData("ar-EG", "rtl")]
+    [InlineData("he", "rtl")]
+    [InlineData("fa_IR", "rtl")]
+    [InlineData("pa-Arab-PK", "rtl")]
+    [InlineData("en", "ltr")]
+    [InlineData("de-DE", "ltr")]
+    [InlineData("", "ltr")]
+    public void Dir_ShouldReturnTextDirection(string language, string expected)
     {
-        return _i18Next.Dir(language);
+        _i18Next.Dir(language).ShouldBe(expected);
     }
 
-    [Test]
+    [Fact]
     public void Dir_WithoutLanguage_ShouldUseCurrentLanguage()
     {
-        _i18Next.Dir().Should().Be("ltr");
+        _i18Next.Dir().ShouldBe("ltr");
 
         _i18Next.Language = "ar";
 
-        _i18Next.Dir().Should().Be("rtl");
+        _i18Next.Dir().ShouldBe("rtl");
     }
 
-    [Test]
+    [Fact]
     public void LanguageFallbacks_ShouldTakePrecedenceOverGlobalFallbacks()
     {
         _i18Next.SetFallbackLanguages("fr");
         _i18Next.SetLanguageFallbacks("de-CH", "it");
 
-        _i18Next.T("de-CH", "italianOnly").Should().Be("Testo italiano.");
-        _i18Next.T("de-CH", "frenchOnly").Should().Be("frenchOnly");
-        _i18Next.T("de-AT", "frenchOnly").Should().Be("Texte français.");
+        _i18Next.T("de-CH", "italianOnly").ShouldBe("Testo italiano.");
+        _i18Next.T("de-CH", "frenchOnly").ShouldBe("frenchOnly");
+        _i18Next.T("de-AT", "frenchOnly").ShouldBe("Texte français.");
     }
 
-    [Test]
+    [Fact]
     public void LanguageFallbacks_ShouldApplyToRegionsOfLanguage()
     {
         _i18Next.SetLanguageFallbacks("de", "it");
 
-        _i18Next.T("de-CH", "italianOnly").Should().Be("Testo italiano.");
-        _i18Next.LanguageFallbacks.Should().ContainKey("DE");
+        _i18Next.T("de-CH", "italianOnly").ShouldBe("Testo italiano.");
+        _i18Next.LanguageFallbacks.ShouldContainKey("DE");
     }
 
-    [Test]
+    [Fact]
     public void SetLanguageFallbacks_InvalidArguments_ShouldThrow()
     {
-        _i18Next.Invoking(i => i.SetLanguageFallbacks(" ", "en")).Should().Throw<System.ArgumentNullException>();
-        _i18Next.Invoking(i => i.SetLanguageFallbacks("de", null)).Should().Throw<System.ArgumentNullException>();
+        Should.Throw<System.ArgumentNullException>(() => _i18Next.SetLanguageFallbacks(" ", "en"));
+        Should.Throw<System.ArgumentNullException>(() => _i18Next.SetLanguageFallbacks("de", null));
     }
 
-    [Test]
+    [Fact]
     public void LanguageFallbacks_ShouldBeUsedWithNamespaceOverride()
     {
         _backend.AddTranslation("it", "other", "italianOther", "Altro testo.");
         _i18Next.SetLanguageFallbacks("de", "it");
 
-        _i18Next.T("de", "other", "italianOther").Should().Be("Altro testo.");
+        _i18Next.T("de", "other", "italianOther").ShouldBe("Altro testo.");
     }
 
-    [Test]
+    [Fact]
     public void NamespaceSeparator_Custom_ShouldSplitNamespace()
     {
         _translator.NamespaceSeparator = "::";
 
-        _i18Next.T("other::otherKey").Should().Be("Other namespace text.");
-        _i18Next.T("cimode", "other::otherKey").Should().Be("other::otherKey");
+        _i18Next.T("other::otherKey").ShouldBe("Other namespace text.");
+        _i18Next.T("cimode", "other::otherKey").ShouldBe("other::otherKey");
     }
 
-    [Test]
+    [Fact]
     public void NamespaceSeparator_Disabled_ShouldUseKeysVerbatim()
     {
         _backend.AddTranslation("en", "translation", "Note: read this", "Hinweis");
         _translator.NamespaceSeparator = null;
 
-        _i18Next.T("Note: read this").Should().Be("Hinweis");
+        _i18Next.T("Note: read this").ShouldBe("Hinweis");
     }
 
-    [Test]
+    [Fact]
     public void ClearCache_ShouldReloadNamespaces()
     {
-        _i18Next.T("es", "exampleKey").Should().Be("exampleKey");
+        _i18Next.T("es", "exampleKey").ShouldBe("exampleKey");
 
         _backend.AddTranslation("es", "translation", "exampleKey", "Texto en español.");
 
-        _i18Next.T("es", "exampleKey").Should().Be("exampleKey");
+        _i18Next.T("es", "exampleKey").ShouldBe("exampleKey");
 
         _translator.ClearCache("es", "translation");
 
-        _i18Next.T("es", "exampleKey").Should().Be("Texto en español.");
+        _i18Next.T("es", "exampleKey").ShouldBe("Texto en español.");
 
-        _backend.RemoveNamespace("es", "translation").Should().BeTrue();
+        _backend.RemoveNamespace("es", "translation").ShouldBeTrue();
         _translator.ClearCache();
 
-        _i18Next.T("es", "exampleKey").Should().Be("exampleKey");
+        _i18Next.T("es", "exampleKey").ShouldBe("exampleKey");
     }
 
-    [Test]
+    [Fact]
     public void InMemoryBackend_AddTranslations_ShouldAddAllTranslations()
     {
         _backend.AddTranslations("nl", "translation", new Dictionary<string, string> { ["a"] = "A", ["b"] = "B" });
 
-        _backend.HasNamespace("nl", "translation").Should().BeTrue();
-        _backend.HasNamespace("nl", "missing").Should().BeFalse();
-        _i18Next.T("nl", "b").Should().Be("B");
-        _backend.Invoking(b => b.AddTranslations("nl", "translation", null)).Should().Throw<System.ArgumentNullException>();
+        _backend.HasNamespace("nl", "translation").ShouldBeTrue();
+        _backend.HasNamespace("nl", "missing").ShouldBeFalse();
+        _i18Next.T("nl", "b").ShouldBe("B");
+        Should.Throw<System.ArgumentNullException>(() => _backend.AddTranslations("nl", "translation", null));
     }
 }

@@ -1,52 +1,51 @@
 using System.IO;
-using FluentAssertions;
 using I18Next.Net.Backends;
-using NUnit.Framework;
+using Shouldly;
+using Xunit;
 
 namespace I18Next.Net.Tests.Backends;
 
-[TestFixture]
 public class SimpleIniParserFixture
 {
     private const string IniContent = "; comment\nRootKey = root value\nFlag\n\n[Section]\nKey = \"quoted value\"\nOther=value=with=equals\n";
 
-    [Test]
+    [Fact]
     public void GetValue_RootSection_ShouldReturnValues()
     {
         var parser = new SimpleIniParser(IniContent);
 
-        parser.GetValue("RootKey").Should().Be("root value");
-        parser.GetValue("rootkey").Should().Be("root value");
-        parser.GetValue("Flag").Should().BeEmpty();
-        parser.GetValue("Missing").Should().BeNull();
+        parser.GetValue("RootKey").ShouldBe("root value");
+        parser.GetValue("rootkey").ShouldBe("root value");
+        parser.GetValue("Flag").ShouldBeEmpty();
+        parser.GetValue("Missing").ShouldBeNull();
     }
 
-    [Test]
+    [Fact]
     public void GetValue_NamedSection_ShouldReturnValues()
     {
         var parser = new SimpleIniParser(IniContent);
 
-        parser.GetValue("Section", "Key").Should().Be("quoted value");
-        parser.GetValue("section", "Other").Should().Be("value=with=equals");
-        parser.GetValue("Section", "Missing").Should().BeNull();
-        parser.GetValue("Missing", "Key", "default").Should().Be("default");
+        parser.GetValue("Section", "Key").ShouldBe("quoted value");
+        parser.GetValue("section", "Other").ShouldBe("value=with=equals");
+        parser.GetValue("Section", "Missing").ShouldBeNull();
+        parser.GetValue("Missing", "Key", "default").ShouldBe("default");
     }
 
-    [Test]
+    [Fact]
     public void GetSectionsAndKeys_ShouldListContent()
     {
         var parser = new SimpleIniParser(IniContent);
 
-        parser.GetSections().Should().Equal("Section");
-        parser.GetKeys("Section").Should().Equal("Key", "Other");
-        parser.GetKeys("Missing").Should().BeEmpty();
+        parser.GetSections().ShouldBe(new[] { "Section" });
+        parser.GetKeys("Section").ShouldBe(new[] { "Key", "Other" });
+        parser.GetKeys("Missing").ShouldBeEmpty();
     }
 
-    [Test]
+    [Fact]
     public void FromFile_ShouldParseFile()
     {
         var parser = SimpleIniParser.FromFile(Path.Combine("TestFiles", "en-US", "test.ini"));
 
-        parser.GetValue("SectionB.SubSectionA", "Value1").Should().Be("Translated value 1");
+        parser.GetValue("SectionB.SubSectionA", "Value1").ShouldBe("Translated value 1");
     }
 }

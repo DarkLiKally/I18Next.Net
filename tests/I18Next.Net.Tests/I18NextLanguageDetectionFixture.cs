@@ -1,20 +1,15 @@
 using System;
 using System.Threading.Tasks;
-using FluentAssertions;
 using I18Next.Net.Backends;
 using I18Next.Net.Plugins;
-using NUnit.Framework;
+using Shouldly;
+using Xunit;
 
 namespace I18Next.Net.Tests;
 
-[TestFixture]
 public class I18NextLanguageDetectionFixture
 {
-    private I18NextNet _i18Next;
-    private TestLanguageDetector _languageDetector;
-
-    [SetUp]
-    public void SetUp()
+    public I18NextLanguageDetectionFixture()
     {
         var backend = new InMemoryBackend();
 
@@ -25,68 +20,71 @@ public class I18NextLanguageDetectionFixture
         _languageDetector = new TestLanguageDetector { Language = "de" };
         _i18Next = new I18NextNet(backend, new DefaultTranslator(backend), _languageDetector) { Language = "en" };
     }
+    private I18NextNet _i18Next;
+    private TestLanguageDetector _languageDetector;
 
-    [Test]
+
+    [Fact]
     public void T_DetectLanguageOnEachTranslation_ShouldUseDetectedLanguage()
     {
         _i18Next.DetectLanguageOnEachTranslation = true;
 
-        _i18Next.T("exampleKey").Should().Be("Mein deutscher text.");
+        _i18Next.T("exampleKey").ShouldBe("Mein deutscher text.");
 
         _languageDetector.Language = "en";
 
-        _i18Next.T("exampleKey").Should().Be("My English text.");
+        _i18Next.T("exampleKey").ShouldBe("My English text.");
     }
 
-    [Test]
+    [Fact]
     public async Task Ta_DetectLanguageOnEachTranslation_ShouldUseDetectedLanguage()
     {
         _i18Next.DetectLanguageOnEachTranslation = true;
 
-        (await _i18Next.Ta("exampleKey")).Should().Be("Mein deutscher text.");
+        (await _i18Next.Ta("exampleKey")).ShouldBe("Mein deutscher text.");
     }
 
-    [Test]
+    [Fact]
     public void T_DetectLanguageOnEachTranslation_ShouldNotChangeLanguage()
     {
         _i18Next.DetectLanguageOnEachTranslation = true;
 
         _i18Next.T("exampleKey");
 
-        _i18Next.Language.Should().Be("en");
+        _i18Next.Language.ShouldBe("en");
     }
 
-    [Test]
+    [Fact]
     public void T_DetectorReturnsNothing_ShouldUseLanguage()
     {
         _i18Next.DetectLanguageOnEachTranslation = true;
         _languageDetector.Language = null;
 
-        _i18Next.T("exampleKey").Should().Be("My English text.");
+        _i18Next.T("exampleKey").ShouldBe("My English text.");
     }
 
-    [Test]
+    [Fact]
     public void T_ExplicitLanguage_ShouldNotBeOverriddenByDetection()
     {
         _i18Next.DetectLanguageOnEachTranslation = true;
         _languageDetector.Language = "de";
 
-        _i18Next.T("en", "exampleKey").Should().Be("My English text.");
+        _i18Next.T("en", "exampleKey").ShouldBe("My English text.");
     }
 
-    [Test]
+    [Fact]
     public void T_ExplicitNamespace_ShouldUseNamespace()
     {
-        _i18Next.T("de", "other", "exampleKey").Should().Be("Mein anderer text.");
+        _i18Next.T("de", "other", "exampleKey").ShouldBe("Mein anderer text.");
     }
 
-    [Test]
+    [Fact]
     public void T_DetectionDisabled_ShouldUseLanguage()
     {
-        _i18Next.T("exampleKey").Should().Be("My English text.");
+        _i18Next.T("exampleKey").ShouldBe("My English text.");
     }
 
-    [Test]
+    [Fact]
     public void UseDetectedLanguage_ShouldChangeLanguageAndRaiseEvent()
     {
         LanguageChangedEventArgs eventArgs = null;
@@ -94,13 +92,13 @@ public class I18NextLanguageDetectionFixture
 
         _i18Next.UseDetectedLanguage();
 
-        _i18Next.Language.Should().Be("de");
-        eventArgs.Should().NotBeNull();
-        eventArgs.OldLanguage.Should().Be("en");
-        eventArgs.NewLanguage.Should().Be("de");
+        _i18Next.Language.ShouldBe("de");
+        eventArgs.ShouldNotBeNull();
+        eventArgs.OldLanguage.ShouldBe("en");
+        eventArgs.NewLanguage.ShouldBe("de");
     }
 
-    [Test]
+    [Fact]
     public void Language_SetToSameValue_ShouldNotRaiseEvent()
     {
         var raised = false;
@@ -108,16 +106,16 @@ public class I18NextLanguageDetectionFixture
 
         _i18Next.Language = "en";
 
-        raised.Should().BeFalse();
+        raised.ShouldBeFalse();
     }
 
-    [Test]
+    [Fact]
     public void InvalidSettings_ShouldThrow()
     {
-        _i18Next.Invoking(i => i.Language = " ").Should().Throw<ArgumentNullException>();
-        _i18Next.Invoking(i => i.DefaultNamespace = "").Should().Throw<ArgumentNullException>();
-        _i18Next.Invoking(i => i.FallbackLanguages = null).Should().Throw<ArgumentNullException>();
-        this.Invoking(_ => new I18NextNet(null, new DefaultTranslator(new InMemoryBackend()))).Should().Throw<ArgumentNullException>();
+        Should.Throw<ArgumentNullException>(() => _i18Next.Language = " ");
+        Should.Throw<ArgumentNullException>(() => _i18Next.DefaultNamespace = "");
+        Should.Throw<ArgumentNullException>(() => _i18Next.FallbackLanguages = null);
+        Should.Throw<ArgumentNullException>(() => new I18NextNet(null, new DefaultTranslator(new InMemoryBackend())));
     }
 
     private class TestLanguageDetector : ILanguageDetector

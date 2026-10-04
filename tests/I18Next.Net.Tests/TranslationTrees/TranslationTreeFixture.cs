@@ -1,17 +1,14 @@
 using System.Collections.Generic;
-using FluentAssertions;
+using System.Linq;
 using I18Next.Net.TranslationTrees;
-using NUnit.Framework;
+using Shouldly;
+using Xunit;
 
 namespace I18Next.Net.Tests.TranslationTrees;
 
-[TestFixture]
 public class TranslationTreeFixture
 {
-    private ITranslationTree _tree;
-
-    [SetUp]
-    public void SetUp()
+    public TranslationTreeFixture()
     {
         var builder = new HierarchicalTranslationTreeBuilder();
 
@@ -21,11 +18,13 @@ public class TranslationTreeFixture
 
         _tree = builder.Build();
     }
+    private ITranslationTree _tree;
 
-    [Test]
+
+    [Fact]
     public void GetAllValues_NestedTranslations_ShouldReturnFullKeyPaths()
     {
-        _tree.GetAllValues().Should().BeEquivalentTo(new Dictionary<string, string>
+        _tree.GetAllValues().ShouldBeEquivalentTo(new Dictionary<string, string>
         {
             ["key"] = "value of key",
             ["look.deep"] = "value of look deep",
@@ -33,37 +32,37 @@ public class TranslationTreeFixture
         });
     }
 
-    [Test]
+    [Fact]
     public void GetValue_ExistingKeys_ShouldReturnValues()
     {
-        _tree.GetValue("key", null).Should().Be("value of key");
-        _tree.GetValue("look.deep", null).Should().Be("value of look deep");
-        _tree.GetValue("look.deeper.down", null).Should().Be("value of look deeper down");
+        _tree.GetValue("key", null).ShouldBe("value of key");
+        _tree.GetValue("look.deep", null).ShouldBe("value of look deep");
+        _tree.GetValue("look.deeper.down", null).ShouldBe("value of look deeper down");
     }
 
-    [Test]
+    [Fact]
     public void GetValue_MissingKeys_ShouldReturnNull()
     {
-        _tree.GetValue("missing", null).Should().BeNull();
-        _tree.GetValue("look.missing", null).Should().BeNull();
-        _tree.GetValue("look.deeper.missing", null).Should().BeNull();
+        _tree.GetValue("missing", null).ShouldBeNull();
+        _tree.GetValue("look.missing", null).ShouldBeNull();
+        _tree.GetValue("look.deeper.missing", null).ShouldBeNull();
     }
 
-    [Test]
+    [Fact]
     public void GetValue_KeyLeadingToGroup_ShouldThrow()
     {
-        _tree.Invoking(t => t.GetValue("look", null)).Should().Throw<TranslationKeyInvalidException>()
-            .Which.Key.Should().Be("look");
+        Should.Throw<TranslationKeyInvalidException>(() => _tree.GetValue("look", null))
+            .Key.ShouldBe("look");
     }
 
-    [Test]
+    [Fact]
     public void GetValue_KeyGoingBeyondTranslation_ShouldThrow()
     {
-        _tree.Invoking(t => t.GetValue("key.sub", null)).Should().Throw<TranslationKeyInvalidException>()
-            .Which.Key.Should().Be("key.sub");
+        Should.Throw<TranslationKeyInvalidException>(() => _tree.GetValue("key.sub", null))
+            .Key.ShouldBe("key.sub");
     }
 
-    [Test]
+    [Fact]
     public void GetValue_ChangedTranslationValue_ShouldReturnNewValue()
     {
         var tree = (TranslationTree) _tree;
@@ -71,32 +70,32 @@ public class TranslationTreeFixture
 
         translation.Value = "changed";
 
-        tree.GetValue("key", null).Should().Be("changed");
+        tree.GetValue("key", null).ShouldBe("changed");
     }
 
-    [Test]
+    [Fact]
     public void Root_Replaced_ShouldUseNewRoot()
     {
         var tree = (TranslationTree) _tree;
 
         tree.Root = new TranslationGroup("", new TranslationTreeNode[] { new Translation("other", "other value") });
 
-        tree.GetValue("other", null).Should().Be("other value");
-        tree.GetValue("key", null).Should().BeNull();
-        tree.GetAllValues().Should().ContainSingle();
+        tree.GetValue("other", null).ShouldBe("other value");
+        tree.GetValue("key", null).ShouldBeNull();
+        tree.GetAllValues().ShouldHaveSingleItem();
     }
 
-    [Test]
+    [Fact]
     public void TryGetChild_DuplicateNames_ShouldReturnFirstChild()
     {
         var group = new TranslationGroup("", new TranslationTreeNode[] { new Translation("a", "first"), new Translation("a", "second") });
 
-        group.TryGetChild("a", out var child).Should().BeTrue();
-        ((Translation) child).Value.Should().Be("first");
-        group.TryGetChild("b", out _).Should().BeFalse();
+        group.TryGetChild("a", out var child).ShouldBeTrue();
+        ((Translation) child).Value.ShouldBe("first");
+        group.TryGetChild("b", out _).ShouldBeFalse();
     }
 
-    [Test]
+    [Fact]
     public void DictionaryTranslationTree_ShouldProvideValues()
     {
         var tree = new DictionaryTranslationTree("ns", new Dictionary<string, string> { ["a"] = "b" });
@@ -104,38 +103,38 @@ public class TranslationTreeFixture
         tree.AddValue("c", "d");
         tree["e"] = "f";
 
-        tree.Namespace.Should().Be("ns");
-        tree.GetValue("a", null).Should().Be("b");
-        tree.GetValue("missing", null).Should().BeNull();
-        tree["c"].Should().Be("d");
-        tree.GetAllValues().Should().HaveCount(3);
+        tree.Namespace.ShouldBe("ns");
+        tree.GetValue("a", null).ShouldBe("b");
+        tree.GetValue("missing", null).ShouldBeNull();
+        tree["c"].ShouldBe("d");
+        tree.GetAllValues().Count().ShouldBe(3);
     }
 
-    [Test]
+    [Fact]
     public void GetGroupValues_ShouldReturnRelativeValues()
     {
         var tree = (IHierarchicalTranslationTree) _tree;
 
-        tree.GetGroupValues("look").Should().BeEquivalentTo(new Dictionary<string, string>
+        tree.GetGroupValues("look").ShouldBeEquivalentTo(new Dictionary<string, string>
         {
             ["deep"] = "value of look deep",
             ["deeper.down"] = "value of look deeper down"
         });
-        tree.GetGroupValues("look.deeper").Should().ContainKey("down");
-        tree.GetGroupValues(null).Should().HaveCount(3);
-        tree.GetGroupValues("key").Should().BeNull();
-        tree.GetGroupValues("missing").Should().BeNull();
-        tree.GetGroupValues("key.sub").Should().BeNull();
+        tree.GetGroupValues("look.deeper").ShouldContainKey("down");
+        tree.GetGroupValues(null).Count().ShouldBe(3);
+        tree.GetGroupValues("key").ShouldBeNull();
+        tree.GetGroupValues("missing").ShouldBeNull();
+        tree.GetGroupValues("key.sub").ShouldBeNull();
     }
 
-    [Test]
+    [Fact]
     public void DictionaryTranslationTree_GetGroupValues_ShouldFilterByPrefix()
     {
         var tree = new DictionaryTranslationTree("ns", new Dictionary<string, string> { ["a.b"] = "1", ["a.c.d"] = "2", ["ab"] = "3" });
 
-        tree.GetGroupValues("a").Should().BeEquivalentTo(new Dictionary<string, string> { ["b"] = "1", ["c.d"] = "2" });
-        tree.GetGroupValues("").Should().HaveCount(3);
-        tree.GetGroupValues("missing").Should().BeNull();
-        new DictionaryTranslationTree("ns").GetGroupValues(null).Should().BeNull();
+        tree.GetGroupValues("a").ShouldBeEquivalentTo(new Dictionary<string, string> { ["b"] = "1", ["c.d"] = "2" });
+        tree.GetGroupValues("").Count().ShouldBe(3);
+        tree.GetGroupValues("missing").ShouldBeNull();
+        new DictionaryTranslationTree("ns").GetGroupValues(null).ShouldBeNull();
     }
 }

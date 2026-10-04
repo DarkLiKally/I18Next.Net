@@ -1,63 +1,62 @@
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using FluentAssertions;
 using I18Next.Net.Backends;
 using I18Next.Net.TranslationTrees;
-using NUnit.Framework;
+using Shouldly;
+using Xunit;
 
 namespace I18Next.Net.Tests.Backends;
 
-[TestFixture]
 public class FileBackendsFixture
 {
-    [Test]
+    [Fact]
     public async Task LoadNamespaceAsync_MissingFiles_ShouldReturnNull()
     {
-        (await new JsonFileBackend("TestFiles").LoadNamespaceAsync("fr", "test")).Should().BeNull();
-        (await new XmlFileBackend("TestFiles").LoadNamespaceAsync("fr", "test")).Should().BeNull();
-        (await new StrictXmlFileBackend("TestFiles").LoadNamespaceAsync("fr", "test")).Should().BeNull();
-        (await new IniFileBackend("TestFiles").LoadNamespaceAsync("fr", "test")).Should().BeNull();
+        (await new JsonFileBackend("TestFiles").LoadNamespaceAsync("fr", "test")).ShouldBeNull();
+        (await new XmlFileBackend("TestFiles").LoadNamespaceAsync("fr", "test")).ShouldBeNull();
+        (await new StrictXmlFileBackend("TestFiles").LoadNamespaceAsync("fr", "test")).ShouldBeNull();
+        (await new IniFileBackend("TestFiles").LoadNamespaceAsync("fr", "test")).ShouldBeNull();
     }
 
-    [Test]
+    [Fact]
     public async Task LoadNamespaceAsync_DefaultBasePath_ShouldUseLocalesDirectory()
     {
-        (await new JsonFileBackend().LoadNamespaceAsync("en", "test")).Should().BeNull();
-        (await new XmlFileBackend().LoadNamespaceAsync("en", "test")).Should().BeNull();
-        (await new StrictXmlFileBackend().LoadNamespaceAsync("en", "test")).Should().BeNull();
-        (await new IniFileBackend().LoadNamespaceAsync("en", "test")).Should().BeNull();
+        (await new JsonFileBackend().LoadNamespaceAsync("en", "test")).ShouldBeNull();
+        (await new XmlFileBackend().LoadNamespaceAsync("en", "test")).ShouldBeNull();
+        (await new StrictXmlFileBackend().LoadNamespaceAsync("en", "test")).ShouldBeNull();
+        (await new IniFileBackend().LoadNamespaceAsync("en", "test")).ShouldBeNull();
     }
 
-    [Test]
+    [Fact]
     public async Task LoadNamespaceAsync_CustomTreeBuilderFactory_ShouldUseFactory()
     {
         var factory = new GenericTranslationTreeBuilderFactory<HierarchicalTranslationTreeBuilder>();
 
-        (await new JsonFileBackend("TestFiles", factory).LoadNamespaceAsync("en-US", "test")).GetValue("Value1", null).Should().Be("Translated value 1");
-        (await new XmlFileBackend("TestFiles", factory).LoadNamespaceAsync("en-US", "test")).GetValue("Value1", null).Should().Be("Translated value 1");
-        (await new IniFileBackend("TestFiles", factory).LoadNamespaceAsync("en-US", "test")).GetValue("Value1", null).Should().Be("Translated value 1");
-        (await new StrictXmlFileBackend("TestFiles", factory).LoadNamespaceAsync("en-US", "test-strict")).GetValue("Value1", null).Should().Be("Translated value 1");
+        (await new JsonFileBackend("TestFiles", factory).LoadNamespaceAsync("en-US", "test")).GetValue("Value1", null).ShouldBe("Translated value 1");
+        (await new XmlFileBackend("TestFiles", factory).LoadNamespaceAsync("en-US", "test")).GetValue("Value1", null).ShouldBe("Translated value 1");
+        (await new IniFileBackend("TestFiles", factory).LoadNamespaceAsync("en-US", "test")).GetValue("Value1", null).ShouldBe("Translated value 1");
+        (await new StrictXmlFileBackend("TestFiles", factory).LoadNamespaceAsync("en-US", "test-strict")).GetValue("Value1", null).ShouldBe("Translated value 1");
     }
 
-    [Test]
+    [Fact]
     public async Task JsonFileBackend_DifferentValueTypes_ShouldBeConvertedToStrings()
     {
         var tree = await new JsonFileBackend("TestFiles").LoadNamespaceAsync("en-US", "types");
 
-        tree.GetValue("String", null).Should().Be("Text");
-        tree.GetValue("Integer", null).Should().Be("42");
-        tree.GetValue("Decimal", null).Should().Be("1.50");
-        tree.GetValue("True", null).Should().Be("True");
-        tree.GetValue("False", null).Should().Be("False");
-        tree.GetValue("Null", null).Should().BeNull();
-        tree.GetValue("Date", null).Should().Be("2018-01-25T07:37:59Z");
-        tree.GetValue("Array.0", null).Should().Be("a");
-        tree.GetValue("Array.1", null).Should().Be("b");
-        tree.GetValue("Nested.Value", null).Should().Be("Nested text");
+        tree.GetValue("String", null).ShouldBe("Text");
+        tree.GetValue("Integer", null).ShouldBe("42");
+        tree.GetValue("Decimal", null).ShouldBe("1.50");
+        tree.GetValue("True", null).ShouldBe("True");
+        tree.GetValue("False", null).ShouldBe("False");
+        tree.GetValue("Null", null).ShouldBeNull();
+        tree.GetValue("Date", null).ShouldBe("2018-01-25T07:37:59Z");
+        tree.GetValue("Array.0", null).ShouldBe("a");
+        tree.GetValue("Array.1", null).ShouldBe("b");
+        tree.GetValue("Nested.Value", null).ShouldBe("Nested text");
     }
 
-    [Test]
+    [Fact]
     public async Task JsonFileBackend_NonUtf8Encoding_ShouldReadFile()
     {
         var backend = new JsonFileBackend("TestFiles") { Encoding = Encoding.Unicode };
@@ -68,18 +67,18 @@ public class FileBackendsFixture
 
         var tree = await backend.LoadNamespaceAsync("utf16", "test");
 
-        tree.GetValue("Key", null).Should().Be("Wert äöü");
+        tree.GetValue("Key", null).ShouldBe("Wert äöü");
     }
 
-    [Test]
+    [Fact]
     public async Task JsonFileBackend_OverriddenFindFile_ShouldUseCustomFileLayout()
     {
         var backend = new CustomJsonFileBackend(Path.Combine("TestFiles", "custom"));
 
         var tree = await backend.LoadNamespaceAsync("en-US", "test");
 
-        tree.Should().NotBeNull();
-        tree.GetValue("Value1", null).Should().Be("Custom value 1");
+        tree.ShouldNotBeNull();
+        tree.GetValue("Value1", null).ShouldBe("Custom value 1");
     }
 
     private class CustomJsonFileBackend : JsonFileBackend

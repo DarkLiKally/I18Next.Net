@@ -1,22 +1,21 @@
-﻿using FluentAssertions;
-using I18Next.Net.Plugins;
-using NUnit.Framework;
+﻿using I18Next.Net.Plugins;
+using Shouldly;
+using Xunit;
 
 namespace I18Next.Net.Tests.Plugins;
 
-[TestFixture]
 public class DefaultLanguageDetectorFixture
 {
-    [Test]
+    [Fact]
     public void GetLanguage_ShouldReturnProvidedLanguage()
     {
         var detector = new DefaultLanguageDetector("de-DE");
-        detector.GetLanguage().Should().Be("de-DE");
+        detector.GetLanguage().ShouldBe("de-DE");
 
         detector = new DefaultLanguageDetector("en-US");
-        detector.GetLanguage().Should().Be("en-US");
+        detector.GetLanguage().ShouldBe("en-US");
 
         detector = new DefaultLanguageDetector("fr");
-        detector.GetLanguage().Should().Be("fr");
+        detector.GetLanguage().ShouldBe("fr");
     }
 }

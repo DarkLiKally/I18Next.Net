@@ -1,14 +1,13 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using I18Next.Net.Formatters;
-using NUnit.Framework;
+using Shouldly;
+using Xunit;
 
 namespace I18Next.Net.Tests.Formatters;
 
-[TestFixture]
 public class IntlFormatterDateTimeParityFixture
 {
     private static readonly HashSet<string> KnownDifferences = new()
@@ -25,11 +24,11 @@ public class IntlFormatterDateTimeParityFixture
 
     private static readonly IntlFormatter Formatter = new();
 
-    public static IEnumerable Cases
+    public static IEnumerable<object[]> Cases
     {
         get
         {
-            using var document = JsonDocument.Parse(File.ReadAllText(Path.Combine(TestContext.CurrentContext.TestDirectory, "TestFiles", "intl", "datetime.json")));
+            using var document = JsonDocument.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "TestFiles", "intl", "datetime.json")));
 
             foreach (var testCase in document.RootElement.GetProperty("cases").EnumerateArray())
             {
@@ -41,16 +40,15 @@ public class IntlFormatterDateTimeParityFixture
 
                 var date = testCase.GetProperty("date").GetString();
 
-                yield return new TestCaseData(locale, date, format)
-                    .Returns(testCase.GetProperty("expected").GetString())
-                    .SetName($"{locale} {date} {format}");
+                yield return new object[] { locale, date, format, testCase.GetProperty("expected").GetString() };
             }
         }
     }
 
-    [TestCaseSource(nameof(Cases))]
-    public string Format_DateTime_ShouldMatchBrowserIntl(string locale, string date, string format)
+    [Theory]
+    [MemberData(nameof(Cases), DisableDiscoveryEnumeration = true)]
+    public void Format_DateTime_ShouldMatchBrowserIntl(string locale, string date, string format, string expected)
     {
-        return Formatter.Format(DateTimeOffset.Parse(date), format, locale);
+        Formatter.Format(DateTimeOffset.Parse(date), format, locale).ShouldBe(expected);
     }
 }

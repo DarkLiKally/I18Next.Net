@@ -1,41 +1,41 @@
+using System;
 using System.Globalization;
-using FluentAssertions;
 using I18Next.Net.Plugins;
-using NUnit.Framework;
+using Shouldly;
+using Xunit;
 
 namespace I18Next.Net.Tests.Plugins;
 
-[TestFixture]
-public class ThreadLanguageDetectorFixture
+public class ThreadLanguageDetectorFixture : IDisposable
 {
-    private CultureInfo _originalCulture;
-
-    [SetUp]
-    public void SetUp()
+    public ThreadLanguageDetectorFixture()
     {
         _originalCulture = CultureInfo.CurrentCulture;
     }
 
-    [TearDown]
-    public void TearDown()
+    public void Dispose()
     {
         CultureInfo.CurrentCulture = _originalCulture;
+    
     }
+    private CultureInfo _originalCulture;
 
-    [Test]
+
+
+    [Fact]
     public void GetLanguage_ShouldReturnCurrentCulture()
     {
         CultureInfo.CurrentCulture = new CultureInfo("de-DE");
 
-        new ThreadLanguageDetector().GetLanguage().Should().Be("de-DE");
+        new ThreadLanguageDetector().GetLanguage().ShouldBe("de-DE");
     }
 
-    [Test]
+    [Fact]
     public void GetLanguage_InvariantCulture_ShouldReturnFallback()
     {
         CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
-        new ThreadLanguageDetector().GetLanguage().Should().Be("en-US");
-        new ThreadLanguageDetector("fr").GetLanguage().Should().Be("fr");
+        new ThreadLanguageDetector().GetLanguage().ShouldBe("en-US");
+        new ThreadLanguageDetector("fr").GetLanguage().ShouldBe("fr");
     }
 }

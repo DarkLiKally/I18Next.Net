@@ -1,27 +1,25 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using FluentAssertions;
 using I18Next.Net.Backends;
 using I18Next.Net.Logging;
 using I18Next.Net.Plugins;
 using NSubstitute;
-using NUnit.Framework;
+using Shouldly;
+using Xunit;
 
 namespace I18Next.Net.Tests.Plugins;
 
-[TestFixture]
 // ReSharper disable once InconsistentNaming
 public class DefaultInterpolator_NestedArgumentsFixture
 {
-    private DefaultInterpolator _interpolator;
-
-    [OneTimeSetUp]
-    public void OneTimeSetUp()
+    public DefaultInterpolator_NestedArgumentsFixture()
     {
         _interpolator = new DefaultInterpolator(Substitute.For<ILogger>());
     }
+    private DefaultInterpolator _interpolator;
 
-    [Test]
+
+    [Fact]
     public async Task NestAsync_DifferentArgumentTypes_ShouldBeConverted()
     {
         IDictionary<string, object> childArgs = null;
@@ -33,16 +31,16 @@ public class DefaultInterpolator_NestedArgumentsFixture
                 return Task.FromResult("done");
             });
 
-        childArgs["count"].Should().Be(2L);
-        childArgs["ratio"].Should().Be(1.5d);
-        childArgs["flag"].Should().Be(true);
-        childArgs["off"].Should().Be(false);
-        childArgs["none"].Should().BeNull();
-        childArgs["list"].Should().BeEquivalentTo(new object[] { 1L, "a" });
-        childArgs["obj"].Should().BeEquivalentTo(new Dictionary<string, object> { ["name"] = "x" });
+        childArgs["count"].ShouldBe(2L);
+        childArgs["ratio"].ShouldBe(1.5d);
+        childArgs["flag"].ShouldBe(true);
+        childArgs["off"].ShouldBe(false);
+        childArgs["none"].ShouldBeNull();
+        childArgs["list"].ShouldBeEquivalentTo(new object[] { 1L, "a" });
+        childArgs["obj"].ShouldBeEquivalentTo(new Dictionary<string, object> { ["name"] = "x" });
     }
 
-    [Test]
+    [Fact]
     public async Task NestAsync_InterpolatedChildArguments_ShouldUseParentValues()
     {
         var parentArgs = new Dictionary<string, object> { ["amount"] = 3 };
@@ -54,11 +52,11 @@ public class DefaultInterpolator_NestedArgumentsFixture
             return Task.FromResult("done");
         });
 
-        childArgs["count"].Should().Be(3L);
-        childArgs["amount"].Should().Be(3);
+        childArgs["count"].ShouldBe(3L);
+        childArgs["amount"].ShouldBe(3);
     }
 
-    [Test]
+    [Fact]
     public void I18Next_NestingWithPluralArguments_ShouldTranslateNestedPlural()
     {
         var backend = new InMemoryBackend();
@@ -69,15 +67,15 @@ public class DefaultInterpolator_NestedArgumentsFixture
 
         var i18Next = new I18NextNet(backend, new DefaultTranslator(backend)) { Language = "en" };
 
-        i18Next.T("girlsAndBoys", new { count = 2, girls = 3 }).Should().Be("3 girls and 2 boys");
+        i18Next.T("girlsAndBoys", new { count = 2, girls = 3 }).ShouldBe("3 girls and 2 boys");
     }
 
-    [Test]
+    [Fact]
     public async Task InterpolateAsync_UnescapedAndEscapedValues_ShouldReplaceBoth()
     {
         var result = await _interpolator.InterpolateAsync("{{-a}} {{b}} {{c.d}}", "key", "en",
             new Dictionary<string, object> { ["a"] = "<a>", ["b"] = "<b>", ["c"] = new Dictionary<string, object> { ["d"] = "e" } });
 
-        result.Should().Be("<a> <b> e");
+        result.ShouldBe("<a> <b> e");
     }
 }

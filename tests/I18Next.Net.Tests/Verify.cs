@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Linq;
-using FluentAssertions.Execution;
 using NSubstitute.Core.Arguments;
 
 namespace I18Next.Net.Tests;
@@ -24,18 +22,17 @@ public static class Verify
 
         public bool IsSatisfiedBy(T argument)
         {
-            using (var scope = new AssertionScope())
+            try
             {
                 _assertion(argument);
 
-                var failures = scope.Discard();
+                return true;
+            }
+            catch (Exception exception)
+            {
+                Trace.WriteLine(exception.Message);
 
-                foreach (var x in failures)
-                    Trace.WriteLine(x);
-
-                var hasFailures = failures.Any();
-
-                return hasFailures == false;
+                return false;
             }
         }
     }

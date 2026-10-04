@@ -1,22 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using FluentAssertions;
 using I18Next.Net.Formatters;
 using I18Next.Net.Plugins;
-using NUnit.Framework;
+using Shouldly;
+using Xunit;
 
 namespace I18Next.Net.Tests.Plugins;
 
-[TestFixture]
 // ReSharper disable once InconsistentNaming
 public class DefaultInterpolator_ChainedFormatsFixture
 {
-    private DefaultInterpolator _interpolator;
-    private Dictionary<string, object> _args;
-
-    [SetUp]
-    public void SetUp()
+    public DefaultInterpolator_ChainedFormatsFixture()
     {
         _interpolator = new DefaultInterpolator(new TraceLogger());
         _interpolator.Formatters.Add(new UppercaseFormatter());
@@ -32,52 +27,57 @@ public class DefaultInterpolator_ChainedFormatsFixture
             ["text"] = "Hello"
         };
     }
+    private DefaultInterpolator _interpolator;
+    private Dictionary<string, object> _args;
+
 
     private Task<string> InterpolateAsync(string source, string language = "en-US")
     {
         return _interpolator.InterpolateAsync(source, "key", language, _args);
     }
 
-    [TestCase("{{price, currency(EUR), uppercase}}", ExpectedResult = "€1,234.50")]
-    [TestCase("{{names, list, uppercase}}", ExpectedResult = "ANNA AND BEN")]
-    [TestCase("{{days, relativetime(numeric: auto), uppercase}}", ExpectedResult = "YESTERDAY")]
-    [TestCase("{{text, uppercase, lowercase}}", ExpectedResult = "hello")]
-    [TestCase("{{price, number(minimumFractionDigits: 2), uppercase}}", ExpectedResult = "1,234.50")]
-    [TestCase("{{date, datetime(dateStyle: full), uppercase}}", ExpectedResult = "TUESDAY, OCTOBER 2, 2018")]
-    public async Task<string> InterpolateAsync_ChainedFormats_ShouldApplyFormatsInOrder(string source)
+    [Theory]
+    [InlineData("{{price, currency(EUR), uppercase}}", "€1,234.50")]
+    [InlineData("{{names, list, uppercase}}", "ANNA AND BEN")]
+    [InlineData("{{days, relativetime(numeric: auto), uppercase}}", "YESTERDAY")]
+    [InlineData("{{text, uppercase, lowercase}}", "hello")]
+    [InlineData("{{price, number(minimumFractionDigits: 2), uppercase}}", "1,234.50")]
+    [InlineData("{{date, datetime(dateStyle: full), uppercase}}", "TUESDAY, OCTOBER 2, 2018")]
+    public async Task InterpolateAsync_ChainedFormats_ShouldApplyFormatsInOrder(string source, string expected)
     {
-        return await InterpolateAsync(source);
+        (await InterpolateAsync(source)).ShouldBe(expected);
     }
 
-    [TestCase("{{price, #,##0.00}}", ExpectedResult = "1,234.50")]
-    [TestCase("{{date, dddd, MMMM Do}}", ExpectedResult = "Tuesday, October 2nd")]
-    [TestCase("{{date, dddd, MMMM}}", ExpectedResult = "Tuesday, October")]
-    [TestCase("{{text, uppercase}}", ExpectedResult = "HELLO")]
-    [TestCase("{{price, N1}}", ExpectedResult = "1,234.5")]
-    public async Task<string> InterpolateAsync_LegacyFormatsWithSeparator_ShouldNotBeChained(string source)
+    [Theory]
+    [InlineData("{{price, #,##0.00}}", "1,234.50")]
+    [InlineData("{{date, dddd, MMMM Do}}", "Tuesday, October 2nd")]
+    [InlineData("{{date, dddd, MMMM}}", "Tuesday, October")]
+    [InlineData("{{text, uppercase}}", "HELLO")]
+    [InlineData("{{price, N1}}", "1,234.5")]
+    public async Task InterpolateAsync_LegacyFormatsWithSeparator_ShouldNotBeChained(string source, string expected)
     {
-        return await InterpolateAsync(source);
+        (await InterpolateAsync(source)).ShouldBe(expected);
     }
 
-    [Test]
+    [Fact]
     public async Task InterpolateAsync_CustomChainableFormat_ShouldBeChainedOnceRegistered()
     {
         _interpolator.Formatters.Add(new ReverseFormatter());
 
-        (await InterpolateAsync("{{text, reverse}}")).Should().Be("olleH");
-        (await InterpolateAsync("{{text, uppercase, reverse}}")).Should().Be("Hello");
+        (await InterpolateAsync("{{text, reverse}}")).ShouldBe("olleH");
+        (await InterpolateAsync("{{text, uppercase, reverse}}")).ShouldBe("Hello");
 
         _interpolator.ChainableFormats.Add("reverse");
 
-        (await InterpolateAsync("{{text, uppercase, reverse}}")).Should().Be("OLLEH");
+        (await InterpolateAsync("{{text, uppercase, reverse}}")).ShouldBe("OLLEH");
     }
 
-    [Test]
+    [Fact]
     public async Task InterpolateAsync_CustomSeparator_ShouldSplitChains()
     {
         _interpolator.FormatSeparator = "|";
 
-        (await InterpolateAsync("{{names | list(type: disjunction) | uppercase}}")).Should().Be("ANNA OR BEN");
+        (await InterpolateAsync("{{names | list(type: disjunction) | uppercase}}")).ShouldBe("ANNA OR BEN");
     }
 
     private class ReverseFormatter : IFormatter

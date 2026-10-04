@@ -1,5 +1,5 @@
 using System;
-using FluentAssertions;
+using System.Linq;
 using I18Next.Net.Backends;
 using I18Next.Net.Extensions;
 using I18Next.Net.Extensions.Builder;
@@ -8,11 +8,11 @@ using I18Next.Net.Logging;
 using I18Next.Net.Plugins;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
-using NUnit.Framework;
+using Shouldly;
+using Xunit;
 
 namespace I18Next.Net.Tests.Extensions;
 
-[TestFixture]
 public class ServiceCollectionExtensionsFixture
 {
     private static InMemoryBackend CreateBackend()
@@ -29,7 +29,7 @@ public class ServiceCollectionExtensionsFixture
         return backend;
     }
 
-    [Test]
+    [Fact]
     public void AddI18NextLocalization_Defaults_ShouldRegisterServices()
     {
         var services = new ServiceCollection();
@@ -37,19 +37,19 @@ public class ServiceCollectionExtensionsFixture
 
         using var provider = services.BuildServiceProvider();
 
-        provider.GetRequiredService<ITranslationBackend>().Should().BeOfType<JsonFileBackend>();
-        provider.GetRequiredService<ITranslator>().Should().BeOfType<DefaultTranslator>();
-        provider.GetRequiredService<IInterpolator>().Should().BeOfType<DefaultInterpolator>();
-        provider.GetRequiredService<IPluralResolver>().Should().BeOfType<DefaultPluralResolver>();
-        provider.GetRequiredService<ILanguageDetector>().Should().BeOfType<DefaultLanguageDetector>();
-        provider.GetRequiredService<ILogger>().Should().BeOfType<TraceLogger>();
-        provider.GetRequiredService<II18Next>().Language.Should().Be("en-US");
-        provider.GetRequiredService<IStringLocalizerFactory>().Should().BeOfType<I18NextStringLocalizerFactory>();
-        provider.GetRequiredService<IStringLocalizer<ServiceCollectionExtensionsFixture>>().Should().NotBeNull();
-        provider.GetRequiredService<IStringLocalizer>().Should().BeOfType<I18NextStringLocalizer>();
+        provider.GetRequiredService<ITranslationBackend>().ShouldBeOfType<JsonFileBackend>();
+        provider.GetRequiredService<ITranslator>().ShouldBeOfType<DefaultTranslator>();
+        provider.GetRequiredService<IInterpolator>().ShouldBeOfType<DefaultInterpolator>();
+        provider.GetRequiredService<IPluralResolver>().ShouldBeOfType<DefaultPluralResolver>();
+        provider.GetRequiredService<ILanguageDetector>().ShouldBeOfType<DefaultLanguageDetector>();
+        provider.GetRequiredService<ILogger>().ShouldBeOfType<TraceLogger>();
+        provider.GetRequiredService<II18Next>().Language.ShouldBe("en-US");
+        provider.GetRequiredService<IStringLocalizerFactory>().ShouldBeOfType<I18NextStringLocalizerFactory>();
+        provider.GetRequiredService<IStringLocalizer<ServiceCollectionExtensionsFixture>>().ShouldNotBeNull();
+        provider.GetRequiredService<IStringLocalizer>().ShouldBeOfType<I18NextStringLocalizer>();
     }
 
-    [Test]
+    [Fact]
     public void AddI18NextLocalization_Configured_ShouldTranslate()
     {
         var services = new ServiceCollection();
@@ -65,16 +65,16 @@ public class ServiceCollectionExtensionsFixture
         using var provider = services.BuildServiceProvider();
         var i18Next = provider.GetRequiredService<II18Next>();
 
-        i18Next.T("exampleKey").Should().Be("Mein deutscher text.");
-        i18Next.T("commonKey").Should().Be("Common English text.");
-        i18Next.T("upper", new { value = "abc" }).Should().Be("ABC");
-        i18Next.T("item", new { count = 1 }).Should().Be("ein Element");
-        i18Next.T("item", new { count = 4 }).Should().Be("4 Elemente");
+        i18Next.T("exampleKey").ShouldBe("Mein deutscher text.");
+        i18Next.T("commonKey").ShouldBe("Common English text.");
+        i18Next.T("upper", new { value = "abc" }).ShouldBe("ABC");
+        i18Next.T("item", new { count = 1 }).ShouldBe("ein Element");
+        i18Next.T("item", new { count = 4 }).ShouldBe("4 Elemente");
 
-        provider.GetRequiredService<IStringLocalizer<ServiceCollectionExtensionsFixture>>()["exampleKey"].Value.Should().Be("Mein deutscher text.");
+        provider.GetRequiredService<IStringLocalizer<ServiceCollectionExtensionsFixture>>()["exampleKey"].Value.ShouldBe("Mein deutscher text.");
     }
 
-    [Test]
+    [Fact]
     public void AddI18NextLocalization_GenericRegistrations_ShouldUseRegisteredTypes()
     {
         var services = new ServiceCollection();
@@ -89,17 +89,17 @@ public class ServiceCollectionExtensionsFixture
 
         using var provider = services.BuildServiceProvider();
 
-        provider.GetRequiredService<ITranslationBackend>().Should().BeOfType<InMemoryBackend>();
-        provider.GetRequiredService<ILanguageDetector>().Should().BeOfType<ThreadLanguageDetector>();
-        provider.GetRequiredService<IInterpolator>().Should().BeOfType<HtmlInterpolator>();
-        provider.GetRequiredService<II18Next>().DetectLanguageOnEachTranslation.Should().BeTrue();
+        provider.GetRequiredService<ITranslationBackend>().ShouldBeOfType<InMemoryBackend>();
+        provider.GetRequiredService<ILanguageDetector>().ShouldBeOfType<ThreadLanguageDetector>();
+        provider.GetRequiredService<IInterpolator>().ShouldBeOfType<HtmlInterpolator>();
+        provider.GetRequiredService<II18Next>().DetectLanguageOnEachTranslation.ShouldBeTrue();
 
         var translator = (DefaultTranslator) provider.GetRequiredService<ITranslator>();
-        translator.PostProcessors.Should().ContainSingle().Which.Should().BeOfType<SprintfPostProcessor>();
-        translator.MissingKeyHandlers.Should().ContainSingle();
+        translator.PostProcessors.ShouldHaveSingleItem().ShouldBeOfType<SprintfPostProcessor>();
+        translator.MissingKeyHandlers.ShouldHaveSingleItem();
     }
 
-    [Test]
+    [Fact]
     public void AddI18NextLocalization_FactoryRegistrations_ShouldUseFactories()
     {
         var backend = CreateBackend();
@@ -120,18 +120,18 @@ public class ServiceCollectionExtensionsFixture
 
         using var provider = services.BuildServiceProvider();
 
-        provider.GetRequiredService<ITranslationBackend>().Should().BeSameAs(backend);
-        provider.GetRequiredService<ILogger>().Should().BeSameAs(logger);
-        provider.GetRequiredService<ILanguageDetector>().GetLanguage().Should().Be("de");
+        provider.GetRequiredService<ITranslationBackend>().ShouldBeSameAs(backend);
+        provider.GetRequiredService<ILogger>().ShouldBeSameAs(logger);
+        provider.GetRequiredService<ILanguageDetector>().GetLanguage().ShouldBe("de");
 
         var translator = (DefaultTranslator) provider.GetRequiredService<ITranslator>();
-        translator.PostProcessors.Should().HaveCount(2);
-        translator.MissingKeyHandlers.Should().HaveCount(2);
+        translator.PostProcessors.Count().ShouldBe(2);
+        translator.MissingKeyHandlers.Count().ShouldBe(2);
 
-        provider.GetRequiredService<II18Next>().T("upper", new { value = "abc" }).Should().Be("ABC");
+        provider.GetRequiredService<II18Next>().T("upper", new { value = "abc" }).ShouldBe("ABC");
     }
 
-    [Test]
+    [Fact]
     public void AddI18NextLocalization_CustomTranslator_ShouldUseTranslator()
     {
         var backend = CreateBackend();
@@ -142,15 +142,15 @@ public class ServiceCollectionExtensionsFixture
 
         using var provider = services.BuildServiceProvider();
 
-        provider.GetRequiredService<ITranslator>().Should().BeSameAs(translator);
+        provider.GetRequiredService<ITranslator>().ShouldBeSameAs(translator);
 
         services = new ServiceCollection();
         services.AddI18NextLocalization(i18n => i18n.AddBackend(backend).AddTranslator(_ => translator).AddInterpolator(_ => new HtmlInterpolator(new TraceLogger())));
 
         using var factoryProvider = services.BuildServiceProvider();
 
-        factoryProvider.GetRequiredService<ITranslator>().Should().BeSameAs(translator);
-        factoryProvider.GetRequiredService<IInterpolator>().Should().BeOfType<HtmlInterpolator>();
+        factoryProvider.GetRequiredService<ITranslator>().ShouldBeSameAs(translator);
+        factoryProvider.GetRequiredService<IInterpolator>().ShouldBeOfType<HtmlInterpolator>();
 
         services = new ServiceCollection();
         services.AddSingleton<ITranslationBackend>(backend);
@@ -158,20 +158,20 @@ public class ServiceCollectionExtensionsFixture
 
         using var typeProvider = services.BuildServiceProvider();
 
-        typeProvider.GetRequiredService<ITranslator>().Should().BeOfType<DefaultTranslator>();
+        typeProvider.GetRequiredService<ITranslator>().ShouldBeOfType<DefaultTranslator>();
     }
 
-    [Test]
+    [Fact]
     public void StringLocalizerFactory_ShouldCreateLocalizers()
     {
         var backend = CreateBackend();
         var factory = new I18NextStringLocalizerFactory(new I18NextNet(backend, new DefaultTranslator(backend)) { Language = "de" });
 
-        factory.Create(typeof(ServiceCollectionExtensionsFixture))["exampleKey"].Value.Should().Be("Mein deutscher text.");
-        factory.Create("base", "location")["exampleKey"].Value.Should().Be("Mein deutscher text.");
+        factory.Create(typeof(ServiceCollectionExtensionsFixture))["exampleKey"].Value.ShouldBe("Mein deutscher text.");
+        factory.Create("base", "location")["exampleKey"].Value.ShouldBe("Mein deutscher text.");
     }
 
-    [Test]
+    [Fact]
     public void AddI18NextLocalization_LanguageFallbacks_ShouldBeApplied()
     {
         var backend = CreateBackend();
@@ -187,25 +187,25 @@ public class ServiceCollectionExtensionsFixture
         using var provider = services.BuildServiceProvider();
         var i18Next = provider.GetRequiredService<II18Next>();
 
-        i18Next.T("de-CH", "italianKey").Should().Be("Testo italiano.");
-        i18Next.T("de-CH", "frenchKey").Should().Be("frenchKey");
-        i18Next.T("de", "frenchKey").Should().Be("Texte français.");
+        i18Next.T("de-CH", "italianKey").ShouldBe("Testo italiano.");
+        i18Next.T("de-CH", "frenchKey").ShouldBe("frenchKey");
+        i18Next.T("de", "frenchKey").ShouldBe("Texte français.");
     }
 
-    [Test]
+    [Fact]
     public void Builder_InvalidArguments_ShouldThrow()
     {
         var builder = new I18NextBuilder(new ServiceCollection());
 
-        builder.Invoking(b => b.UseDefaultLanguage("")).Should().Throw<ArgumentException>();
-        builder.Invoking(b => b.UseDefaultNamespace(null)).Should().Throw<ArgumentException>();
-        builder.Invoking(b => b.UseFallbackLanguage()).Should().Throw<ArgumentException>();
-        builder.Invoking(b => b.UseFallbackLanguage("en", "")).Should().Throw<ArgumentException>();
-        builder.Invoking(b => b.UseFallbackNamespace()).Should().Throw<ArgumentException>();
-        builder.Invoking(b => b.UseFallbackNamespace("common", null)).Should().Throw<ArgumentException>();
-        builder.Invoking(b => b.UseFallbackLanguagesFor("", "en")).Should().Throw<ArgumentException>();
-        builder.Invoking(b => b.UseFallbackLanguagesFor("de")).Should().Throw<ArgumentException>();
-        builder.Invoking(b => b.UseFallbackLanguagesFor("de", "en", null)).Should().Throw<ArgumentException>();
+        Should.Throw<ArgumentException>(() => builder.UseDefaultLanguage(""));
+        Should.Throw<ArgumentException>(() => builder.UseDefaultNamespace(null));
+        Should.Throw<ArgumentException>(() => builder.UseFallbackLanguage());
+        Should.Throw<ArgumentException>(() => builder.UseFallbackLanguage("en", ""));
+        Should.Throw<ArgumentException>(() => builder.UseFallbackNamespace());
+        Should.Throw<ArgumentException>(() => builder.UseFallbackNamespace("common", null));
+        Should.Throw<ArgumentException>(() => builder.UseFallbackLanguagesFor("", "en"));
+        Should.Throw<ArgumentException>(() => builder.UseFallbackLanguagesFor("de"));
+        Should.Throw<ArgumentException>(() => builder.UseFallbackLanguagesFor("de", "en", null));
     }
 
     private class CountingMissingKeyHandler : IMissingKeyHandler

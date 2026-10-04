@@ -1,15 +1,16 @@
 ﻿using I18Next.Net.Plugins;
-using NUnit.Framework;
+using Shouldly;
+using Xunit;
 
 namespace I18Next.Net.Tests.Plugins;
 
-[TestFixture]
 public class DefaultPluralResolverFixture
 {
-    [TestCase(JsonFormat.Version1, ExpectedResult = "")]
-    [TestCase(JsonFormat.Version2, ExpectedResult = "")]
-    [TestCase(JsonFormat.Version3, ExpectedResult = "")]
-    public string GetPluralSuffix_OneInEnglish_ShouldReturnEmptyWhenUsingSimpleSuffix(JsonFormat jsonFormatVersion)
+    [Theory]
+    [InlineData(JsonFormat.Version1, "")]
+    [InlineData(JsonFormat.Version2, "")]
+    [InlineData(JsonFormat.Version3, "")]
+    public void GetPluralSuffix_OneInEnglish_ShouldReturnEmptyWhenUsingSimpleSuffix(JsonFormat jsonFormatVersion, string expected)
     {
         var pluralResolver = new DefaultPluralResolver()
         {
@@ -17,13 +18,14 @@ public class DefaultPluralResolverFixture
             UseSimplePluralSuffixIfPossible = true
         };
 
-        return pluralResolver.GetPluralSuffix("en", 1);
+        pluralResolver.GetPluralSuffix("en", 1).ShouldBe(expected);
     }
 
-    [TestCase(JsonFormat.Version1, ExpectedResult = "")]
-    [TestCase(JsonFormat.Version2, ExpectedResult = "_1")]
-    [TestCase(JsonFormat.Version3, ExpectedResult = "_0")]
-    public string GetPluralSuffix_OneInEnglish_ShouldReturnNumberWhenNotUsingSimpleSuffix(JsonFormat jsonFormatVersion)
+    [Theory]
+    [InlineData(JsonFormat.Version1, "")]
+    [InlineData(JsonFormat.Version2, "_1")]
+    [InlineData(JsonFormat.Version3, "_0")]
+    public void GetPluralSuffix_OneInEnglish_ShouldReturnNumberWhenNotUsingSimpleSuffix(JsonFormat jsonFormatVersion, string expected)
     {
         var pluralResolver = new DefaultPluralResolver()
         {
@@ -31,13 +33,14 @@ public class DefaultPluralResolverFixture
             UseSimplePluralSuffixIfPossible = false
         };
 
-        return pluralResolver.GetPluralSuffix("en", 1);
+        pluralResolver.GetPluralSuffix("en", 1).ShouldBe(expected);
     }
 
-    [TestCase(JsonFormat.Version1, ExpectedResult = "_plural")]
-    [TestCase(JsonFormat.Version2, ExpectedResult = "_plural")]
-    [TestCase(JsonFormat.Version3, ExpectedResult = "_plural")]
-    public string GetPluralSuffix_TwoInEnglish_ShouldReturnPluralWhenUsingSimpleSuffix(JsonFormat jsonFormatVersion)
+    [Theory]
+    [InlineData(JsonFormat.Version1, "_plural")]
+    [InlineData(JsonFormat.Version2, "_plural")]
+    [InlineData(JsonFormat.Version3, "_plural")]
+    public void GetPluralSuffix_TwoInEnglish_ShouldReturnPluralWhenUsingSimpleSuffix(JsonFormat jsonFormatVersion, string expected)
     {
         var pluralResolver = new DefaultPluralResolver()
         {
@@ -45,13 +48,14 @@ public class DefaultPluralResolverFixture
             UseSimplePluralSuffixIfPossible = true
         };
 
-        return pluralResolver.GetPluralSuffix("en", 2);
+        pluralResolver.GetPluralSuffix("en", 2).ShouldBe(expected);
     }
 
-    [TestCase(JsonFormat.Version1, ExpectedResult = "_plural_2")]
-    [TestCase(JsonFormat.Version2, ExpectedResult = "_2")]
-    [TestCase(JsonFormat.Version3, ExpectedResult = "_1")]
-    public string GetPluralSuffix_TwoInEnglish_ShouldReturnNumberWhenNotUsingSimpleSuffix(JsonFormat jsonFormatVersion)
+    [Theory]
+    [InlineData(JsonFormat.Version1, "_plural_2")]
+    [InlineData(JsonFormat.Version2, "_2")]
+    [InlineData(JsonFormat.Version3, "_1")]
+    public void GetPluralSuffix_TwoInEnglish_ShouldReturnNumberWhenNotUsingSimpleSuffix(JsonFormat jsonFormatVersion, string expected)
     {
         var pluralResolver = new DefaultPluralResolver()
         {
@@ -59,32 +63,34 @@ public class DefaultPluralResolverFixture
             UseSimplePluralSuffixIfPossible = false
         };
 
-        return pluralResolver.GetPluralSuffix("en", 2);
+        pluralResolver.GetPluralSuffix("en", 2).ShouldBe(expected);
     }
 
-    [TestCase(JsonFormat.Version1, ExpectedResult = "")]
-    [TestCase(JsonFormat.Version2, ExpectedResult = "")]
-    [TestCase(JsonFormat.Version3, ExpectedResult = "_0")]
-    public string GetPluralSuffix_OneInJapanese_ShouldReturnNumber(JsonFormat jsonFormatVersion)
+    [Theory]
+    [InlineData(JsonFormat.Version1, "")]
+    [InlineData(JsonFormat.Version2, "")]
+    [InlineData(JsonFormat.Version3, "_0")]
+    public void GetPluralSuffix_OneInJapanese_ShouldReturnNumber(JsonFormat jsonFormatVersion, string expected)
     {
         var pluralResolver = new DefaultPluralResolver()
         {
             JsonFormatVersion = jsonFormatVersion,
         };
 
-        return pluralResolver.GetPluralSuffix("ja", 1);
+        pluralResolver.GetPluralSuffix("ja", 1).ShouldBe(expected);
     }
 
-    [TestCase(JsonFormat.Version1, ExpectedResult = "")]
-    [TestCase(JsonFormat.Version2, ExpectedResult = "")]
-    [TestCase(JsonFormat.Version3, ExpectedResult = "_0")]
-    public string GetPluralSuffix_TwoInJapanese_ShouldReturnNumber(JsonFormat jsonFormatVersion)
+    [Theory]
+    [InlineData(JsonFormat.Version1, "")]
+    [InlineData(JsonFormat.Version2, "")]
+    [InlineData(JsonFormat.Version3, "_0")]
+    public void GetPluralSuffix_TwoInJapanese_ShouldReturnNumber(JsonFormat jsonFormatVersion, string expected)
     {
         var pluralResolver = new DefaultPluralResolver()
         {
             JsonFormatVersion = jsonFormatVersion,
         };
 
-        return pluralResolver.GetPluralSuffix("ja", 2);
+        pluralResolver.GetPluralSuffix("ja", 2).ShouldBe(expected);
     }
 }

@@ -1,28 +1,16 @@
-﻿using System.Threading.Tasks;
-using FluentAssertions;
+﻿using System;
+using System.Threading.Tasks;
 using I18Next.Net.Backends;
 using I18Next.Net.TranslationTrees;
 using NSubstitute;
-using NUnit.Framework;
+using Shouldly;
+using Xunit;
 
 namespace I18Next.Net.Tests.Backends;
 
-[TestFixture]
-public class CompositeBackendFixture
+public class CompositeBackendFixture : IDisposable
 {
-    [TearDown]
-    public void TearDown()
-    {
-        _backendA.ClearReceivedCalls();
-        _backendB.ClearReceivedCalls();
-    }
-
-    private ITranslationBackend _backendB;
-    private ITranslationBackend _backendA;
-    private CompositeBackend _backend;
-
-    [OneTimeSetUp]
-    public void OneTimeSetUp()
+    public CompositeBackendFixture()
     {
         _backendA = Substitute.For<ITranslationBackend>();
         _backendB = Substitute.For<ITranslationBackend>();
@@ -33,12 +21,24 @@ public class CompositeBackendFixture
         _backendB.LoadNamespaceAsync("en", "backA").Returns((ITranslationTree) null);
     }
 
-    [Test]
+    public void Dispose()
+    {
+        _backendA.ClearReceivedCalls();
+        _backendB.ClearReceivedCalls();
+    
+    }
+
+    private ITranslationBackend _backendB;
+    private ITranslationBackend _backendA;
+    private CompositeBackend _backend;
+
+
+    [Fact]
     public async Task LoadNamespaceAsync_WithBackendANamespace_ShouldCallBackendA()
     {
         var tree = await _backend.LoadNamespaceAsync("en", "backA");
 
-        tree.Should().NotBeNull();
+        tree.ShouldNotBeNull();
 
         await _backendA.Received(1).LoadNamespaceAsync("en", "backA");
         await _backendA.DidNotReceive().LoadNamespaceAsync("en", "backB");
@@ -46,12 +46,12 @@ public class CompositeBackendFixture
         await _backendB.DidNotReceive().LoadNamespaceAsync("en", "backB");
     }
 
-    [Test]
+    [Fact]
     public async Task LoadNamespaceAsync_WithBackendBNamespace_ShouldCallBackendB()
     {
         var tree = await _backend.LoadNamespaceAsync("en", "backB");
 
-        tree.Should().NotBeNull();
+        tree.ShouldNotBeNull();
 
         await _backendA.DidNotReceive().LoadNamespaceAsync("en", "backA");
         await _backendA.Received(1).LoadNamespaceAsync("en", "backB");

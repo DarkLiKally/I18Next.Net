@@ -1,41 +1,45 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using I18Next.Net.Plugins;
-using NUnit.Framework;
+using Shouldly;
+using Xunit;
 
 namespace I18Next.Net.Tests.Plugins;
 
-[TestFixture]
 public class DefaultPluralResolverCldrFixture
 {
-    private static IEnumerable GetSamples(string kind)
+    private static IEnumerable<object[]> GetSamples(string kind)
     {
-        using var document = JsonDocument.Parse(File.ReadAllText(Path.Combine(TestContext.CurrentContext.TestDirectory, "TestFiles", "cldr", "plural-samples.json")));
+        using var document = JsonDocument.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "TestFiles", "cldr", "plural-samples.json")));
 
         foreach (var language in document.RootElement.GetProperty(kind).EnumerateObject())
         {
             foreach (var category in language.Value.EnumerateObject())
             {
                 foreach (var sample in category.Value.EnumerateArray())
-                    yield return new TestCaseData(language.Name, sample.GetInt32()).Returns(category.Name).SetName($"{kind} {language.Name} {sample.GetInt32()}");
+                    yield return new object[] { language.Name, sample.GetInt32(), category.Name };
             }
         }
     }
 
-    public static IEnumerable CardinalSamples => GetSamples("cardinal");
+    public static IEnumerable<object[]> CardinalSamples => GetSamples("cardinal");
 
-    public static IEnumerable OrdinalSamples => GetSamples("ordinal");
+    public static IEnumerable<object[]> OrdinalSamples => GetSamples("ordinal");
 
-    [TestCaseSource(nameof(CardinalSamples))]
-    public string GetPluralCategory_CldrSamples_ShouldMatch(string language, int count)
+    [Theory]
+    [MemberData(nameof(CardinalSamples), DisableDiscoveryEnumeration = true)]
+    public void GetPluralCategory_CldrSamples_ShouldMatch(string language, int count, string expected)
     {
-        return DefaultPluralResolver.GetPluralCategory(language, count);
+        DefaultPluralResolver.GetPluralCategory(language, count).ShouldBe(expected);
     }
 
-    [TestCaseSource(nameof(OrdinalSamples))]
-    public string GetOrdinalPluralCategory_CldrSamples_ShouldMatch(string language, int count)
+    [Theory]
+    [MemberData(nameof(OrdinalSamples), DisableDiscoveryEnumeration = true)]
+    public void GetOrdinalPluralCategory_CldrSamples_ShouldMatch(string language, int count, string expected)
     {
-        return DefaultPluralResolver.GetOrdinalPluralCategory(language, count);
+        DefaultPluralResolver.GetOrdinalPluralCategory(language, count).ShouldBe(expected);
     }
 }

@@ -1,28 +1,26 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using FluentAssertions;
 using I18Next.Net.Extensions;
 using I18Next.Net.Logging;
 using I18Next.Net.Plugins;
 using NSubstitute;
-using NUnit.Framework;
+using Shouldly;
+using Xunit;
 
 namespace I18Next.Net.Tests;
 
-[TestFixture]
 public class LoggingFixture
 {
-    private ILogger _logger;
-
-    [SetUp]
-    public void SetUp()
+    public LoggingFixture()
     {
         _logger = Substitute.For<ILogger>();
         _logger.IsEnabled(Arg.Any<LogLevel>()).Returns(true);
     }
+    private ILogger _logger;
 
-    [Test]
+
+    [Fact]
     public void Extensions_WithoutException_ShouldForwardLogLevel()
     {
         _logger.LogTrace("trace {a}", 1);
@@ -40,7 +38,7 @@ public class LoggingFixture
         _logger.Received(1).Log(LogLevel.Critical, "critical {a}", Arg.Any<object[]>());
     }
 
-    [Test]
+    [Fact]
     public void Extensions_WithException_ShouldForwardLogLevelAndException()
     {
         var exception = new InvalidOperationException();
@@ -61,7 +59,7 @@ public class LoggingFixture
     }
 
 #if NET6_0_OR_GREATER
-    [Test]
+    [Fact]
     public void Extensions_InterpolatedStrings_ShouldCreateStructuredTemplates()
     {
         var value = 42;
@@ -96,7 +94,7 @@ public class LoggingFixture
         _logger.Received(1).Log(LogLevel.Critical, exception, "critical {@value}", Arg.Any<object[]>());
     }
 
-    [Test]
+    [Fact]
     public void Extensions_InterpolatedStringsWithDisabledLevel_ShouldNotLog()
     {
         var logger = Substitute.For<ILogger>();
@@ -108,7 +106,7 @@ public class LoggingFixture
     }
 #endif
 
-    [Test]
+    [Fact]
     public void TraceLogger_ShouldOnlyWriteEnabledLevels()
     {
         var writer = new StringWriter();
@@ -119,8 +117,8 @@ public class LoggingFixture
         {
             var logger = new TraceLogger { LogLevel = LogLevel.Information };
 
-            logger.IsEnabled(LogLevel.Debug).Should().BeFalse();
-            logger.IsEnabled(LogLevel.Information).Should().BeTrue();
+            logger.IsEnabled(LogLevel.Debug).ShouldBeFalse();
+            logger.IsEnabled(LogLevel.Information).ShouldBeTrue();
 
             logger.LogDebug("hidden {value}", 1);
             logger.LogInformation("Value {value,5:D3} and {other}", 7, "text");
@@ -132,12 +130,12 @@ public class LoggingFixture
 
             var output = writer.ToString();
 
-            output.Should().NotContain("hidden");
-            output.Should().Contain("Value   007 and text");
-            output.Should().Contain("warning {escaped} 2");
-            output.Should().Contain("error 3");
-            output.Should().Contain("{braces}");
-            output.Should().Contain("critical");
+            output.ShouldNotContain("hidden");
+            output.ShouldContain("Value   007 and text");
+            output.ShouldContain("warning {escaped} 2");
+            output.ShouldContain("error 3");
+            output.ShouldContain("{braces}");
+            output.ShouldContain("critical");
         }
         finally
         {
@@ -145,7 +143,7 @@ public class LoggingFixture
         }
     }
 
-    [Test]
+    [Fact]
     public void DefaultExtensionsLogger_ShouldForwardToMicrosoftLogger()
     {
         var msLogger = Substitute.For<Microsoft.Extensions.Logging.ILogger>();
@@ -153,8 +151,8 @@ public class LoggingFixture
 
         var logger = new DefaultExtensionsLogger(msLogger);
 
-        logger.IsEnabled(LogLevel.Warning).Should().BeTrue();
-        logger.IsEnabled(LogLevel.Debug).Should().BeFalse();
+        logger.IsEnabled(LogLevel.Warning).ShouldBeTrue();
+        logger.IsEnabled(LogLevel.Debug).ShouldBeFalse();
 
         logger.Log(LogLevel.Warning, "message {a}", 1);
         logger.Log(LogLevel.Error, new InvalidOperationException(), "message {a}", 1);

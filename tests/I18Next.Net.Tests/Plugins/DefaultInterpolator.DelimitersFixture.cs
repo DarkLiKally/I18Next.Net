@@ -1,37 +1,35 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using FluentAssertions;
 using I18Next.Net.Logging;
 using I18Next.Net.Plugins;
 using NSubstitute;
-using NUnit.Framework;
+using Shouldly;
+using Xunit;
 
 namespace I18Next.Net.Tests.Plugins;
 
-[TestFixture]
 // ReSharper disable once InconsistentNaming
 public class DefaultInterpolator_DelimitersFixture
 {
-    private DefaultInterpolator _interpolator;
-
-    [SetUp]
-    public void SetUp()
+    public DefaultInterpolator_DelimitersFixture()
     {
         _interpolator = new HtmlInterpolator(Substitute.For<ILogger>());
     }
+    private DefaultInterpolator _interpolator;
 
-    [Test]
+
+    [Fact]
     public void Delimiters_Defaults_ShouldMatchI18Next()
     {
-        _interpolator.Prefix.Should().Be("{{");
-        _interpolator.Suffix.Should().Be("}}");
-        _interpolator.UnescapePrefix.Should().Be("-");
-        _interpolator.NestingPrefix.Should().Be("$t(");
-        _interpolator.NestingSuffix.Should().Be(")");
+        _interpolator.Prefix.ShouldBe("{{");
+        _interpolator.Suffix.ShouldBe("}}");
+        _interpolator.UnescapePrefix.ShouldBe("-");
+        _interpolator.NestingPrefix.ShouldBe("$t(");
+        _interpolator.NestingSuffix.ShouldBe(")");
     }
 
-    [Test]
+    [Fact]
     public async Task InterpolateAsync_CustomDelimiters_ShouldReplaceValues()
     {
         _interpolator.Prefix = "__";
@@ -42,10 +40,10 @@ public class DefaultInterpolator_DelimitersFixture
 
         var result = await _interpolator.InterpolateAsync("Hello __name__ and __!raw__, not {{name}}", "key", "en", args);
 
-        result.Should().Be("Hello &lt;b&gt; and <i>, not {{name}}");
+        result.ShouldBe("Hello &lt;b&gt; and <i>, not {{name}}");
     }
 
-    [Test]
+    [Fact]
     public async Task InterpolateAsync_RegexCharactersInDelimiters_ShouldBeEscaped()
     {
         _interpolator.Prefix = "[[";
@@ -53,33 +51,33 @@ public class DefaultInterpolator_DelimitersFixture
 
         var result = await _interpolator.InterpolateAsync("Value: [[value]]", "key", "en", new Dictionary<string, object> { ["value"] = 5 });
 
-        result.Should().Be("Value: 5");
+        result.ShouldBe("Value: 5");
     }
 
-    [Test]
+    [Fact]
     public async Task NestAsync_CustomNestingDelimiters_ShouldNest()
     {
         _interpolator.NestingPrefix = "@t{";
         _interpolator.NestingSuffix = "}";
 
-        _interpolator.CanNest("Hello @t{other}").Should().BeTrue();
-        _interpolator.CanNest("Hello $t(other)").Should().BeFalse();
+        _interpolator.CanNest("Hello @t{other}").ShouldBeTrue();
+        _interpolator.CanNest("Hello $t(other)").ShouldBeFalse();
 
         _interpolator.UseFastNestingMatch = false;
-        _interpolator.CanNest("Hello @t{other}").Should().BeTrue();
+        _interpolator.CanNest("Hello @t{other}").ShouldBeTrue();
 
         var result = await _interpolator.NestAsync("Hello @t{other} $t(ignored)", "en", null, (_, key, _) => Task.FromResult($"<{key}>"));
 
-        result.Should().Be("Hello <other> $t(ignored)");
+        result.ShouldBe("Hello <other> $t(ignored)");
     }
 
-    [Test]
+    [Fact]
     public void Delimiters_Empty_ShouldThrow()
     {
-        _interpolator.Invoking(i => i.Prefix = "").Should().Throw<ArgumentNullException>();
-        _interpolator.Invoking(i => i.Suffix = null).Should().Throw<ArgumentNullException>();
-        _interpolator.Invoking(i => i.UnescapePrefix = "").Should().Throw<ArgumentNullException>();
-        _interpolator.Invoking(i => i.NestingPrefix = "").Should().Throw<ArgumentNullException>();
-        _interpolator.Invoking(i => i.NestingSuffix = "").Should().Throw<ArgumentNullException>();
+        Should.Throw<ArgumentNullException>(() => _interpolator.Prefix = "");
+        Should.Throw<ArgumentNullException>(() => _interpolator.Suffix = null);
+        Should.Throw<ArgumentNullException>(() => _interpolator.UnescapePrefix = "");
+        Should.Throw<ArgumentNullException>(() => _interpolator.NestingPrefix = "");
+        Should.Throw<ArgumentNullException>(() => _interpolator.NestingSuffix = "");
     }
 }
