@@ -2,15 +2,7 @@
 
     <PropertyGroup>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Company>DarkLiKally</Company>
-        <Authors>DarkLiKally</Authors>
-        <PackageProjectUrl>https://github.com/DarkLiKally/I18Next.Net</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/DarkLiKally/I18Next.Net</RepositoryUrl>
-        <RepositoryType>git</RepositoryType>
-        <Product>I18Next.Net</Product>
-        <Version>1.0.0</Version>
         <TargetFrameworks>netstandard2.0;net6.0;net8.0;net10.0</TargetFrameworks>
-        <LangVersion>latest</LangVersion>
         <NoWarn>CS1591</NoWarn>
     </PropertyGroup>
 
