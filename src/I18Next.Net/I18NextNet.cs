@@ -100,17 +100,17 @@ public class I18NextNet : II18Next
 
     public string T(string key, object args = null)
     {
-        return Ta(key, args).ConfigureAwait(false).GetAwaiter().GetResult();
+        return Translate(GetCurrentLanguage(), key, args, _options);
     }
 
     public string T(string language, string key, object args = null)
     {
-        return Ta(language, key, args).ConfigureAwait(false).GetAwaiter().GetResult();
+        return Translate(language, key, args, _options);
     }
 
     public string T(string language, string defaultNamespace, string key, object args = null)
     {
-        return Ta(language, defaultNamespace, key, args).ConfigureAwait(false).GetAwaiter().GetResult();
+        return Translate(language, key, args, CreateTranslationOptions(defaultNamespace));
     }
 
     public Task<string> Ta(string key, object args = null)
@@ -281,6 +281,16 @@ public class I18NextNet : II18Next
     private void OnLanguageChanged(LanguageChangedEventArgs e)
     {
         LanguageChanged?.Invoke(this, e);
+    }
+
+    private string Translate(string language, string key, object args, TranslationOptions options)
+    {
+        if (Translator is not DefaultTranslator translator || translator.GetType() != typeof(DefaultTranslator))
+            return Ta(language, key, args, options).ConfigureAwait(false).GetAwaiter().GetResult();
+
+        var result = translator.TranslateValueAsync(language, key, args.ToDictionary(), options);
+
+        return result.IsCompletedSuccessfully ? result.Result : result.AsTask().ConfigureAwait(false).GetAwaiter().GetResult();
     }
 
     private Task<string> Ta(string language, string key, object args, TranslationOptions options)

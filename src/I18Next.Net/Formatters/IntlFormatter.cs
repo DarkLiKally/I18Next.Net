@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -20,6 +20,8 @@ namespace I18Next.Net.Formatters;
 public class IntlFormatter : IFormatter
 {
     private static readonly ConcurrentDictionary<(string Currency, string Language), (string Symbol, int DecimalDigits)> Currencies = new();
+    private static readonly ConcurrentDictionary<string, ParsedFormat> ParsedFormats = new();
+    private static readonly ConcurrentDictionary<(int Minimum, int Maximum, bool Grouping), string> NumberPatterns = new();
 
     public bool CanFormat(object value, string format, string language)
     {
@@ -39,10 +41,12 @@ public class IntlFormatter : IFormatter
         if (value == null)
             return null;
 
-        var options = ParseOptions(format, out var positionalOption);
+        var parsedFormat = ParsedFormats.GetOrAdd(format, ParseFormat);
+        var options = parsedFormat.Options;
+        var positionalOption = parsedFormat.PositionalOption;
         var culture = GetCulture(language);
 
-        return GetFormatName(format) switch
+        return parsedFormat.Name switch
         {
             "number" => FormatNumber((IFormattable)value, options, culture),
             "currency" => FormatCurrency((IFormattable)value, options, positionalOption, culture),
@@ -59,10 +63,8 @@ public class IntlFormatter : IFormatter
         var maximumFractionDigits = Math.Max(GetIntOption(options, "maximumFractionDigits", Math.Max(3, minimumFractionDigits)), minimumFractionDigits);
         var useGrouping = !options.TryGetValue("useGrouping", out var grouping) || !string.Equals(grouping, "false", StringComparison.OrdinalIgnoreCase);
 
-        var format = useGrouping ? "#,##0" : "0";
-
-        if (maximumFractionDigits > 0)
-            format += "." + new string('0', minimumFractionDigits) + new string('#', maximumFractionDigits - minimumFractionDigits);
+        var format = NumberPatterns.GetOrAdd((minimumFractionDigits, maximumFractionDigits, useGrouping), static key =>
+            (key.Grouping ? "#,##0" : "0") + (key.Maximum > 0 ? "." + new string('0', key.Minimum) + new string('#', key.Maximum - key.Minimum) : ""));
 
         return RoundAwayFromZero(value, maximumFractionDigits).ToString(format, culture);
     }
@@ -353,10 +355,16 @@ public class IntlFormatter : IFormatter
 
     private static string GetFormatName(string format)
     {
-        var optionsIndex = format.IndexOf('(');
-        var name = optionsIndex > -1 ? format.Substring(0, optionsIndex) : format;
+        return ParsedFormats.GetOrAdd(format, ParseFormat).Name;
+    }
 
-        return name.Trim().ToLowerInvariant();
+    private static ParsedFormat ParseFormat(string format)
+    {
+        var optionsIndex = format.IndexOf('(');
+        var name = (optionsIndex > -1 ? format.Substring(0, optionsIndex) : format).Trim().ToLowerInvariant();
+        var options = ParseOptions(format, out var positionalOption);
+
+        return new ParsedFormat(name, options, positionalOption);
     }
 
     private static int GetIntOption(IDictionary<string, string> options, string name, int defaultValue)
@@ -402,5 +410,14 @@ public class IntlFormatter : IFormatter
         }
 
         return options;
+    }
+
+    private sealed class ParsedFormat(string name, IDictionary<string, string> options, string positionalOption)
+    {
+        public string Name { get; } = name;
+
+        public IDictionary<string, string> Options { get; } = options;
+
+        public string PositionalOption { get; } = positionalOption;
     }
 }

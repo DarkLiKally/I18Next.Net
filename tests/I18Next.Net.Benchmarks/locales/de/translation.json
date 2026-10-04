@@ -1,0 +1,22 @@
+{
+    "simple": "Hallo Welt",
+    "deep": {
+        "nested": {
+            "key": "Tief verschachtelt"
+        }
+    },
+    "greeting": "Hallo {{name}}!",
+    "multiple": "{{a}}, {{b}} und {{c}}",
+    "item_one": "{{count}} Element",
+    "item_other": "{{count}} Elemente",
+    "friend": "Ein Freund",
+    "friend_male_one": "Ein Freund",
+    "friend_male_other": "{{count}} Freunde",
+    "appName": "I18Next",
+    "nesting": "Willkommen bei $t(appName)",
+    "price": "Preis: {{value, number}}",
+    "menu": {
+        "title": "Menü",
+        "items": [ "Start", "Über", "Kontakt" ]
+    }
+}

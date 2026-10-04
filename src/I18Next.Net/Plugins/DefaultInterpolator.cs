@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -21,8 +22,6 @@ public class DefaultInterpolator : IInterpolator
 
     private static readonly Regex DefaultExpressionRegex = CreateExpressionRegex(DefaultPrefix, DefaultSuffix);
 
-    private static readonly Regex DefaultUnescapedExpressionRegex = CreateExpressionRegex(DefaultPrefix + DefaultUnescapePrefix, DefaultSuffix);
-
     private static readonly Regex DefaultNestingRegex = CreateExpressionRegex(DefaultNestingPrefix, DefaultNestingSuffix);
 
     private static readonly JsonDocumentOptions NestedArgsDocumentOptions = new()
@@ -32,9 +31,12 @@ public class DefaultInterpolator : IInterpolator
     };
 
 
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<(string Expression, string Separator), (string Key, string Format)> _expressions = new();
+    [ThreadStatic]
+    private static StringBuilder _cachedBuilder;
+
     private List<IFormatter> _formatters;
     private Regex _expressionRegex = DefaultExpressionRegex;
-    private Regex _unescapedExpressionRegex = DefaultUnescapedExpressionRegex;
     private Regex _nestingRegex = DefaultNestingRegex;
 
     public string Prefix
@@ -104,6 +106,17 @@ public class DefaultInterpolator : IInterpolator
 
     public bool UseFastNestingMatch { get; set; } = true;
 
+    /// <summary>
+    ///     Skips the interpolation and nesting of placeholders contained in the inserted values, like the i18next
+    ///     <c>skipOnVariables</c> option.
+    /// </summary>
+    public bool SkipOnVariables { get; set; } = true;
+
+    /// <summary>
+    ///     Passes values without a format to the formatters, like the i18next <c>alwaysFormat</c> option.
+    /// </summary>
+    public bool AlwaysFormat { get; set; }
+
     public DefaultInterpolator(ILogger logger)
     {
         _logger = logger;
@@ -119,42 +132,97 @@ public class DefaultInterpolator : IInterpolator
 
     public virtual Task<string> InterpolateAsync(string source, string key, string language, IDictionary<string, object> args)
     {
-        if (!source.Contains(Prefix))
-            return Task.FromResult(source);
+        return Task.FromResult(Interpolate(source, key, language, args));
+    }
 
-        var matches = _expressionRegex.Matches(source);
-
-        var result = source;
+    public string Interpolate(string source, string key, string language, IDictionary<string, object> args)
+    {
         var replaces = 0;
+        var result = InterpolateOnce(source, language, args, ref replaces);
 
-        if (source.Contains(Prefix + UnescapePrefix))
+        while (!SkipOnVariables && replaces < MaximumReplaces && !ReferenceEquals(result, source))
         {
-            var unescapeMatches = _unescapedExpressionRegex.Matches(source);
-
-            for (var i = 0; i < unescapeMatches.Count; i++)
-            {
-                var match = unescapeMatches[i];
-                result = HandleUnescapeRegexMatch(result, language, args, match);
-
-                replaces++;
-
-                if (replaces >= MaximumReplaces)
-                    break;
-            }
+            source = result;
+            result = InterpolateOnce(source, language, args, ref replaces);
         }
 
-        for (var i = 0; i < matches.Count; i++)
+        return result;
+    }
+
+    private string InterpolateOnce(string source, string language, IDictionary<string, object> args, ref int replaces)
+    {
+        var start = source.IndexOf(Prefix, StringComparison.Ordinal);
+
+        if (start < 0)
+            return source;
+
+        StringBuilder builder = null;
+        var position = 0;
+
+        while (start >= 0 && replaces < MaximumReplaces)
         {
-            if (replaces >= MaximumReplaces)
+            var expressionStart = start + Prefix.Length;
+            var end = expressionStart < source.Length ? source.IndexOf(Suffix, expressionStart + 1, StringComparison.Ordinal) : -1;
+
+            if (end < 0)
                 break;
 
-            var match = matches[i];
-            result = HandleRegexMatch(result, language, args, match);
+            if (source.IndexOf('\n', expressionStart, end - expressionStart) >= 0)
+            {
+                start = source.IndexOf(Prefix, start + 1, StringComparison.Ordinal);
+                continue;
+            }
 
+            var expression = source.Substring(expressionStart, end - expressionStart);
+            var unescape = expression.Length > UnescapePrefix.Length && expression.StartsWith(UnescapePrefix, StringComparison.Ordinal);
+
+            if (unescape)
+                expression = expression.Substring(UnescapePrefix.Length);
+
+            var value = GetValueForExpression(expression, language, args);
+
+            value ??= MissingValueHandler != null ? MissingValueHandler(source, _expressionRegex.Match(source, start)) : string.Empty;
+
+            if (!unescape && EscapeValues)
+                value = EscapeValue(value);
+
+            if (builder == null)
+            {
+                builder = _cachedBuilder ?? new StringBuilder(source.Length + 32);
+                _cachedBuilder = null;
+            }
+
+            builder.Append(source, position, start - position).Append(value);
+            position = end + Suffix.Length;
             replaces++;
+
+            start = source.IndexOf(Prefix, position, StringComparison.Ordinal);
         }
 
-        return Task.FromResult(result);
+        if (builder == null)
+            return source;
+
+        builder.Append(source, position, source.Length - position);
+
+        var result = builder.ToString();
+
+        if (builder.Capacity <= 1024)
+        {
+            builder.Clear();
+            _cachedBuilder = builder;
+        }
+
+        return result;
+    }
+
+    internal int CountNestings(string source)
+    {
+        var count = 0;
+
+        for (var index = source.IndexOf(NestingPrefix, StringComparison.Ordinal); index >= 0; index = source.IndexOf(NestingPrefix, index + 1, StringComparison.Ordinal))
+            count++;
+
+        return count;
     }
 
     public virtual async Task<string> NestAsync(
@@ -189,7 +257,6 @@ public class DefaultInterpolator : IInterpolator
     private void UpdateExpressionRegexes()
     {
         _expressionRegex = CreateExpressionRegex(Prefix, Suffix);
-        _unescapedExpressionRegex = CreateExpressionRegex(Prefix + UnescapePrefix, Suffix);
     }
 
     protected virtual string EscapeValue(string value)
@@ -254,14 +321,23 @@ public class DefaultInterpolator : IInterpolator
 
     protected virtual string GetValueForExpression(string key, string language, IDictionary<string, object> args)
     {
-        key = key.Trim();
+        var (actualKey, format) = _expressions.GetOrAdd((key, FormatSeparator), static entry =>
+        {
+            var expression = entry.Expression.Trim();
+            var separatorIndex = expression.IndexOf(entry.Separator, StringComparison.Ordinal);
 
-        if (key.IndexOf(FormatSeparator, StringComparison.Ordinal) < 0)
-            return GetValue(key, args)?.ToString();
+            return separatorIndex < 0
+                ? (expression, null)
+                : (expression.Substring(0, separatorIndex).Trim(), expression.Substring(separatorIndex + entry.Separator.Length).Trim());
+        });
 
-        var keyParts = key.Split(FormatSeparator, 2);
-        var actualKey = keyParts[0].Trim();
-        var format = keyParts[1].Trim();
+        if (format == null)
+        {
+            var plainValue = GetValue(actualKey, args);
+
+            return AlwaysFormat && plainValue != null ? Format(plainValue, null, language) : plainValue?.ToString();
+        }
+
         var value = GetValue(actualKey, args);
 
         var formats = SplitChainedFormats(format);
@@ -345,31 +421,6 @@ public class DefaultInterpolator : IInterpolator
             return source;
 
         return value.Contains(match.Value) ? source : source.ReplaceFirst(match.Value, value);
-    }
-
-    protected virtual string HandleRegexMatch(string source, string language, IDictionary<string, object> args, Match match)
-    {
-        var expression = match.Groups[1];
-        var value = GetValueForExpression(expression.Value, language, args);
-
-        value ??= MissingValueHandler != null ? MissingValueHandler(source, match) : string.Empty;
-
-        if (EscapeValues)
-            value = EscapeValue(value);
-
-        source = source.ReplaceFirst(match.Value, value);
-        return source;
-    }
-
-    protected virtual string HandleUnescapeRegexMatch(string source, string language, IDictionary<string, object> args, Match match)
-    {
-        var expression = match.Groups[1];
-        var value = GetValueForExpression(expression.Value, language, args);
-
-        value ??= MissingValueHandler != null ? MissingValueHandler(source, match) : string.Empty;
-
-        source = source.ReplaceFirst(match.Value, value);
-        return source;
     }
 
     protected virtual async Task<IDictionary<string, object>> ParseNestedArgsAsync(

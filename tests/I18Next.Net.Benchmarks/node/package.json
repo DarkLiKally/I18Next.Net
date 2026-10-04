@@ -1,0 +1,11 @@
+{
+  "name": "i18next-benchmarks",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "bench": "node bench.mjs"
+  },
+  "dependencies": {
+    "i18next": "26.4.2"
+  }
+}

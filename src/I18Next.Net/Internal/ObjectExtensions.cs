@@ -2,28 +2,30 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace I18Next.Net.Internal;
 
 public static class ObjectExtensions
 {
-    private static readonly ConcurrentDictionary<Type, PropertyInfo[]> ReflectionCache = new();
+    private static readonly ConcurrentDictionary<Type, PropertyAccessor[]> AccessorCache = new();
 
     public static IDictionary<string, object> ObjectToDictionary(object value)
     {
-        var dictionary = new Dictionary<string, object>();
-
         if (value == null)
+            return new Dictionary<string, object>();
+
+        if (value is IDictionary<string, object> dictionary)
             return dictionary;
 
-        if (value is IDictionary<string, object>)
-            return value as IDictionary<string, object>;
+        var accessors = AccessorCache.GetOrAdd(value.GetType(), CreateAccessors);
+        var result = new Dictionary<string, object>(accessors.Length);
 
-        foreach (var property in GetProperties(value))
-            dictionary.Add(property.Name, property.GetValue(value));
+        for (var i = 0; i < accessors.Length; i++)
+            result.Add(accessors[i].Name, accessors[i].Getter(value));
 
-        return dictionary;
+        return result;
     }
 
     public static IDictionary<string, object> ToDictionary(this object value)
@@ -31,23 +33,33 @@ public static class ObjectExtensions
         return ObjectToDictionary(value);
     }
 
-    private static IEnumerable<PropertyInfo> GetProperties(object instance)
+    private static PropertyAccessor[] CreateAccessors(Type type)
     {
-        var type = instance.GetType();
+        return
+        [
+            .. type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                .Where(prop => prop.GetIndexParameters().Length == 0 && prop.GetMethod != null)
+                .Select(prop => new PropertyAccessor(prop.Name, CreateGetter(type, prop)))
+        ];
+    }
 
-        if (ReflectionCache.TryGetValue(type, out var array))
-            return array;
+    private static Func<object, object> CreateGetter(Type type, PropertyInfo property)
+    {
+#if NET
+        if (!System.Runtime.CompilerServices.RuntimeFeature.IsDynamicCodeCompiled)
+            return property.GetValue;
+#endif
 
-        var propertyInfos = type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-            .Where(prop =>
-            {
-                return prop.GetIndexParameters().Length == 0 && prop.GetMethod != null;
-            });
+        var instance = Expression.Parameter(typeof(object), "instance");
+        var body = Expression.Convert(Expression.Property(Expression.Convert(instance, type), property), typeof(object));
 
-        array = [.. propertyInfos];
+        return Expression.Lambda<Func<object, object>>(body, instance).Compile();
+    }
 
-        ReflectionCache.TryAdd(type, array);
+    private readonly struct PropertyAccessor(string name, Func<object, object> getter)
+    {
+        public Func<object, object> Getter { get; } = getter;
 
-        return array;
+        public string Name { get; } = name;
     }
 }

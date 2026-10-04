@@ -13,6 +13,10 @@
     </ItemGroup>
 
     <ItemGroup>
+        <None Update="locales\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+
+    <ItemGroup>
       <ProjectReference Include="..\..\src\I18Next.Net\I18Next.Net.csproj" />
     </ItemGroup>
 

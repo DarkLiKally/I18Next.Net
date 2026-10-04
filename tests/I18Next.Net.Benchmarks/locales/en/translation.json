@@ -1,0 +1,23 @@
+{
+    "simple": "Hello world",
+    "deep": {
+        "nested": {
+            "key": "Deeply nested"
+        }
+    },
+    "greeting": "Hello {{name}}!",
+    "multiple": "{{a}}, {{b}} and {{c}}",
+    "item_one": "{{count}} item",
+    "item_other": "{{count}} items",
+    "friend": "A friend",
+    "friend_male_one": "A boyfriend",
+    "friend_male_other": "{{count}} boyfriends",
+    "appName": "I18Next",
+    "nesting": "Welcome to $t(appName)",
+    "price": "Price: {{value, number}}",
+    "onlyEnglish": "Fallback text",
+    "menu": {
+        "title": "Menu",
+        "items": [ "Home", "About", "Contact" ]
+    }
+}

@@ -284,6 +284,8 @@ public class DefaultPluralResolver : IPluralResolver
 
     public string PluralSeparator { get; set; } = "_";
 
+    private CategorySuffixes _categorySuffixes;
+
     public JsonFormat JsonFormatVersion { get; set; } = JsonFormat.Version3;
 
     public bool UseSimplePluralSuffixIfPossible { get; set; } = true;
@@ -291,7 +293,7 @@ public class DefaultPluralResolver : IPluralResolver
     public string GetPluralSuffix(string language, int count)
     {
         if (JsonFormatVersion == JsonFormat.Version4)
-            return $"{PluralSeparator}{GetPluralCategory(language, count)}";
+            return GetCategorySuffix(GetPluralCategory(language, count), false);
 
         var rule = GetRule(language);
 
@@ -385,7 +387,7 @@ public class DefaultPluralResolver : IPluralResolver
     /// <returns>Suffix to be used to look for ordinal plural handling.</returns>
     public string GetOrdinalPluralSuffix(string language, int count)
     {
-        return $"{PluralSeparator}ordinal{PluralSeparator}{GetOrdinalPluralCategory(language, count)}";
+        return GetCategorySuffix(GetOrdinalPluralCategory(language, count), true);
     }
 
     /// <summary>
@@ -441,5 +443,39 @@ public class DefaultPluralResolver : IPluralResolver
         public string[] Languages { get; set; }
 
         public int[] Numbers { get; set; }
+    }
+
+    internal string GetCategorySuffix(string category, bool ordinal)
+    {
+        var suffixes = _categorySuffixes;
+
+        if (suffixes == null || suffixes.Separator != PluralSeparator)
+            _categorySuffixes = suffixes = new CategorySuffixes(PluralSeparator);
+
+        var lookup = ordinal ? suffixes.Ordinal : suffixes.Cardinal;
+
+        return lookup.TryGetValue(category, out var suffix)
+            ? suffix
+            : ordinal ? $"{PluralSeparator}ordinal{PluralSeparator}{category}" : $"{PluralSeparator}{category}";
+    }
+
+    private sealed class CategorySuffixes
+    {
+        public CategorySuffixes(string separator)
+        {
+            Separator = separator;
+
+            foreach (var category in new[] { Zero, One, Two, Few, Many, Other })
+            {
+                Cardinal[category] = $"{separator}{category}";
+                Ordinal[category] = $"{separator}ordinal{separator}{category}";
+            }
+        }
+
+        public Dictionary<string, string> Cardinal { get; } = [];
+
+        public Dictionary<string, string> Ordinal { get; } = [];
+
+        public string Separator { get; }
     }
 }
