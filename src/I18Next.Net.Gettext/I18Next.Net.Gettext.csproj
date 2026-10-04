@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <Description>Backend for I18Next.Net reading translations from compiled gettext .mo files.</Description>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <TargetFrameworks>netstandard2.0;net6.0;net8.0;net10.0</TargetFrameworks>
         <NoWarn>CS1591</NoWarn>

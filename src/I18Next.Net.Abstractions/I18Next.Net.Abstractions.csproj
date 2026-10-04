@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <Description>Interfaces of I18Next.Net for writing custom backends, translators, interpolators, formatters, language detectors and loggers.</Description>
         <TargetFrameworks>netstandard2.0;net6.0;net8.0;net10.0</TargetFrameworks>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <RootNamespace>I18Next.Net</RootNamespace>

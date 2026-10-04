@@ -1,5 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
+        <Description>A port of i18next for .NET with interpolation, plurals, context, nesting, browser compatible number, date, relative time and list formats and JSON, XML, INI, HTTP, delegate and in-memory backends.</Description>
         <TargetFrameworks>netstandard2.0;net6.0;net8.0;net10.0</TargetFrameworks>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <NoWarn>CS1591</NoWarn>
