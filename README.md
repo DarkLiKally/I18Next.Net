@@ -13,6 +13,7 @@ localization.
 - [Quick start](#quick-start)
 - [Translation files](#translation-files)
 - [Usage](#usage)
+- [Built-in plugins](#built-in-plugins)
 - [Dependency injection and ASP.NET Core](#dependency-injection-and-aspnet-core)
 - [Feature parity with i18next](#feature-parity-with-i18next)
 - [Breaking changes](#breaking-changes)
@@ -22,7 +23,7 @@ localization.
 
 | Package | Description |
 |---|---|
-| `I18Next.Net` | Core library with translator, interpolation, plurals, formats and the JSON, XML, INI and in-memory backends |
+| `I18Next.Net` | Core library with translator, interpolation, plurals, formats and the JSON, XML, INI, HTTP, in-memory, delegate and chained backends |
 | `I18Next.Net.Abstractions` | Interfaces for writing your own backends, translators, interpolators, formatters and loggers |
 | `I18Next.Net.Extensions` | Registration in `IServiceCollection` and `IStringLocalizer` support |
 | `I18Next.Net.AspNetCore` | ASP.NET Core integration including view localization |
@@ -85,17 +86,7 @@ i18n.T("common:save");
 i18n.T("de", "common", "save");
 ```
 
-| Backend | Files |
-|---|---|
-| `JsonFileBackend` | i18next JSON files including nested objects and arrays (`key.0`) |
-| `XmlFileBackend` | XML where elements form the keys (`<inbox><title>Inbox</title></inbox>`) |
-| `StrictXmlFileBackend` | XML using `<Section name="...">` and `<Translation key="...">` elements |
-| `IniFileBackend` | INI files where sections form the key prefix |
-| `InMemoryBackend` | Translations added in code |
-| `CompositeBackend` | Combines several backends, the first one providing a namespace wins |
-| `GettextBackend` | `.po`/`.mo` files (`I18Next.Net.Gettext`) |
-
-To use a different file layout override `FindFile`:
+All shipped backends are listed under [Backends](#backends). To use a different file layout override `FindFile`:
 
 ```csharp
 public class FlatJsonFileBackend : JsonFileBackend
@@ -177,7 +168,7 @@ var interpolator = new DefaultInterpolator(logger)
 ### Formatting
 
 The i18next built-in formats are available without any registration. They use the culture of the target language and
-the bundled [CLDR](https://cldr.unicode.org/) data, so the results match the browser `Intl` APIs used by i18next.
+the bundled [CLDR](https://cldr.unicode.org/) 47 data, so the results match the browser `Intl` APIs used by i18next.
 
 ```json
 {
@@ -206,13 +197,13 @@ i18n.T("choice", new { value = new[] { "tea", "coffee" } });         // tea or c
 |---|---|
 | `number` | `minimumFractionDigits`, `maximumFractionDigits`, `useGrouping` |
 | `currency(EUR)` | currency code (positional or `currency`), `minimumFractionDigits`, `maximumFractionDigits` |
-| `datetime` | `dateStyle` and `timeStyle` (`full`, `long`, `medium`, `short`) |
+| `datetime` | `dateStyle`, `timeStyle` (`full`, `long`, `medium`, `short`), `weekday`, `era`, `year`, `month`, `day`, `hour`, `minute`, `second`, `fractionalSecondDigits`, `timeZoneName`, `hour12`, `hourCycle` |
 | `relativetime(day)` | unit (positional or `range`): `year`, `quarter`, `month`, `week`, `day`, `hour`, `minute`, `second`; `numeric` (`always`, `auto`); `style` (`long`, `short`, `narrow`) |
 | `list` | `type` (`conjunction`, `disjunction`, `unit`), `style` (`long`, `short`, `narrow`) |
 
 Formats are chained with the format separator (`{{value, number, uppercase}}`). Besides the i18next formats every
-.NET format string works (`{{value, N2}}`, `{{value, #,##0.00}}`), as well as the bundled `LowercaseFormatter`,
-`UppercaseFormatter` and the `MomentJsFormatter` (`{{date, dddd, MMMM Do}}`). Custom formatters implement `IFormatter`:
+.NET format string works (`{{value, N2}}`, `{{value, #,##0.00}}`), and date-fns or Moment.js patterns are supported by
+the [bundled formatters](#formatters). Custom formatters implement `IFormatter`:
 
 ```csharp
 public class ReverseFormatter : IFormatter
@@ -427,6 +418,192 @@ var logger = new TraceLogger { LogLevel = LogLevel.Debug };
 var translator = new DefaultTranslator(backend, logger, new DefaultPluralResolver(), new DefaultInterpolator(logger));
 ```
 
+## Built-in plugins
+
+Everything below ships with the packages and can be combined freely. Each plugin type has an interface in
+`I18Next.Net.Abstractions`, so any of them can be replaced by your own implementation.
+
+### Backends
+
+Backends load the translations of a language and namespace (`ITranslationBackend`). The file and HTTP backends fall back
+to the language part of a regional language (`de` for `de-CH`).
+
+| Backend | Package | Loads |
+|---|---|---|
+| `JsonFileBackend` | `I18Next.Net` | i18next JSON files from `{basePath}/{lng}/{ns}.json`, nested objects and arrays (`key.0`) |
+| `XmlFileBackend` | `I18Next.Net` | XML files where elements form the keys (`<inbox><title>Inbox</title></inbox>`) |
+| `StrictXmlFileBackend` | `I18Next.Net` | XML files with `<Section name="...">` and `<Translation key="...">` elements |
+| `IniFileBackend` | `I18Next.Net` | INI files where sections form the key prefix |
+| `HttpBackend` | `I18Next.Net` | JSON over HTTP, the equivalent of i18next-http-backend |
+| `FuncBackend` | `I18Next.Net` | Whatever a delegate returns, the equivalent of i18next-resources-to-backend |
+| `InMemoryBackend` | `I18Next.Net` | Translations added in code |
+| `ChainedBackend` | `I18Next.Net` | Asks several backends in order, with optional caching and expiry |
+| `GettextBackend` | `I18Next.Net.Gettext` | Compiled gettext `.mo` files from `{basePath}/{lng}/{ns}.mo` |
+
+`CompositeBackend` is the former name of `ChainedBackend` and still works, but is marked obsolete.
+
+#### HttpBackend
+
+```csharp
+var httpClient = new HttpClient { BaseAddress = new Uri("https://cdn.example.com/") };
+var backend = new HttpBackend(httpClient, "locales/{{lng}}/{{ns}}.json")
+{
+    LoadPathResolver = (lng, ns) => ns == "legal" ? $"https://legal.example.com/{lng}.json" : null,
+    QueryStringParams = { ["v"] = "1.4.2" },
+    CustomHeaders = { ["Authorization"] = "Bearer ..." },
+    FallbackToLanguagePart = true
+};
+```
+
+`{{lng}}` and `{{ns}}` are replaced in the load path, relative paths use the base address of the client. A `404` means
+the namespace does not exist, other failed responses throw an `HttpRequestException`. `Parse` replaces the JSON parser,
+e.g. for YAML or other formats. With dependency injection the client comes from `IHttpClientFactory`, so retries and
+other resilience handlers can be added to it:
+
+```csharp
+services.AddI18NextLocalization(i18n => i18n
+    .AddHttpBackend("locales/{{lng}}/{{ns}}.json",
+        backend => backend.QueryStringParams["v"] = "1.4.2",
+        client => client.ConfigureHttpClient(c => c.BaseAddress = new Uri("https://cdn.example.com/"))));
+```
+
+#### FuncBackend
+
+```csharp
+// translation trees
+new FuncBackend((lng, ns) => LoadTree(lng, ns));
+new FuncBackend(async (lng, ns) => await LoadTreeAsync(lng, ns));
+
+// JSON strings, e.g. from a database
+FuncBackend.FromJson(async (lng, ns) => await db.GetTranslationJsonAsync(lng, ns));
+
+// JSON streams, e.g. embedded resources
+FuncBackend.FromStream((lng, ns) => typeof(Program).Assembly.GetManifestResourceStream($"MyApp.Locales.{lng}.{ns}.json"));
+
+// nested dictionaries, lists, anonymous objects or JsonElements
+FuncBackend.FromObject((lng, ns) => new { greeting = "Hello {{name}}", menu = new { items = new[] { "Home", "About" } } });
+```
+
+Returning `null` means the namespace does not exist.
+
+#### ChainedBackend
+
+```csharp
+var backend = new ChainedBackend(
+    new JsonFileBackend("overrides"),
+    new HttpBackend(httpClient))
+{
+    CacheEnabled = true,
+    CacheExpiration = TimeSpan.FromMinutes(10),
+    UseExpiredCacheOnFailure = true
+};
+```
+
+The first backend providing a namespace wins. `CacheEnabled` keeps loaded namespaces in memory, which helps when several
+translators share the backend. `CacheExpiration` also tells the translator to reload a namespace after that time, so
+updated translations are picked up while the application runs. When reloading fails or no backend provides the
+namespace anymore, the expired namespace is used until the next expiry. `ClearCache()` and `ClearCache(lng, ns)` drop
+cached namespaces.
+
+### Translation tree builders
+
+The file, HTTP and delegate backends accept an `ITranslationTreeBuilderFactory`:
+
+| Builder | Description |
+|---|---|
+| `HierarchicalTranslationTreeBuilder` | Default. Splits keys at dots into groups, supports objects and arrays |
+| `FlatTranslationTreeBuilder` | Keeps keys as they are, the equivalent of `keySeparator: false` |
+
+```csharp
+var backend = new JsonFileBackend("locales", new GenericTranslationTreeBuilderFactory<FlatTranslationTreeBuilder>());
+```
+
+### Interpolators
+
+| Interpolator | Package | Description |
+|---|---|---|
+| `DefaultInterpolator` | `I18Next.Net` | i18next `{{value}}` interpolation, `$t()` nesting, formats, configurable delimiters |
+| `HtmlInterpolator` | `I18Next.Net` | Like the default interpolator but HTML encodes values, used by the ASP.NET Core integration |
+| `MessageFormatInterpolator` | `I18Next.Net.ICU` | ICU message format (`{count, plural, one {# item} other {# items}}`) |
+| `PolyglotInterpolator` | `I18Next.Net.PolyglotJs` | Polyglot.js phrases (`%{name}`, plurals separated by `\|\|\|\|` and `smart_count`) |
+
+```csharp
+var translator = new DefaultTranslator(backend, new MessageFormatInterpolator());
+```
+
+### Formatters
+
+Formatters are added to `DefaultInterpolator.Formatters` (or with `AddFormatter` when using dependency injection). The
+first formatter whose `CanFormat` returns `true` formats the value, the `DefaultFormatter` is used when none matches.
+
+| Formatter | Formats | Example |
+|---|---|---|
+| `DefaultFormatter` | Always active. The i18next formats via `IntlFormatter`, otherwise .NET format strings with the culture of the language | `{{value, N2}}` |
+| `IntlFormatter` | `number`, `currency`, `datetime`, `relativetime` and `list` like the browser `Intl` APIs | `{{value, currency(EUR)}}` |
+| `DateFnsFormatter` | `DateTime` and `DateTimeOffset` with date-fns `format` tokens, all date-fns locales bundled | `{{date, EEEE, do MMMM yyyy}}` |
+| `MomentJsFormatter` | `DateTime` and `DateTimeOffset` with Moment.js tokens mapped to .NET patterns | `{{date, dddd, MMMM Do}}` |
+| `LowercaseFormatter` | `lowercase` with the culture of the language | `{{value, lowercase}}` |
+| `UppercaseFormatter` | `uppercase` with the culture of the language | `{{value, uppercase}}` |
+
+```csharp
+interpolator.Formatters.Add(new DateFnsFormatter { WeekStartsOn = 1 });
+```
+
+```json
+{
+    "dueDate": "Due {{date, PPPP}}",
+    "week": "Week {{date, wo}} of {{date, yyyy}}"
+}
+```
+
+`DateFnsFormatter` produces the same output as date-fns 4 for every bundled locale, including ordinals (`do`), the long
+localized formats (`P`, `PP`, `PPpp`, ...) and week numbering. `WeekStartsOn` and `FirstWeekContainsDate` override the
+locale defaults.
+
+### Post processors
+
+Post processors run after interpolation when their keyword is listed in the `postProcess` argument
+(`postProcess = "sprintf"` or `postProcess = new[] { "interval", "pseudo" }`).
+
+| Post processor | Keyword | Description |
+|---|---|---|
+| `SprintfPostProcessor` | `sprintf` | Replaces `%s`, `%d`, ... placeholders in order with the values of the `sprintf` array |
+| `IntervalPostProcessor` | `interval` | Picks an interval like `(1){one};(2-7){a few};(8-inf){a lot};` by `count` |
+| `PseudoLocalizationPostProcessor` | `pseudo` | Replaces letters with accented look-alikes to find hard-coded or truncated texts |
+
+`PseudoLocalizationOptions` configures the pseudo localization: `LanguagesToPseudo` limits it to some languages,
+`LetterMultiplier` and `RepeatedLetters` lengthen vowels to simulate longer translations, `Letters` maps the characters and
+`WrapStrings` adds brackets around the text.
+
+### Plural resolver
+
+`DefaultPluralResolver` implements the CLDR cardinal and ordinal rules of all languages. `JsonFormatVersion` selects the
+key suffixes (`Version1` to `Version4`, see [Plurals](#plurals)), `UseSimplePluralSuffixIfPossible` controls the
+`_plural` suffix of the older formats.
+
+### Language detectors
+
+| Detector | Description |
+|---|---|
+| `DefaultLanguageDetector` | Always returns the configured language |
+| `ThreadLanguageDetector` | Returns `CultureInfo.CurrentCulture` of the current thread, or `FallbackLanguage` |
+
+With `IntegrateToAspNetCore` the request culture is detected through the current thread culture, so it works together
+with `UseRequestLocalization`.
+
+### Loggers
+
+| Logger | Package | Description |
+|---|---|---|
+| `TraceLogger` | `I18Next.Net` | Writes to `System.Diagnostics.Trace`, filtered by `LogLevel` |
+| `DefaultExtensionsLogger` | `I18Next.Net.Extensions` | Forwards to `Microsoft.Extensions.Logging`, registered automatically with dependency injection |
+| `I18NextSerilogLogger` | `I18Next.Net.Serilog` | Forwards to Serilog |
+
+### Missing key handlers
+
+There is no built-in handler. Subscribe to `DefaultTranslator.MissingKey` or add an `IMissingKeyHandler` to
+`MissingKeyHandlers` to log, collect or save missing keys.
+
 ## Dependency injection and ASP.NET Core
 
 ```csharp
@@ -498,8 +675,9 @@ public class HomeController : Controller
 | Custom prefix/suffix | ✅ | `Prefix`, `Suffix`, `UnescapePrefix` |
 | `skipOnVariables`, `alwaysFormat` | ❌ | |
 | Formatting with format strings | ✅ | .NET format strings and MomentJS tokens |
-| Built-in `number`, `currency`, `datetime` | ✅ | `datetime` maps the styles to the culture patterns |
-| Built-in `relativetime`, `list` | ✅ | Bundled CLDR 48.2 data |
+| Built-in `number`, `currency`, `datetime` | ✅ | `datetime` matches `Intl.DateTimeFormat` incl. component options |
+| Built-in `relativetime`, `list` | ✅ | Bundled CLDR 47 data |
+| date-fns formatting | ✅ | `DateFnsFormatter` with the date-fns 4 locales |
 | Chained formats | ✅ | |
 | Custom formatters | ✅ | `IFormatter` |
 | `formatParams` per call | ❌ | Use the inline options |
@@ -527,7 +705,10 @@ public class HomeController : Controller
 | Missing key handling | ✅ | `MissingKey` event, `IMissingKeyHandler` |
 | `saveMissing` to backend | ❌ | Implement an `IMissingKeyHandler` |
 | Post processors | ✅ | sprintf, interval, pseudo localization, custom `IPostProcessor` |
-| Backends | ✅ | JSON, XML, INI, gettext, in-memory, composite, custom `ITranslationBackend` |
+| Backends | ✅ | JSON, XML, INI, gettext, in-memory, custom `ITranslationBackend` |
+| i18next-http-backend | ✅ | `HttpBackend`, `AddHttpBackend` with `IHttpClientFactory` |
+| i18next-chained-backend | ✅ | `ChainedBackend` with in-memory caching and expiry |
+| i18next-resources-to-backend | ✅ | `FuncBackend` |
 | `addResource`, `addResourceBundle`, `hasResourceBundle`, `removeResourceBundle` | ✅ | `InMemoryBackend` |
 | `reloadResources` | ✅ | `DefaultTranslator.ClearCache` |
 | `getFixedT` | ❌ | Use the language and namespace overloads of `T` |
@@ -552,10 +733,13 @@ Compared to version 1.0.0:
 ## Development
 
 ```
-dotnet build
+dotnet build I18Next.Net.slnx
 dotnet test tests/I18Next.Net.Tests
 dotnet run -c Release --project tests/I18Next.Net.Benchmarks
 ```
+
+The tests use xUnit, Shouldly and NSubstitute. The code style follows the default .NET rules in `.editorconfig`
+(`dotnet format`), and the CI fails on NuGet packages with known vulnerabilities.
 
 The CLDR data for relative times, lists and the plural rule tests is generated from the official CLDR JSON packages:
 

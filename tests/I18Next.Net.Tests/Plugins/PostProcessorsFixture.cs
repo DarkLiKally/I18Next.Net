@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 using I18Next.Net.Backends;
 using I18Next.Net.Plugins;
@@ -76,6 +76,18 @@ public class PostProcessorsFixture
         postProcessor.ProcessTranslation("key", "abc", null, "en", null).ShouldBe("abc");
         postProcessor.ProcessResult("key", "ab 1", null, "en", null).ShouldBe("αααḅ 1");
         postProcessor.ProcessResult("key", "ab 1", null, "de", null).ShouldBe("ab 1");
+    }
+
+    [Fact]
+    public void PseudoLocalizationPostProcessor_WrapStrings_ShouldAddBrackets()
+    {
+        var options = new PseudoLocalizationOptions { WrapStrings = true, LetterMultiplier = 1 };
+        options.LanguagesToPseudo.Add("en");
+
+        var postProcessor = new PseudoLocalizationPostProcessor(options);
+
+        postProcessor.ProcessResult("key", "ab", null, "en", null).ShouldBe("[αḅ]");
+        postProcessor.ProcessResult("key", "ab", null, "de", null).ShouldBe("ab");
     }
 
     [Fact]

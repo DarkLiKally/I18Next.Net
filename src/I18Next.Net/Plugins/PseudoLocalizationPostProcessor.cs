@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -22,6 +22,9 @@ public class PseudoLocalizationPostProcessor(PseudoLocalizationOptions options) 
 
         var output = new StringBuilder();
 
+        if (Options.WrapStrings)
+            output.Append('[');
+
         foreach (var c in value)
         {
             var newChar = Options.Letters.TryGetValue(c, out var c2) ? c2 : c;
@@ -31,6 +34,9 @@ public class PseudoLocalizationPostProcessor(PseudoLocalizationOptions options) 
             else
                 output.Append(newChar);
         }
+
+        if (Options.WrapStrings)
+            output.Append(']');
 
         return output.ToString();
     }
