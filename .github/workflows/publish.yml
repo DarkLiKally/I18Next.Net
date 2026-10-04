@@ -58,6 +58,7 @@ jobs:
           for project in src/*/*.csproj; do
           dotnet pack "$project" -c Release -o artifacts/packages
           -p:Version=${{ steps.version.outputs.version }}
+          -p:GeneratePackageOnBuild=false
           -p:ContinuousIntegrationBuild=true || exit 1;
           done
       - name: Create tag
