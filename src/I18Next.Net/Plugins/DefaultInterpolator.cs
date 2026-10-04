@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -340,6 +341,8 @@ public class DefaultInterpolator : IInterpolator
 
         var value = GetValue(actualKey, args);
 
+        format = ApplyFormatParams(actualKey, format, args);
+
         var formats = SplitChainedFormats(format);
 
         if (formats == null)
@@ -351,6 +354,40 @@ public class DefaultInterpolator : IInterpolator
             result = Format(result, formats[i], language);
 
         return result;
+    }
+
+    private string ApplyFormatParams(string key, string format, IDictionary<string, object> args)
+    {
+        if (args == null || !args.TryGetValue("formatParams", out var formatParams) || formatParams == null)
+            return format;
+
+        if (!formatParams.ToDictionary().TryGetValue(key, out var keyParams) || keyParams == null)
+            return format;
+
+        var options = new List<string>();
+
+        foreach (var option in keyParams.ToDictionary())
+            options.Add($"{option.Key}: {Convert.ToString(option.Value, CultureInfo.InvariantCulture)}");
+
+        if (options.Count == 0)
+            return format;
+
+        var optionsString = string.Join("; ", options);
+        var formats = SplitChainedFormats(format) ?? [format];
+
+        for (var i = 0; i < formats.Count; i++)
+        {
+            if (!IntlFormatter.IsFormatName(formats[i]))
+                continue;
+
+            var end = formats[i].LastIndexOf(')');
+
+            formats[i] = formats[i].IndexOf('(') > 0 && end > 0
+                ? $"{formats[i].Substring(0, end)}; {optionsString})"
+                : $"{formats[i]}({optionsString})";
+        }
+
+        return string.Join(FormatSeparator + " ", formats);
     }
 
     private List<string> SplitChainedFormats(string format)

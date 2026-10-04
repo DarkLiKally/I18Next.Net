@@ -331,6 +331,36 @@ i18n.T("menu.items.0");                                   // Home
 
 All values of an object are interpolated with the given arguments.
 
+### Fixed translators and key prefixes
+
+```csharp
+var t = i18n.GetFixedT("de", "common", keyPrefix: "menu");
+t.T("save");                                              // common:menu.save in German
+t.T("translation:title");                                 // other namespaces still work
+
+i18n.T("title", new { keyPrefix = "menu" });              // menu.title
+```
+
+### Format parameters
+
+```json
+{
+    "price": "{{value, number}}"
+}
+```
+
+```csharp
+i18n.T("price", new { value = 5, formatParams = new { value = new { minimumFractionDigits = 2 } } });   // 5.00
+```
+
+### Interpolation options
+
+```csharp
+translator.ReturnEmptyString = false;   // empty strings fall back to other languages and default values
+interpolator.SkipOnVariables = true;    // default: values containing {{...}} or $t(...) are not processed again
+interpolator.AlwaysFormat = true;       // values without a format are passed to the formatters, too
+```
+
 ### Fallbacks
 
 ```csharp
@@ -762,14 +792,14 @@ public class HomeController : Controller
 | Unescaped interpolation `{{- value}}` | ✅ | |
 | Escaping | ✅ | `HtmlInterpolator` |
 | Custom prefix/suffix | ✅ | `Prefix`, `Suffix`, `UnescapePrefix` |
-| `skipOnVariables`, `alwaysFormat` | ❌ | |
+| `skipOnVariables`, `alwaysFormat` | ✅ | `DefaultInterpolator.SkipOnVariables` (default `true`), `AlwaysFormat` |
 | Formatting with format strings | ✅ | .NET format strings and MomentJS tokens |
 | Built-in `number`, `currency`, `datetime` | ✅ | `datetime` matches `Intl.DateTimeFormat` incl. component options |
 | Built-in `relativetime`, `list` | ✅ | Bundled CLDR 47 data |
 | date-fns formatting | ✅ | `DateFnsFormatter` with the date-fns 4 locales |
 | Chained formats | ✅ | |
 | Custom formatters | ✅ | `IFormatter` |
-| `formatParams` per call | ❌ | Use the inline options |
+| `formatParams` per call | ✅ | Merged into the options of the Intl formats |
 | Nesting `$t(key)`, `$t(key, {...})` | ✅ | Custom nesting prefix/suffix |
 | Plurals JSON v1, v2, v3 | ✅ | |
 | Plurals JSON v4 | ✅ | CLDR categories incl. `_zero` lookup |
@@ -782,7 +812,7 @@ public class HomeController : Controller
 | `returnObjects` | ✅ | `TObject`, `T<TModel>` |
 | `joinArrays` | ✅ | |
 | Arrays in resources | ✅ | `key.0` |
-| `returnNull`, `returnEmptyString` | ⚠️ | `null` values are skipped, empty strings are returned |
+| `returnNull`, `returnEmptyString` | ✅ | `DefaultTranslator.ReturnEmptyString`, `null` values fall back like `returnNull: false` |
 | Fallback languages | ✅ | |
 | Fallback languages per language | ✅ | `SetLanguageFallbacks`, `UseFallbackLanguagesFor` |
 | Fallback from region to language (`de-CH` → `de`) | ✅ | Done by the backends |
@@ -800,8 +830,8 @@ public class HomeController : Controller
 | i18next-resources-to-backend | ✅ | `FuncBackend` |
 | `addResource`, `addResourceBundle`, `hasResourceBundle`, `removeResourceBundle` | ✅ | `InMemoryBackend` |
 | `reloadResources` | ✅ | `DefaultTranslator.ClearCache` |
-| `getFixedT` | ❌ | Use the language and namespace overloads of `T` |
-| `keyPrefix` | ❌ | |
+| `getFixedT` | ✅ | `GetFixedT(language, namespace, keyPrefix)` |
+| `keyPrefix` | ✅ | `keyPrefix` argument and `GetFixedT` |
 | ICU message format | ✅ | `I18Next.Net.ICU` |
 | Typed keys (TypeScript `CustomTypeOptions`) | ✅ | `I18Next.Net.Generators` source generator |
 | Missing key and placeholder checks (i18next-parser, linters) | ✅ | `I18Next.Net.Generators` analyzers |

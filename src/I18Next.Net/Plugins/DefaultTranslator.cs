@@ -59,6 +59,12 @@ public class DefaultTranslator : ITranslator
 
     public string NamespaceSeparator { get; set; } = ":";
 
+    /// <summary>
+    ///     Returns empty strings as valid translations. When disabled, empty strings are treated as missing like the i18next
+    ///     <c>returnEmptyString: false</c> option.
+    /// </summary>
+    public bool ReturnEmptyString { get; set; } = true;
+
     public List<IMissingKeyHandler> MissingKeyHandlers { get; } = [];
 
     public event EventHandler<MissingKeyEventArgs> MissingKey;
@@ -75,6 +81,7 @@ public class DefaultTranslator : ITranslator
         ValidateArguments(language, key, options);
 
         var actualNamespace = SplitNamespace(ref key, options);
+        key = ApplyKeyPrefix(key, args);
 
         if (string.Equals(language, "cimode", StringComparison.OrdinalIgnoreCase))
             return $"{actualNamespace}{NamespaceSeparator}{key}";
@@ -111,6 +118,7 @@ public class DefaultTranslator : ITranslator
         ValidateArguments(language, key, options);
 
         var actualNamespace = SplitNamespace(ref key, options);
+        key = ApplyKeyPrefix(key, args);
         var groupValues = await ResolveGroupValuesAsync(language, actualNamespace, key, options).ConfigureAwait(false);
 
         if (groupValues == null)
@@ -142,6 +150,7 @@ public class DefaultTranslator : ITranslator
         ValidateArguments(language, key, options);
 
         var actualNamespace = SplitNamespace(ref key, options);
+        key = ApplyKeyPrefix(key, args);
 
         return await ResolveTranslationAsync(language, actualNamespace, key, args, options, false).ConfigureAwait(false) != null;
     }
@@ -277,6 +286,11 @@ public class DefaultTranslator : ITranslator
             throw new ArgumentNullException(nameof(key));
         if (options == null)
             throw new ArgumentNullException(nameof(options));
+    }
+
+    private static string ApplyKeyPrefix(string key, IDictionary<string, object> args)
+    {
+        return args != null && args.TryGetValue("keyPrefix", out var keyPrefix) && keyPrefix is string { Length: > 0 } prefix ? prefix + "." + key : key;
     }
 
     private string SplitNamespace(ref string key, TranslationOptions options)
@@ -585,6 +599,9 @@ public class DefaultTranslator : ITranslator
         {
             foundGroup = true;
         }
+
+        if (result is { Length: 0 } && !ReturnEmptyString)
+            result = null;
 
         if (result == null && _logger.IsEnabled(LogLevel.Debug))
             _logger.LogDebug("Unable to resolve a translation for {currentKey} from the translation tree.", key);
