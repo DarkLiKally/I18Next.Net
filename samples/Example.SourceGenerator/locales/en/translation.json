@@ -1,0 +1,13 @@
+{
+    "welcome": "Hello {{name}}!",
+    "cart": {
+        "title": "Your cart",
+        "items_one": "{{count}} item",
+        "items_other": "{{count}} items",
+        "total": "Total: {{amount, currency(EUR)}}"
+    },
+    "friend": "A friend",
+    "friend_male": "A boyfriend",
+    "friend_female": "A girlfriend",
+    "steps": [ "Choose", "Pay", "Enjoy" ]
+}

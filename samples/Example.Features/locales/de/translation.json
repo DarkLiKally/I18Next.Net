@@ -1,0 +1,32 @@
+{
+    "welcome": "Hallo {{name}}, willkommen bei {{- appName}}!",
+    "appName": "I18Next.Net",
+    "intro": "In diesem Beispiel geht es um $t(appName)",
+    "inbox": {
+        "title": "Posteingang",
+        "unread_zero": "Keine ungelesenen Nachrichten",
+        "unread_one": "{{count}} ungelesene Nachricht",
+        "unread_other": "{{count}} ungelesene Nachrichten"
+    },
+    "place_ordinal_other": "{{count}}. Platz",
+    "distance_one": "{{count}} Kilometer",
+    "distance_other": "{{count}} Kilometer",
+    "friend": "Ein Freund",
+    "friend_male": "Ein Freund",
+    "friend_female": "Eine Freundin",
+    "menu": {
+        "title": "Menü von {{name}}",
+        "items": [ "Start", "Produkte", "Kontakt" ]
+    },
+    "price": "Preis: {{value, currency(EUR)}}",
+    "amount": "Betrag: {{value, number}}",
+    "date": "Heute ist {{value, datetime(dateStyle: full)}}",
+    "time": "Es ist {{value, datetime(hour: numeric; minute: 2-digit)}}",
+    "dateFns": "Fällig am {{value, EEEE, do MMMM yyyy}}",
+    "updated": "Aktualisiert {{value, relativetime(day; numeric: auto)}}",
+    "guests": "Gäste: {{value, list}}",
+    "choice": "Tee oder Kaffee? {{value, list(type: disjunction)}}",
+    "shout": "{{value, uppercase}}",
+    "sprintf": "Die Buchstaben sind %s, %s und %s",
+    "interval": "(1){ein Element};(2-7){einige Elemente};(8-inf){viele Elemente};"
+}

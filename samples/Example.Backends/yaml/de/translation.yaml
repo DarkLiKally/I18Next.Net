@@ -1,0 +1,5 @@
+greeting: Hallo {{name}} aus YAML!
+menu:
+  items:
+    - Start
+    - Über uns

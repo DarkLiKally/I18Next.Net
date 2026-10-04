@@ -28,6 +28,11 @@ jobs:
           for project in src/*/*.csproj tests/*/*.csproj; do
           dotnet build "$project" -c Release -warnaserror:NU1901,NU1902,NU1903,NU1904 || exit 1;
           done
+      - name: Build samples
+        run: >-
+          for project in samples/*/*.csproj; do
+          dotnet build "$project" -c Release || exit 1;
+          done
       - name: Vulnerability audit
         run: |
           failed=0

@@ -1,0 +1,13 @@
+{
+    "welcome": "Hallo {{name}}!",
+    "cart": {
+        "title": "Dein Warenkorb",
+        "items_one": "{{count}} Artikel",
+        "items_other": "{{count}} Artikel",
+        "total": "Summe: {{amount, currency(EUR)}}"
+    },
+    "friend": "Ein Freund",
+    "friend_male": "Ein Freund",
+    "friend_female": "Eine Freundin",
+    "steps": [ "Auswählen", "Bezahlen", "Genießen" ]
+}

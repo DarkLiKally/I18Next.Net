@@ -1,0 +1,17 @@
+pages:
+  image: node:22
+  stage: deploy
+  cache:
+    key: docs
+    paths:
+      - docs/node_modules/
+  script:
+    - cd docs
+    - npm ci
+    - npm run build
+    - mv .vitepress/dist ../public
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH

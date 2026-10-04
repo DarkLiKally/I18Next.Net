@@ -28,6 +28,12 @@ public class DefaultFormatter(ILogger logger) : IFormatter
         if (IntlFormatter.CanFormat(value, format, language))
             return IntlFormatter.Format(value, format, language);
 
+        if (string.Equals(format, "uppercase", StringComparison.OrdinalIgnoreCase))
+            return value.ToString().ToUpper(GetCulture(language));
+
+        if (string.Equals(format, "lowercase", StringComparison.OrdinalIgnoreCase))
+            return value.ToString().ToLower(GetCulture(language));
+
         var formatString = $"{{0:{format}}}";
 
         try
@@ -44,6 +50,18 @@ public class DefaultFormatter(ILogger logger) : IFormatter
         {
             _logger.LogWarning(ex, "The provided format string \"{format}\" is not compatible with the default .NET string formatting functionality. Check your format string or register a custom formatter to handle this format.", format);
             return value.ToString();
+        }
+    }
+
+    private static CultureInfo GetCulture(string language)
+    {
+        try
+        {
+            return CultureInfo.GetCultureInfo(language);
+        }
+        catch (CultureNotFoundException)
+        {
+            return CultureInfo.InvariantCulture;
         }
     }
 }

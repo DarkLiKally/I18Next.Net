@@ -18,6 +18,7 @@ localization.
 - [Dependency injection and ASP.NET Core](#dependency-injection-and-aspnet-core)
 - [Feature parity with i18next](#feature-parity-with-i18next)
 - [Breaking changes](#breaking-changes)
+- [Samples](#samples)
 - [Development](#development)
 
 ## Packages
@@ -850,6 +851,22 @@ Compared to version 1.0.0:
 - JSON v1 plural suffixes for numbers use `_plural_N` like i18next and negative counts use the absolute value.
 - `TraceLogger` respects its `LogLevel`.
 - .NET Standard 2.1 and .NET 5 are no longer separate targets, they use the .NET Standard 2.0 build.
+
+## Samples
+
+| Sample | Shows |
+|---|---|
+| [`Example.Features`](samples/Example.Features) | Interpolation, nesting, plurals, ordinals, context, objects, Intl and date-fns formats, fixed translators, fallbacks and post processors in English and German |
+| [`Example.Backends`](samples/Example.Backends) | YAML files, embedded resources and objects through the `FuncBackend`, the `HttpBackend` and a cached `ChainedBackend` |
+| [`Example.SourceGenerator`](samples/Example.SourceGenerator) | Typed keys and translation methods generated from the JSON files |
+| [`Example.MinimalApi`](samples/Example.MinimalApi) | ASP.NET Core minimal API with request localization, `II18Next` and `IStringLocalizer` |
+| [`Example.WebApp`](samples/Example.WebApp) | ASP.NET Core MVC with view localization |
+| [`Example.ConsoleApp.NetCore`](samples/Example.ConsoleApp.NetCore) | Console application with and without dependency injection |
+| [`Example.ConsoleApp.NetFramework`](samples/Example.ConsoleApp.NetFramework) | .NET Framework 4.6.2 console application |
+
+```
+dotnet run --project samples/Example.Features
+```
 
 ## Development
 

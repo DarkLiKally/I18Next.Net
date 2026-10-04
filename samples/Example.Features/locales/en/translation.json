@@ -1,0 +1,36 @@
+{
+    "welcome": "Hello {{name}}, welcome to {{- appName}}!",
+    "appName": "I18Next.Net",
+    "intro": "This sample is about $t(appName)",
+    "inbox": {
+        "title": "Inbox",
+        "unread_zero": "No unread messages",
+        "unread_one": "{{count}} unread message",
+        "unread_other": "{{count}} unread messages"
+    },
+    "place_ordinal_one": "{{count}}st place",
+    "place_ordinal_two": "{{count}}nd place",
+    "place_ordinal_few": "{{count}}rd place",
+    "place_ordinal_other": "{{count}}th place",
+    "distance_one": "{{count}} kilometer",
+    "distance_other": "{{count}} kilometers",
+    "friend": "A friend",
+    "friend_male": "A boyfriend",
+    "friend_female": "A girlfriend",
+    "menu": {
+        "title": "Menu of {{name}}",
+        "items": [ "Home", "Products", "Contact" ]
+    },
+    "price": "Price: {{value, currency(EUR)}}",
+    "amount": "Amount: {{value, number}}",
+    "date": "Today is {{value, datetime(dateStyle: full)}}",
+    "time": "It is {{value, datetime(hour: numeric; minute: 2-digit)}}",
+    "dateFns": "Due {{value, EEEE, do MMMM yyyy}}",
+    "updated": "Updated {{value, relativetime(day; numeric: auto)}}",
+    "guests": "Guests: {{value, list}}",
+    "choice": "Tea or coffee? {{value, list(type: disjunction)}}",
+    "shout": "{{value, uppercase}}",
+    "sprintf": "The letters are %s, %s and %s",
+    "interval": "(1){one item};(2-7){a few items};(8-inf){a lot of items};",
+    "onlyEnglish": "This text only exists in English"
+}

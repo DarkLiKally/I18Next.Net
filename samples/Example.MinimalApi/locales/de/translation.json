@@ -1,0 +1,7 @@
+{
+    "hello": "Hallo {{name}}!",
+    "orders_zero": "Du hast keine Bestellungen",
+    "orders_one": "Du hast {{count}} Bestellung",
+    "orders_other": "Du hast {{count}} Bestellungen",
+    "total": "Summe: {{value, currency(EUR)}}"
+}

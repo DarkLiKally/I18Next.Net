@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 using I18Next.Net.Formatters;
 using I18Next.Net.Logging;
@@ -29,6 +29,15 @@ public class DefaultFormatterFixture
         _formatter.CanFormat(1, "N2", "de-DE").ShouldBeTrue();
         _formatter.Format(1234.5, "N2", "de-DE").ShouldBe("1.234,50");
         _formatter.Format(1234.5, "N2", "en-US").ShouldBe("1,234.50");
+    }
+
+    [Fact]
+    public void Format_UppercaseAndLowercase_ShouldUseCulture()
+    {
+        _formatter.Format("istanbul", "uppercase", "tr-TR").ShouldBe("İSTANBUL");
+        _formatter.Format("istanbul", "UPPERCASE", "en").ShouldBe("ISTANBUL");
+        _formatter.Format("ÄBC", "lowercase", "de").ShouldBe("äbc");
+        _formatter.Format("ABC", "lowercase", "not-a-culture-xx").ShouldBe("abc");
     }
 
     [Fact]
