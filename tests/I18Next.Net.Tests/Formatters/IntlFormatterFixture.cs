@@ -36,6 +36,9 @@ public class IntlFormatterFixture
     [TestCase(1234.5, "currency(usd; minimumFractionDigits: 0)", "en-US", ExpectedResult = "$1,235")]
     [TestCase(1234.5, "currency", "en-US", ExpectedResult = "$1,234.50")]
     [TestCase(1234.5, "currency(XYZ)", "en-US", ExpectedResult = "XYZ1,234.50")]
+    [TestCase(1234.5, "currency(EUR)", "de", ExpectedResult = "1.234,50 €")]
+    [TestCase(1234.5, "currency(USD)", "en", ExpectedResult = "$1,234.50")]
+    [TestCase(1234.5, "currency(JPY)", "ja", ExpectedResult = "￥1,235")]
     [TestCase(1234.5, "number", "invalid culture!", ExpectedResult = "1,234.5")]
     public string Format_Numbers_ShouldFormatLikeIntl(double value, string format, string language)
     {

@@ -214,7 +214,7 @@ public class IntlFormatter : IFormatter
     {
         return Currencies.GetOrAdd((currency, culture.Name), key =>
         {
-            if (TryGetRegion(culture, out var cultureRegion) && cultureRegion.ISOCurrencySymbol == key.Currency)
+            if (!culture.IsNeutralCulture && TryGetRegion(culture, out var cultureRegion) && cultureRegion.ISOCurrencySymbol == key.Currency)
                 return (culture.NumberFormat.CurrencySymbol, culture.NumberFormat.CurrencyDecimalDigits);
 
             var candidates = CultureInfo.GetCultures(CultureTypes.SpecificCultures)
