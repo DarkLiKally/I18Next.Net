@@ -8,6 +8,8 @@ JavaScript library and implements most of its features, so web frontends and .NE
 On top of that it integrates with `Microsoft.Extensions.DependencyInjection`, `IStringLocalizer` and ASP.NET Core view
 localization.
 
+The documentation is available at [darklikally.github.io/I18Next.Net](https://darklikally.github.io/I18Next.Net/).
+
 - [Packages](#packages)
 - [Installation](#installation)
 - [Quick start](#quick-start)
