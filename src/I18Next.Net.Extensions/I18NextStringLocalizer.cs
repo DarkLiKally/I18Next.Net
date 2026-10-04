@@ -58,8 +58,12 @@ public class I18NextStringLocalizer : IStringLocalizer
             args = arguments[0];
 
         var language = GetLanguage();
+        var value = _instance.T(language, _defaultNamespace, name, args);
 
-        return new LocalizedString(name, _instance.T(language, _defaultNamespace, name, args));
+        var namespaceSeparatorIndex = name.IndexOf(':');
+        var key = namespaceSeparatorIndex > -1 ? name.Substring(namespaceSeparatorIndex + 1) : name;
+
+        return new LocalizedString(name, value, value == key);
     }
 
     private string GetLanguage()
