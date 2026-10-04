@@ -48,7 +48,7 @@ public class DefaultPluralResolverFixture
         return pluralResolver.GetPluralSuffix("en", 2);
     }
 
-    [TestCase(JsonFormat.Version1, ExpectedResult = "_2")]
+    [TestCase(JsonFormat.Version1, ExpectedResult = "_plural_2")]
     [TestCase(JsonFormat.Version2, ExpectedResult = "_2")]
     [TestCase(JsonFormat.Version3, ExpectedResult = "_1")]
     public string GetPluralSuffix_TwoInEnglish_ShouldReturnNumberWhenNotUsingSimpleSuffix(JsonFormat jsonFormatVersion)

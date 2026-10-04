@@ -172,6 +172,27 @@ public class ServiceCollectionExtensionsFixture
     }
 
     [Test]
+    public void AddI18NextLocalization_LanguageFallbacks_ShouldBeApplied()
+    {
+        var backend = CreateBackend();
+        backend.AddTranslation("fr", "translation", "frenchKey", "Texte français.");
+        backend.AddTranslation("it", "translation", "italianKey", "Testo italiano.");
+
+        var services = new ServiceCollection();
+        services.AddI18NextLocalization(i18n => i18n
+            .AddBackend(backend)
+            .UseFallbackLanguage("fr")
+            .UseFallbackLanguagesFor("de-CH", "it"));
+
+        using var provider = services.BuildServiceProvider();
+        var i18Next = provider.GetRequiredService<II18Next>();
+
+        i18Next.T("de-CH", "italianKey").Should().Be("Testo italiano.");
+        i18Next.T("de-CH", "frenchKey").Should().Be("frenchKey");
+        i18Next.T("de", "frenchKey").Should().Be("Texte français.");
+    }
+
+    [Test]
     public void Builder_InvalidArguments_ShouldThrow()
     {
         var builder = new I18NextBuilder(new ServiceCollection());
@@ -182,6 +203,9 @@ public class ServiceCollectionExtensionsFixture
         builder.Invoking(b => b.UseFallbackLanguage("en", "")).Should().Throw<ArgumentException>();
         builder.Invoking(b => b.UseFallbackNamespace()).Should().Throw<ArgumentException>();
         builder.Invoking(b => b.UseFallbackNamespace("common", null)).Should().Throw<ArgumentException>();
+        builder.Invoking(b => b.UseFallbackLanguagesFor("", "en")).Should().Throw<ArgumentException>();
+        builder.Invoking(b => b.UseFallbackLanguagesFor("de")).Should().Throw<ArgumentException>();
+        builder.Invoking(b => b.UseFallbackLanguagesFor("de", "en", null)).Should().Throw<ArgumentException>();
     }
 
     private class CountingMissingKeyHandler : IMissingKeyHandler

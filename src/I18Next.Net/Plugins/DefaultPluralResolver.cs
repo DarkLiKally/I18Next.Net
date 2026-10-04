@@ -285,7 +285,7 @@ public class DefaultPluralResolver : IPluralResolver
         if (rule == null)
             return string.Empty;
 
-        var numberIndex = rule.Filter(count);
+        var numberIndex = rule.Filter(count == int.MinValue ? int.MaxValue : Math.Abs(count));
         var suffixNumber = numberIndex >= rule.Numbers.Length ? numberIndex : rule.Numbers[numberIndex];
         string suffix;
 
@@ -309,10 +309,10 @@ public class DefaultPluralResolver : IPluralResolver
                 if (suffixNumber == 1)
                     return string.Empty;
 
-                if (suffixNumber > 2)
-                    return $"_plural_{suffixNumber.ToString()}";
+                if (suffix == "plural")
+                    return "_plural";
 
-                return $"_{suffix}";
+                return $"_plural_{suffixNumber.ToString()}";
 
             case JsonFormat.Version2:
                 if (rule.Numbers.Length == 1 || suffix == null)

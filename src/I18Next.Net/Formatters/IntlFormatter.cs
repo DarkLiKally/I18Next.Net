@@ -64,7 +64,7 @@ public class IntlFormatter : IFormatter
         if (maximumFractionDigits > 0)
             format += "." + new string('0', minimumFractionDigits) + new string('#', maximumFractionDigits - minimumFractionDigits);
 
-        return value.ToString(format, culture);
+        return RoundAwayFromZero(value, maximumFractionDigits).ToString(format, culture);
     }
 
     private static string FormatCurrency(IFormattable value, IDictionary<string, string> options, string positionalOption, CultureInfo culture)
@@ -85,7 +85,7 @@ public class IntlFormatter : IFormatter
 
         var fractionDigits = GetIntOption(options, "maximumFractionDigits", GetIntOption(options, "minimumFractionDigits", defaultFractionDigits));
 
-        return value.ToString("C" + fractionDigits.ToString(CultureInfo.InvariantCulture), numberFormat);
+        return RoundAwayFromZero(value, fractionDigits).ToString("C" + fractionDigits.ToString(CultureInfo.InvariantCulture), numberFormat);
     }
 
     private static string FormatDateTime(IFormattable value, IDictionary<string, string> options, CultureInfo culture)
@@ -105,6 +105,21 @@ public class IntlFormatter : IFormatter
             formats.Add(timeStyle == "short" ? culture.DateTimeFormat.ShortTimePattern : culture.DateTimeFormat.LongTimePattern);
 
         return value.ToString(string.Join(" ", formats), culture);
+    }
+
+    private static IFormattable RoundAwayFromZero(IFormattable value, int fractionDigits)
+    {
+        switch (value)
+        {
+            case double doubleValue when !double.IsNaN(doubleValue) && !double.IsInfinity(doubleValue):
+                return Math.Round(doubleValue, Math.Min(fractionDigits, 15), MidpointRounding.AwayFromZero);
+            case float floatValue when !float.IsNaN(floatValue) && !float.IsInfinity(floatValue):
+                return Math.Round((double) floatValue, Math.Min(fractionDigits, 15), MidpointRounding.AwayFromZero);
+            case decimal decimalValue:
+                return Math.Round(decimalValue, Math.Min(fractionDigits, 28), MidpointRounding.AwayFromZero);
+            default:
+                return value;
+        }
     }
 
     private static (string Symbol, int DecimalDigits) GetCurrency(string currency, CultureInfo culture)

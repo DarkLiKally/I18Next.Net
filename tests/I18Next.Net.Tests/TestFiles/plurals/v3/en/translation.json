@@ -1,0 +1,8 @@
+{
+    "item": "{{count}} item",
+    "item_plural": "{{count}} items",
+    "friend": "A friend",
+    "friend_plural": "{{count}} friends",
+    "friend_male": "{{count}} boyfriend",
+    "friend_male_plural": "{{count}} boyfriends"
+}

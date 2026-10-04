@@ -1,0 +1,5 @@
+{
+    "item": "{{count}} предмет",
+    "item_plural_2": "{{count}} предмета",
+    "item_plural_5": "{{count}} предметов"
+}

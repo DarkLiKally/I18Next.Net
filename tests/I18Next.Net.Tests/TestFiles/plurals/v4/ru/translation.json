@@ -1,0 +1,6 @@
+{
+    "item_one": "{{count}} предмет",
+    "item_few": "{{count}} предмета",
+    "item_many": "{{count}} предметов",
+    "item_other": "{{count}} предмета"
+}

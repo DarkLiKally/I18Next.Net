@@ -1,0 +1,13 @@
+{
+    "item_zero": "No items",
+    "item_one": "{{count}} item",
+    "item_other": "{{count}} items",
+    "friend_one": "A friend",
+    "friend_other": "{{count}} friends",
+    "friend_male_one": "{{count}} boyfriend",
+    "friend_male_other": "{{count}} boyfriends",
+    "place_ordinal_one": "{{count}}st place",
+    "place_ordinal_two": "{{count}}nd place",
+    "place_ordinal_few": "{{count}}rd place",
+    "place_ordinal_other": "{{count}}th place"
+}
