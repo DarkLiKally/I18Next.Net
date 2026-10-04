@@ -1,0 +1,14 @@
+{
+    // comments are allowed
+    "String": "Text",
+    "Integer": 42,
+    "Decimal": 1.50,
+    "True": true,
+    "False": false,
+    "Null": null,
+    "Date": "2018-01-25T07:37:59Z",
+    "Array": [ "a", "b" ],
+    "Nested": {
+        "Value": "Nested text",
+    },
+}

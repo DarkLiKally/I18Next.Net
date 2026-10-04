@@ -8,12 +8,14 @@
     <ItemGroup>
         <PackageReference Include="coverlet.collector" Version="6.0.2" />
         <PackageReference Include="FluentAssertions" Version="6.12.2" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
         <PackageReference Include="NSubstitute" Version="5.3.0" />
         <PackageReference Include="nunit" Version="3.14.0" />
         <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
     </ItemGroup>
     <ItemGroup>
+        <ProjectReference Include="..\..\src\I18Next.Net.Extensions\I18Next.Net.Extensions.csproj" />
         <ProjectReference Include="..\..\src\I18Next.Net\I18Next.Net.csproj" />
     </ItemGroup>
     <ItemGroup>
@@ -41,6 +43,12 @@
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
         <None Update="TestFiles\en-US\test-strict.xml">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="TestFiles\en-US\types.json">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="TestFiles\custom\test_en.json">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
     </ItemGroup>
