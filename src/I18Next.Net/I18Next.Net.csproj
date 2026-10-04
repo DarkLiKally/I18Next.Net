@@ -14,6 +14,9 @@
         <PackageReference Include="System.Text.Json" Version="8.0.6" />
     </ItemGroup>
     <ItemGroup>
+        <EmbeddedResource Include="Resources\cldr.json.gz" LogicalName="I18Next.Net.Resources.cldr.json.gz" />
+    </ItemGroup>
+    <ItemGroup>
         <ProjectReference Include="..\I18Next.Net.Abstractions\I18Next.Net.Abstractions.csproj" />
     </ItemGroup>
 </Project>

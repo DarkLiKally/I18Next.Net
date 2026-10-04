@@ -51,6 +51,9 @@
         <None Update="TestFiles\custom\test_en.json">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
+        <None Update="TestFiles\cldr\*.json">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
         <None Update="TestFiles\objects\**\*.json">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>

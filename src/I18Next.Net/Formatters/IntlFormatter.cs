@@ -1,15 +1,19 @@
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using I18Next.Net.Internal;
 using I18Next.Net.Plugins;
 
 namespace I18Next.Net.Formatters;
 
 /// <summary>
-///     Provides the built-in i18next formats number, currency and datetime, e.g. <c>{{value, number(minimumFractionDigits: 2)}}</c>,
-///     <c>{{value, currency(USD)}}</c> or <c>{{value, datetime(dateStyle: long; timeStyle: short)}}</c>.
+///     Provides the built-in i18next formats number, currency, datetime, relativetime and list, e.g.
+///     <c>{{value, number(minimumFractionDigits: 2)}}</c>, <c>{{value, currency(USD)}}</c>,
+///     <c>{{value, datetime(dateStyle: long; timeStyle: short)}}</c>, <c>{{value, relativetime(quarter)}}</c> or
+///     <c>{{value, list(type: disjunction)}}</c>. Relative times and lists use the bundled CLDR data.
 /// </summary>
 public class IntlFormatter : IFormatter
 {
@@ -24,9 +28,12 @@ public class IntlFormatter : IFormatter
         {
             case "number":
             case "currency":
+            case "relativetime":
                 return IsNumber(value);
             case "datetime":
                 return value is DateTime || value is DateTimeOffset;
+            case "list":
+                return value is IEnumerable && value is not string;
             default:
                 return false;
         }
@@ -48,6 +55,10 @@ public class IntlFormatter : IFormatter
                 return FormatCurrency((IFormattable) value, options, positionalOption, culture);
             case "datetime":
                 return FormatDateTime((IFormattable) value, options, culture);
+            case "relativetime":
+                return FormatRelativeTime((IFormattable) value, options, positionalOption, language, culture);
+            case "list":
+                return FormatList((IEnumerable) value, options, language);
             default:
                 return value.ToString();
         }
@@ -105,6 +116,83 @@ public class IntlFormatter : IFormatter
             formats.Add(timeStyle == "short" ? culture.DateTimeFormat.ShortTimePattern : culture.DateTimeFormat.LongTimePattern);
 
         return value.ToString(string.Join(" ", formats), culture);
+    }
+
+    private static string FormatRelativeTime(IFormattable value, IDictionary<string, string> options, string positionalOption, string language,
+        CultureInfo culture)
+    {
+        if (!options.TryGetValue("range", out var unit))
+            unit = positionalOption ?? "day";
+
+        unit = unit.Trim().ToLowerInvariant();
+
+        if (unit.EndsWith("s", StringComparison.Ordinal))
+            unit = unit.Substring(0, unit.Length - 1);
+
+        var style = options.TryGetValue("style", out var styleOption) ? styleOption.ToLowerInvariant() : "long";
+        var data = CldrData.Default.GetRelativeTime(language, unit, style) ??
+                   throw new ArgumentException($"The relative time unit \"{unit}\" is not supported.", nameof(options));
+
+        var number = Convert.ToDouble(value, CultureInfo.InvariantCulture);
+        var isInteger = Math.Abs(number % 1) < double.Epsilon;
+
+        if (options.TryGetValue("numeric", out var numeric) && string.Equals(numeric, "auto", StringComparison.OrdinalIgnoreCase) && isInteger &&
+            data.Relative.TryGetValue(((long) number).ToString(CultureInfo.InvariantCulture), out var relative))
+            return relative;
+
+        var isPast = BitConverter.DoubleToInt64Bits(number) < 0;
+        var absolute = Math.Abs(number);
+        var category = isInteger && absolute <= int.MaxValue ? DefaultPluralResolver.GetPluralCategory(language, (int) absolute) : "other";
+        var patterns = isPast ? data.Past : data.Future;
+
+        if (!patterns.TryGetValue(category, out var pattern))
+            pattern = patterns["other"];
+
+        var formattedNumber = absolute.ToString(isInteger ? "#,##0" : "#,##0.###", culture);
+
+        return pattern.Replace("{0}", formattedNumber);
+    }
+
+    private static string FormatList(IEnumerable value, IDictionary<string, string> options, string language)
+    {
+        var items = new List<string>();
+
+        foreach (var item in value)
+            items.Add(item?.ToString() ?? string.Empty);
+
+        if (items.Count == 0)
+            return string.Empty;
+
+        if (items.Count == 1)
+            return items[0];
+
+        var type = options.TryGetValue("type", out var typeOption) ? typeOption.ToLowerInvariant() : "conjunction";
+        var style = options.TryGetValue("style", out var styleOption) ? styleOption.ToLowerInvariant() : "long";
+        var patterns = CldrData.Default.GetListPatterns(language, type, style) ??
+                       throw new ArgumentException($"The list type \"{type}\" is not supported.", nameof(options));
+
+        if (items.Count == 2)
+            return ApplyListPattern(patterns[3], items[0], items[1]);
+
+        var result = ApplyListPattern(patterns[2], items[items.Count - 2], items[items.Count - 1]);
+
+        for (var i = items.Count - 3; i > 0; i--)
+            result = ApplyListPattern(patterns[1], items[i], result);
+
+        return ApplyListPattern(patterns[0], items[0], result);
+    }
+
+    private static string ApplyListPattern(string pattern, string first, string second)
+    {
+        var firstIndex = pattern.IndexOf("{0}", StringComparison.Ordinal);
+        var secondIndex = pattern.IndexOf("{1}", StringComparison.Ordinal);
+
+        if (firstIndex < secondIndex)
+            return pattern.Substring(0, firstIndex) + first + pattern.Substring(firstIndex + 3, secondIndex - firstIndex - 3) + second +
+                   pattern.Substring(secondIndex + 3);
+
+        return pattern.Substring(0, secondIndex) + second + pattern.Substring(secondIndex + 3, firstIndex - secondIndex - 3) + first +
+               pattern.Substring(firstIndex + 3);
     }
 
     private static IFormattable RoundAwayFromZero(IFormattable value, int fractionDigits)

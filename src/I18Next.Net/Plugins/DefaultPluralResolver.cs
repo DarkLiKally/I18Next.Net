@@ -125,8 +125,8 @@ public class DefaultPluralResolver : IPluralResolver
         {
             Languages = new[]
             {
-                "ak", "am", "as", "bho", "bn", "csw", "doi", "fa", "ff", "gu", "guw", "hi", "hy", "kab", "kn", "ln", "mg",
-                "nso", "pa", "pcm", "si", "ti", "wa", "zu"
+                "ak", "am", "as", "bho", "bn", "csw", "doi", "fa", "ff", "gu", "guw", "hi", "hy", "kab", "kn", "kok", "kok-Latn", "ln",
+                "mg", "nso", "pa", "pcm", "si", "ti", "wa", "zu"
             },
             Filter = n => n <= 1 ? One : Other
         },
@@ -136,7 +136,7 @@ public class DefaultPluralResolver : IPluralResolver
             {
                 "af", "an", "asa", "ast", "az", "bal", "bem", "bez", "bg", "brx", "ce", "cgg", "chr", "ckb", "da", "de",
                 "dev", "dv", "ee", "el", "en", "eo", "et", "eu", "fi", "fo", "fur", "fy", "gl", "gsw", "ha", "haw", "hu",
-                "ia", "io", "ji", "jgo", "jmc", "ka", "kaj", "kcg", "kk", "kkj", "kl", "ks", "ksb", "ku", "ky", "lb", "lg",
+                "ia", "ie", "io", "ji", "jgo", "jmc", "ka", "kaj", "kcg", "kk", "kkj", "kl", "ks", "ksb", "ku", "ky", "lb", "lg",
                 "lij", "mas", "mgo", "ml", "mn", "mr", "nah", "nb", "nd", "ne", "nl", "nn", "nnh", "no", "nr", "ny", "nyn",
                 "om", "or", "os", "pap", "ps", "rm", "rof", "rwk", "saq", "sc", "sd", "sdh", "seh", "sn", "so", "sq", "ss",
                 "ssy", "st", "sv", "sw", "syr", "ta", "te", "teo", "tig", "tk", "tn", "tr", "ts", "ug", "ur", "uz", "ve",
@@ -148,7 +148,8 @@ public class DefaultPluralResolver : IPluralResolver
         new() { Languages = new[] { "is", "mk" }, Filter = n => n % 10 == 1 && n % 100 != 11 ? One : Other },
         new() { Languages = new[] { "ceb", "fil", "tl" }, Filter = n => n % 10 != 4 && n % 10 != 6 && n % 10 != 9 ? One : Other },
         new() { Languages = new[] { "lv", "prg" }, Filter = n => n % 10 == 0 || n % 100 >= 11 && n % 100 <= 19 ? Zero : n % 10 == 1 && n % 100 != 11 ? One : Other },
-        new() { Languages = new[] { "ksh", "lag" }, Filter = n => n == 0 ? Zero : n == 1 ? One : Other },
+        new() { Languages = new[] { "blo", "cv", "ksh", "lag" }, Filter = n => n == 0 ? Zero : n == 1 ? One : Other },
+        new() { Languages = new[] { "sgs" }, Filter = n => n % 10 == 1 && n % 100 != 11 ? One : n == 2 ? Two : n % 10 >= 2 && (n % 100 < 11 || n % 100 > 19) ? Few : Other },
         new() { Languages = new[] { "he", "iu", "naq", "sat", "se", "sma", "smi", "smj", "smn", "sms" }, Filter = n => n == 1 ? One : n == 2 ? Two : Other },
         new() { Languages = new[] { "shi" }, Filter = n => n <= 1 ? One : n <= 10 ? Few : Other },
         new() { Languages = new[] { "mo", "ro" }, Filter = n => n == 1 ? One : n == 0 || n % 100 >= 1 && n % 100 <= 19 ? Few : Other },
@@ -198,7 +199,17 @@ public class DefaultPluralResolver : IPluralResolver
         new() { Languages = new[] { "hu" }, Filter = n => n == 1 || n == 5 ? One : Other },
         new() { Languages = new[] { "ne" }, Filter = n => n >= 1 && n <= 4 ? One : Other },
         new() { Languages = new[] { "sv" }, Filter = n => (n % 10 == 1 || n % 10 == 2) && n % 100 != 11 && n % 100 != 12 ? One : Other },
-        new() { Languages = new[] { "it", "lld", "sc", "scn", "vec" }, Filter = n => n == 11 || n == 8 || n == 80 || n == 800 ? Many : Other },
+        new() { Languages = new[] { "it", "lld", "sc", "vec" }, Filter = n => n == 11 || n == 8 || n == 80 || n == 800 ? Many : Other },
+        new() { Languages = new[] { "lij", "scn" }, Filter = n => n == 11 || n == 8 || n >= 80 && n <= 89 || n >= 800 && n <= 899 ? Many : Other },
+        new() { Languages = new[] { "blo" }, Filter = n => n == 0 ? Zero : n == 1 ? One : n >= 2 && n <= 6 ? Few : Other },
+        new()
+        {
+            Languages = new[] { "kw" },
+            Filter = n => n >= 1 && n <= 4 || n % 100 >= 1 && n % 100 <= 4 || n % 100 >= 21 && n % 100 <= 24 || n % 100 >= 41 && n % 100 <= 44 ||
+                          n % 100 >= 61 && n % 100 <= 64 || n % 100 >= 81 && n % 100 <= 84 ? One
+                : n == 5 || n % 100 == 5 ? Many
+                : Other
+        },
         new() { Languages = new[] { "kk" }, Filter = n => n % 10 == 6 || n % 10 == 9 || n % 10 == 0 && n != 0 ? Many : Other },
         new() { Languages = new[] { "ka" }, Filter = n => n == 1 ? One : n == 0 || n % 100 >= 2 && n % 100 <= 20 || n % 100 == 40 || n % 100 == 60 || n % 100 == 80 ? Many : Other },
         new() { Languages = new[] { "sq" }, Filter = n => n == 1 ? One : n % 10 == 4 && n % 100 != 14 ? Many : Other },
@@ -207,7 +218,7 @@ public class DefaultPluralResolver : IPluralResolver
         new() { Languages = new[] { "tk" }, Filter = n => n % 10 == 6 || n % 10 == 9 || n == 10 ? Few : Other },
         new() { Languages = new[] { "mk" }, Filter = n => n % 10 == 1 && n % 100 != 11 ? One : n % 10 == 2 && n % 100 != 12 ? Two : (n % 10 == 7 || n % 10 == 8) && n % 100 != 17 && n % 100 != 18 ? Many : Other },
         new() { Languages = new[] { "ca" }, Filter = n => n == 1 || n == 3 ? One : n == 2 ? Two : n == 4 ? Few : Other },
-        new() { Languages = new[] { "mr" }, Filter = n => n == 1 ? One : n == 2 || n == 3 ? Two : n == 4 ? Few : Other },
+        new() { Languages = new[] { "kok", "kok-Latn", "mr" }, Filter = n => n == 1 ? One : n == 2 || n == 3 ? Two : n == 4 ? Few : Other },
         new() { Languages = new[] { "gu", "hi" }, Filter = n => n == 1 ? One : n == 2 || n == 3 ? Two : n == 4 ? Few : n == 6 ? Many : Other },
         new() { Languages = new[] { "as", "bn" }, Filter = n => n == 1 || n == 5 || n >= 7 && n <= 10 ? One : n == 2 || n == 3 ? Two : n == 4 ? Few : n == 6 ? Many : Other },
         new() { Languages = new[] { "or" }, Filter = n => n == 1 || n == 5 || n >= 7 && n <= 9 ? One : n == 2 || n == 3 ? Two : n == 4 ? Few : n == 6 ? Many : Other },
