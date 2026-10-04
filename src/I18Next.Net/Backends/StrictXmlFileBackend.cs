@@ -8,7 +8,6 @@ namespace I18Next.Net.Backends;
 
 public class StrictXmlFileBackend : ITranslationBackend
 {
-    private readonly string _basePath;
     private readonly ITranslationTreeBuilderFactory _treeBuilderFactory;
 
     public StrictXmlFileBackend(string basePath)
@@ -18,7 +17,7 @@ public class StrictXmlFileBackend : ITranslationBackend
 
     public StrictXmlFileBackend(string basePath, ITranslationTreeBuilderFactory treeBuilderFactory)
     {
-        _basePath = basePath;
+        BasePath = basePath;
         _treeBuilderFactory = treeBuilderFactory;
     }
 
@@ -32,6 +31,8 @@ public class StrictXmlFileBackend : ITranslationBackend
     {
     }
 
+    protected string BasePath { get; }
+
     public Encoding Encoding { get; set; } = Encoding.UTF8;
 
     public Task<ITranslationTree> LoadNamespaceAsync(string language, string @namespace)
@@ -39,7 +40,7 @@ public class StrictXmlFileBackend : ITranslationBackend
         var path = FindFile(language, @namespace);
 
         if (path == null)
-            return null;
+            return Task.FromResult<ITranslationTree>(null);
 
         XContainer parsedXml;
 
@@ -57,14 +58,14 @@ public class StrictXmlFileBackend : ITranslationBackend
         return Task.FromResult(builder.Build());
     }
 
-    private string FindFile(string language, string @namespace)
+    protected virtual string FindFile(string language, string @namespace)
     {
-        var path = Path.Combine(_basePath, language, @namespace + ".xml");
+        var path = Path.Combine(BasePath, language, @namespace + ".xml");
 
         if (File.Exists(path))
             return path;
 
-        path = Path.Combine(_basePath, BackendUtilities.GetLanguagePart(language), @namespace + ".xml");
+        path = Path.Combine(BasePath, BackendUtilities.GetLanguagePart(language), @namespace + ".xml");
 
         return !File.Exists(path) ? null : path;
     }

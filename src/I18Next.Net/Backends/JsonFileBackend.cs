@@ -1,15 +1,19 @@
 ﻿using System.IO;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using I18Next.Net.TranslationTrees;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace I18Next.Net.Backends;
 
 public class JsonFileBackend : ITranslationBackend
 {
-    private readonly string _basePath;
+    private static readonly JsonDocumentOptions DocumentOptions = new()
+    {
+        AllowTrailingCommas = true,
+        CommentHandling = JsonCommentHandling.Skip
+    };
+
     private readonly ITranslationTreeBuilderFactory _treeBuilderFactory;
 
     public JsonFileBackend(string basePath)
@@ -19,7 +23,7 @@ public class JsonFileBackend : ITranslationBackend
 
     public JsonFileBackend(string basePath, ITranslationTreeBuilderFactory treeBuilderFactory)
     {
-        _basePath = basePath;
+        BasePath = basePath;
         _treeBuilderFactory = treeBuilderFactory;
     }
 
@@ -33,6 +37,8 @@ public class JsonFileBackend : ITranslationBackend
     {
     }
 
+    protected string BasePath { get; }
+
     public Encoding Encoding { get; set; } = Encoding.UTF8;
 
     public async Task<ITranslationTree> LoadNamespaceAsync(string language, string @namespace)
@@ -42,46 +48,72 @@ public class JsonFileBackend : ITranslationBackend
         if (path == null)
             return null;
 
-        JObject parsedJson;
-
-        using (var streamReader = new StreamReader(path, Encoding))
-        using (var reader = new JsonTextReader(streamReader))
-        {
-            parsedJson = (JObject) await JToken.ReadFromAsync(reader);
-        }
-
         var builder = _treeBuilderFactory.Create();
 
-        PopulateTreeBuilder("", parsedJson, builder);
+        using (var document = await ParseDocumentAsync(path).ConfigureAwait(false))
+        {
+            if (document.RootElement.ValueKind == JsonValueKind.Object)
+                PopulateTreeBuilder("", document.RootElement, builder);
+        }
 
         return builder.Build();
     }
 
-    private string FindFile(string language, string @namespace)
+    protected virtual string FindFile(string language, string @namespace)
     {
-        var path = Path.Combine(_basePath, language, @namespace + ".json");
+        var path = Path.Combine(BasePath, language, @namespace + ".json");
 
         if (File.Exists(path))
             return path;
 
-        path = Path.Combine(_basePath, BackendUtilities.GetLanguagePart(language), @namespace + ".json");
+        path = Path.Combine(BasePath, BackendUtilities.GetLanguagePart(language), @namespace + ".json");
 
         return !File.Exists(path) ? null : path;
     }
 
-    private static void PopulateTreeBuilder(string path, JObject node, ITranslationTreeBuilder builder)
+    private async Task<JsonDocument> ParseDocumentAsync(string path)
+    {
+        if (Encoding.CodePage == Encoding.UTF8.CodePage)
+        {
+            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true))
+                return await JsonDocument.ParseAsync(stream, DocumentOptions).ConfigureAwait(false);
+        }
+
+        string content;
+
+        using (var streamReader = new StreamReader(path, Encoding))
+            content = await streamReader.ReadToEndAsync().ConfigureAwait(false);
+
+        return JsonDocument.Parse(content, DocumentOptions);
+    }
+
+    private static void PopulateTreeBuilder(string path, JsonElement node, ITranslationTreeBuilder builder)
     {
         if (path != string.Empty)
             path = path + ".";
 
-        foreach (var childNode in node)
+        foreach (var childNode in node.EnumerateObject())
         {
-            var key = path + childNode.Key;
+            var key = path + childNode.Name;
 
-            if (childNode.Value is JObject jObj)
-                PopulateTreeBuilder(key, jObj, builder);
-            else if (childNode.Value is JValue jVal)
-                builder.AddTranslation(key, jVal.Value.ToString());
+            switch (childNode.Value.ValueKind)
+            {
+                case JsonValueKind.Object:
+                    PopulateTreeBuilder(key, childNode.Value, builder);
+                    break;
+                case JsonValueKind.String:
+                    builder.AddTranslation(key, childNode.Value.GetString());
+                    break;
+                case JsonValueKind.Number:
+                    builder.AddTranslation(key, childNode.Value.GetRawText());
+                    break;
+                case JsonValueKind.True:
+                    builder.AddTranslation(key, bool.TrueString);
+                    break;
+                case JsonValueKind.False:
+                    builder.AddTranslation(key, bool.FalseString);
+                    break;
+            }
         }
     }
 }

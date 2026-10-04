@@ -670,6 +670,28 @@ public class I18NextBuilder
         return this;
     }
 
+    /// <summary>
+    ///     Sets one or more globally used fallback namespaces used by I18Next to resolve translations if the requested
+    ///     namespace does not provide a value for a requested key. The fallback namespaces will be checked in given order
+    ///     until a value is found.
+    /// </summary>
+    /// <param name="namespaces">One or more fallback namespaces.</param>
+    /// <returns>The current I18Next builder instance.</returns>
+    /// <exception cref="ArgumentException">
+    ///     If no fallback namespace was provided or any of the provided values is null or empty.
+    /// </exception>
+    public I18NextBuilder UseFallbackNamespace(params string[] namespaces)
+    {
+        if (namespaces.Length == 0)
+            throw new ArgumentException("Please supply at least one fallback namespace", nameof(namespaces));
+        if (namespaces.Any(string.IsNullOrEmpty))
+            throw new ArgumentException("None of fallback namespaces can be null or empty.", nameof(namespaces));
+
+        Services.Configure<I18NextOptions>(options => options.FallbackNamespaces = namespaces);
+
+        return this;
+    }
+
     private void AddSingletonIfNotPresent<TService, TImplementation>()
         where TImplementation : class, TService
         where TService : class

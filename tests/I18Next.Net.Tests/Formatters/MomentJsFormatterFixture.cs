@@ -84,10 +84,8 @@ public class MomentJsFormatterFixture
                 yield return new TestCaseData("en-US", new DateTime(636524626794846031), "S SS SSS SSSS SSSSS SSSSSS SSSSSSS SSSSSSSS SSSSSSSSS", "4 48 484 4846 48460 484603 4846031 484603100 4846031000");
                 yield return new TestCaseData("en-US", new DateTime(636740968794846031), "\\S \\SS \\SSS \\SSSS \\SSSSS \\SSSSSS \\SSSSSSS \\SSSSSSSS \\SSSSSSSSS", "S SS SSS SSSS SSSSS SSSSSS SSSSSSS SSSSSSSS SSSSSSSSS");
                 
-                yield return new TestCaseData("en-US", new DateTime(636524626794846031), "z zz Z ZZ", "A A +01:00 +0100");
                 yield return new TestCaseData("en-US", new DateTime(636740968794846031), "\\z \\zz \\Z \\ZZ", "z zz Z ZZ");
                 
-                yield return new TestCaseData("en-US", new DateTime(636524626794846031), "X x", "1516862279 1516862279484");
                 yield return new TestCaseData("en-US", new DateTime(636740968794846031), "\\X \\x", "X x");
                 
                 yield return new TestCaseData("en-US", new DateTime(636524626794846031), "[HH:mm:ss] HH:mm:ss \\HH:\\mm:\\ss", "HH:mm:ss 07:37:59 HH:mm:ss");
@@ -106,6 +104,18 @@ public class MomentJsFormatterFixture
                 yield return new TestCaseData("en-US", new DateTime(636740968794846031), "MM/DD/YYYY LLLL [hh:mm:ss] hh:mm A L", "10/02/2018 Tuesday, October 2, 2018 5:07:59 PM hh:mm:ss 05:07 PM 10/2/2018");
                 yield return new TestCaseData("en-US", new DateTime(636740968794846031), "\\LLL LLLL [mm:ss] hh:mm [L]", "LLL Tuesday, October 2, 2018 5:07:59 PM mm:ss 05:07 L");
                 yield return new TestCaseData("en-US", new DateTime(636524626794846031), "[HH:mm:ss] LLLL \\HH:\\mm:\\ss", "HH:mm:ss Thursday, January 25, 2018 7:37:59 AM HH:mm:ss");
+            // @formatter:on
+        }
+    }
+
+    public static IEnumerable FormatWithOffsetTestData
+    {
+        get
+        {
+            // @formatter:off
+            yield return new TestCaseData("en-US", new DateTimeOffset(636524626794846031, TimeSpan.FromHours(1)), "z zz Z ZZ", "A A +01:00 +0100");
+            yield return new TestCaseData("en-US", new DateTimeOffset(636524626794846031, TimeSpan.FromHours(1)), "X x", "1516862279 1516862279484");
+            yield return new TestCaseData("en-US", new DateTimeOffset(636524626794846031, TimeSpan.FromHours(-5)), "Z ZZ", "-05:00 -0500");
             // @formatter:on
         }
     }
@@ -134,7 +144,19 @@ public class MomentJsFormatterFixture
     [TestCaseSource(nameof(FormatTestData))]
     public void Format(string language, DateTime value, string format, string expected)
     {
-        _formatter.Format(value, format, language).Should().Be(expected);
-        _formatter.Format(new DateTimeOffset(value), format, language).Should().Be(expected);
+        NormalizeSpaces(_formatter.Format(value, format, language)).Should().Be(expected);
+        NormalizeSpaces(_formatter.Format(new DateTimeOffset(value), format, language)).Should().Be(expected);
+    }
+
+    [Test]
+    [TestCaseSource(nameof(FormatWithOffsetTestData))]
+    public void Format_WithOffset(string language, DateTimeOffset value, string format, string expected)
+    {
+        NormalizeSpaces(_formatter.Format(value, format, language)).Should().Be(expected);
+    }
+
+    private static string NormalizeSpaces(string value)
+    {
+        return value.Replace('\u202F', ' ').Replace('\u00A0', ' ');
     }
 }

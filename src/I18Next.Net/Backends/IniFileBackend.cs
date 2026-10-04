@@ -8,7 +8,6 @@ namespace I18Next.Net.Backends;
 
 public class IniFileBackend : ITranslationBackend
 {
-    private readonly string _basePath;
     private readonly ITranslationTreeBuilderFactory _treeBuilderFactory;
 
     public IniFileBackend(string basePath)
@@ -18,7 +17,7 @@ public class IniFileBackend : ITranslationBackend
 
     public IniFileBackend(string basePath, ITranslationTreeBuilderFactory treeBuilderFactory)
     {
-        _basePath = basePath;
+        BasePath = basePath;
         _treeBuilderFactory = treeBuilderFactory;
     }
 
@@ -31,6 +30,8 @@ public class IniFileBackend : ITranslationBackend
         : this("locales")
     {
     }
+
+    protected string BasePath { get; }
 
     public Encoding Encoding { get; set; } = Encoding.UTF8;
 
@@ -45,7 +46,7 @@ public class IniFileBackend : ITranslationBackend
 
         using (var reader = new StreamReader(path, Encoding))
         {
-            iniContent = await reader.ReadToEndAsync();
+            iniContent = await reader.ReadToEndAsync().ConfigureAwait(false);
         }
 
         var iniReader = new SimpleIniParser(iniContent);
@@ -57,14 +58,14 @@ public class IniFileBackend : ITranslationBackend
         return builder.Build();
     }
 
-    private string FindFile(string language, string @namespace)
+    protected virtual string FindFile(string language, string @namespace)
     {
-        var path = Path.Combine(_basePath, language, @namespace + ".ini");
+        var path = Path.Combine(BasePath, language, @namespace + ".ini");
 
         if (File.Exists(path))
             return path;
 
-        path = Path.Combine(_basePath, BackendUtilities.GetLanguagePart(language), @namespace + ".ini");
+        path = Path.Combine(BasePath, BackendUtilities.GetLanguagePart(language), @namespace + ".ini");
 
         return !File.Exists(path) ? null : path;
     }

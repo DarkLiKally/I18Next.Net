@@ -11,4 +11,6 @@ public class I18NextOptions
     public bool DetectLanguageOnEachTranslation { get; set; }
 
     public IList<string> FallbackLanguages { get; set; } = new List<string>();
+
+    public IList<string> FallbackNamespaces { get; set; } = new List<string>();
 }

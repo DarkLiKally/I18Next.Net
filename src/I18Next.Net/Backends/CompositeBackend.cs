@@ -16,7 +16,7 @@ public class CompositeBackend : ITranslationBackend
     {
         foreach (var backend in _backends)
         {
-            var tree = await backend.LoadNamespaceAsync(language, @namespace);
+            var tree = await backend.LoadNamespaceAsync(language, @namespace).ConfigureAwait(false);
 
             if (tree != null)
                 return tree;

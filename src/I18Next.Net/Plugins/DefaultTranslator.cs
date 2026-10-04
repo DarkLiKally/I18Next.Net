@@ -17,7 +17,7 @@ public class DefaultTranslator : ITranslator
     private readonly ILogger _logger;
     private readonly IPluralResolver _pluralResolver;
 
-    private readonly ConcurrentDictionary<string, ITranslationTree> _treeCache = new();
+    private readonly ConcurrentDictionary<(string Language, string Namespace), ITranslationTree> _treeCache = new();
 
     public DefaultTranslator(ITranslationBackend backend, ILogger logger, IPluralResolver pluralResolver, IInterpolator interpolator)
     {
@@ -68,25 +68,27 @@ public class DefaultTranslator : ITranslator
 
         string actualNamespace;
 
-        if (key.IndexOf(':') > -1)
+        var namespaceSeparatorIndex = key.IndexOf(':');
+
+        if (namespaceSeparatorIndex > -1)
         {
-            actualNamespace = key.Substring(0, key.IndexOf(':'));
-            key = key.Substring(key.IndexOf(':') + 1);
+            actualNamespace = key.Substring(0, namespaceSeparatorIndex);
+            key = key.Substring(namespaceSeparatorIndex + 1);
         }
         else
         {
             actualNamespace = options.DefaultNamespace;
         }
 
-        if (language.ToLower() == "cimode")
+        if (string.Equals(language, "cimode", StringComparison.OrdinalIgnoreCase))
             return $"{actualNamespace}:{key}";
 
-        var result = await ResolveTranslationAsync(language, actualNamespace, key, args, options);
+        var result = await ResolveTranslationAsync(language, actualNamespace, key, args, options).ConfigureAwait(false);
 
         if (result == null)
             return key;
 
-        return await ExtendTranslationAsync(result, key, language, args, options);
+        return await ExtendTranslationAsync(result, key, language, args, options).ConfigureAwait(false);
     }
 
     private static bool CheckForSpecialArg(IDictionary<string, object> args, string key, params Type[] allowedTypes)
@@ -94,20 +96,26 @@ public class DefaultTranslator : ITranslator
         if (args == null)
             return false;
 
-        if (!args.ContainsKey(key))
+        if (!args.TryGetValue(key, out var value) || value == null)
             return false;
 
-        var value = args[key];
+        var valueType = value.GetType();
 
         for (var i = 0; i < allowedTypes.Length; i++)
         {
-            var type = allowedTypes[i];
-
-            if (value.GetType() == type)
+            if (valueType == allowedTypes[i])
                 return true;
         }
 
         return false;
+    }
+
+    private static bool IsEnabledByArg(IDictionary<string, object> args, string key)
+    {
+        if (args == null || !args.TryGetValue(key, out var value))
+            return true;
+
+        return value is true;
     }
 
     private async Task<string> ExtendTranslationAsync(string result, string key, string language, IDictionary<string, object> args,
@@ -115,17 +123,17 @@ public class DefaultTranslator : ITranslator
     {
         IDictionary<string, object> replaceArgs;
 
-        if ((args?.ContainsKey("replace") ?? false) && args["replace"].GetType().IsClass)
-            replaceArgs = args["replace"].ToDictionary();
+        if (args != null && args.TryGetValue("replace", out var replace) && replace != null && replace.GetType().IsClass)
+            replaceArgs = replace.ToDictionary();
         else
             replaceArgs = args;
 
-        if (AllowInterpolation && (!(args?.ContainsKey("interpolate") ?? false) || args["interpolate"] is bool interpolate && interpolate))
-            result = await _interpolator.InterpolateAsync(result, key, language, replaceArgs);
+        if (AllowInterpolation && IsEnabledByArg(args, "interpolate"))
+            result = await _interpolator.InterpolateAsync(result, key, language, replaceArgs).ConfigureAwait(false);
 
-        if (AllowNesting && (!(args?.ContainsKey("nest") ?? false) || args["nest"] is bool nest && nest) && _interpolator.CanNest(result))
+        if (AllowNesting && IsEnabledByArg(args, "nest") && _interpolator.CanNest(result))
             result = await _interpolator.NestAsync(result, language, replaceArgs,
-                (lang2, key2, args2) => TranslateAsync(lang2, key2, args2, options));
+                (lang2, key2, args2) => TranslateAsync(lang2, key2, args2, options)).ConfigureAwait(false);
 
         if (AllowPostprocessing && PostProcessors.Count > 0)
             result = HandlePostProcessing(result, language, key, args);
@@ -138,10 +146,10 @@ public class DefaultTranslator : ITranslator
         if (args == null)
             return null;
 
-        if (!args.ContainsKey("postProcess"))
+        if (!args.TryGetValue("postProcess", out var localArgs))
             return null;
 
-        if (args["postProcess"] is string postProcessorStr)
+        if (localArgs is string postProcessorStr)
         {
             if (postProcessorStr.IndexOf(',') > -1)
                 return postProcessorStr.Split(",", StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).ToArray();
@@ -149,12 +157,7 @@ public class DefaultTranslator : ITranslator
             return new[] { postProcessorStr };
         }
 
-        var localArgs = args["postProcess"];
-        var postProcessType = localArgs.GetType();
-        if (postProcessType.IsArray && postProcessType.HasElementType && postProcessType.GetElementType() == typeof(string))
-            return localArgs as string[];
-
-        return null;
+        return localArgs as string[];
     }
 
     private string HandlePostProcessing(string result, string language, string key, IDictionary<string, object> args)
@@ -179,7 +182,8 @@ public class DefaultTranslator : ITranslator
 
     private async Task OnMissingKey(string language, string @namespace, string key, List<string> possibleKeys)
     {
-        _logger.LogInformation("Missing translation for {namespace}:{key} in language {language}.", @namespace, key, language);
+        if (_logger.IsEnabled(LogLevel.Information))
+            _logger.LogInformation("Missing translation for {namespace}:{key} in language {language}.", @namespace, key, language);
         
         if (MissingKey == null && MissingKeyHandlers.Count == 0)
             return;
@@ -190,58 +194,70 @@ public class DefaultTranslator : ITranslator
 
         if (MissingKeyHandlers.Count > 0)
         {
-            _logger.LogDebug("Invoking missing key handlers for {namespace}:{key} in language {language}.", @namespace, key, language);
+            if (_logger.IsEnabled(LogLevel.Debug))
+                _logger.LogDebug("Invoking missing key handlers for {namespace}:{key} in language {language}.", @namespace, key, language);
 
             foreach (var missingKeyHandler in MissingKeyHandlers)
-                await missingKeyHandler.HandleMissingKeyAsync(this, args);
+                await missingKeyHandler.HandleMissingKeyAsync(this, args).ConfigureAwait(false);
         }
     }
 
     private async Task<string> ResolveTranslationNoFallbackAsync(string language, string ns, string key, IDictionary<string, object> args)
     {
-        var translationTree = await ResolveTranslationTreeAsync(language, ns);
+        var translationTree = await ResolveTranslationTreeAsync(language, ns).ConfigureAwait(false);
 
         if (translationTree == null)
         {
-            _logger.LogDebug("Unable to resolve a translation tree for {ns} with language {language}", ns, language);
+            if (_logger.IsEnabled(LogLevel.Debug))
+                _logger.LogDebug("Unable to resolve a translation tree for {ns} with language {language}", ns, language);
+
             return null;
         }
 
         var needsPluralHandling = CheckForSpecialArg(args, "count", typeof(int), typeof(long)) && _pluralResolver.NeedsPlural(language);
         var needsContextHandling = CheckForSpecialArg(args, "context", typeof(string));
 
-        var finalKey = key;
-        var possibleKeys = new List<string>();
-        possibleKeys.Add(finalKey);
+        var possibleKeys = new List<string>(needsPluralHandling || needsContextHandling ? 6 : 1) { key };
         var pluralSuffix = string.Empty;
+        string zeroSuffix = null;
 
         if (needsPluralHandling)
         {
-            _logger.LogDebug("Translation {ns}:{key} needs plural handling.", ns, key);
-            
+            if (_logger.IsEnabled(LogLevel.Debug))
+                _logger.LogDebug("Translation {ns}:{key} needs plural handling.", ns, key);
+
             var count = (int) Convert.ChangeType(args["count"], typeof(int));
             pluralSuffix = _pluralResolver.GetPluralSuffix(language, count);
 
-            // Fallback for plural if context was not found
-            if (needsContextHandling)
-                possibleKeys.Add($"{finalKey}{pluralSuffix}");
+            if (count == 0 && _pluralResolver is DefaultPluralResolver { JsonFormatVersion: JsonFormat.Version4 } pluralResolver)
+            {
+                zeroSuffix = $"{pluralResolver.PluralSeparator}zero";
+
+                if (zeroSuffix == pluralSuffix)
+                    zeroSuffix = null;
+            }
+
+            possibleKeys.Add($"{key}{pluralSuffix}");
+
+            if (zeroSuffix != null)
+                possibleKeys.Add($"{key}{zeroSuffix}");
         }
 
-        // Get key for context if needed
         if (needsContextHandling)
         {
-            _logger.LogDebug("Translation {ns}:{key} needs context handling.", ns, key);
+            if (_logger.IsEnabled(LogLevel.Debug))
+                _logger.LogDebug("Translation {ns}:{key} needs context handling.", ns, key);
 
-            var context = (string) args["context"];
-            finalKey = $"{finalKey}{ContextSeparator}{context}";
-            possibleKeys.Add(finalKey);
-        }
+            var contextKey = $"{key}{ContextSeparator}{(string) args["context"]}";
+            possibleKeys.Add(contextKey);
 
-        // Get key for plural if needed
-        if (needsPluralHandling)
-        {
-            finalKey = $"{finalKey}{pluralSuffix}";
-            possibleKeys.Add(finalKey);
+            if (needsPluralHandling)
+            {
+                possibleKeys.Add($"{contextKey}{pluralSuffix}");
+
+                if (zeroSuffix != null)
+                    possibleKeys.Add($"{contextKey}{zeroSuffix}");
+            }
         }
 
         string result = null;
@@ -254,27 +270,29 @@ public class DefaultTranslator : ITranslator
 
             if (result != null)
                 break;
-            
-            _logger.LogDebug("Unable to resolve a translation for {currentKey} from the translation tree.", currentKey);
+
+            if (_logger.IsEnabled(LogLevel.Debug))
+                _logger.LogDebug("Unable to resolve a translation for {currentKey} from the translation tree.", currentKey);
         }
         
-        if(result == null)
-            await OnMissingKey(language, ns, key, possibleKeys);
+        if (result == null)
+            await OnMissingKey(language, ns, key, possibleKeys).ConfigureAwait(false);
 
-        _logger.LogInformation("The resolved translation for {ns}:{key} on language {language} was \"{result}\"", ns, key, language, result);
+        if (_logger.IsEnabled(LogLevel.Information))
+            _logger.LogInformation("The resolved translation for {ns}:{key} on language {language} was \"{result}\"", ns, key, language, result);
         
         return result;
     }
 
     private async Task<string> ResolveTranslationAsync(string language, string ns, string key, IDictionary<string, object> args, TranslationOptions options)
     {
-        var result = await ResolveTranslationNoFallbackAsync(language, ns, key, args);
+        var result = await ResolveTranslationNoFallbackAsync(language, ns, key, args).ConfigureAwait(false);
 
         if (result == null && options?.FallbackNamespaces?.Length > 0)
         {
             foreach (var fallbackNamespace in options.FallbackNamespaces)
             {
-                var fallbackResult = await ResolveTranslationNoFallbackAsync(language, fallbackNamespace, key, args);
+                var fallbackResult = await ResolveTranslationNoFallbackAsync(language, fallbackNamespace, key, args).ConfigureAwait(false);
                 if (fallbackResult != null)
                     return fallbackResult;
             }
@@ -284,7 +302,7 @@ public class DefaultTranslator : ITranslator
         {
             foreach (var fallbackLanguage in options.FallbackLanguages)
             {
-                var fallbackResult = await ResolveTranslationNoFallbackAsync(fallbackLanguage, ns, key, args);
+                var fallbackResult = await ResolveTranslationNoFallbackAsync(fallbackLanguage, ns, key, args).ConfigureAwait(false);
                 if (fallbackResult != null)
                     return fallbackResult;
                 
@@ -292,7 +310,7 @@ public class DefaultTranslator : ITranslator
                 {
                     foreach (var fallbackNamespace in options.FallbackNamespaces)
                     {
-                        fallbackResult = await ResolveTranslationNoFallbackAsync(fallbackLanguage, fallbackNamespace, key, args);
+                        fallbackResult = await ResolveTranslationNoFallbackAsync(fallbackLanguage, fallbackNamespace, key, args).ConfigureAwait(false);
                         if (fallbackResult != null)
                             return fallbackResult;
                     }
@@ -305,17 +323,16 @@ public class DefaultTranslator : ITranslator
 
     private async Task<ITranslationTree> ResolveTranslationTreeAsync(string language, string ns)
     {
-        var cacheKey = $"{language}.{ns}";
-        
-        _logger.LogDebug("Trying to resolve translation tree {cacheKey}", cacheKey);
+        var cacheKey = (language, ns);
 
         if (_treeCache.TryGetValue(cacheKey, out var tree))
             return tree;
 
-        tree = await _backend.LoadNamespaceAsync(language, ns);
+        if (_logger.IsEnabled(LogLevel.Debug))
+            _logger.LogDebug("Trying to resolve translation tree {language}.{ns}", language, ns);
 
-        _treeCache.TryAdd(cacheKey, tree);
+        tree = await _backend.LoadNamespaceAsync(language, ns).ConfigureAwait(false);
 
-        return tree;
+        return _treeCache.GetOrAdd(cacheKey, tree);
     }
 }

@@ -79,7 +79,7 @@ public class I18NextNet : II18Next
 
     public string T(string key, object args = null)
     {
-        return Ta(_language, key, args).ConfigureAwait(false).GetAwaiter().GetResult();
+        return Ta(key, args).ConfigureAwait(false).GetAwaiter().GetResult();
     }
 
     public string T(string language, string key, object args = null)
@@ -94,7 +94,7 @@ public class I18NextNet : II18Next
 
     public Task<string> Ta(string key, object args = null)
     {
-        return Ta(_language, key, args);
+        return Ta(GetCurrentLanguage(), key, args);
     }
 
     public Task<string> Ta(string language, string key, object args = null)
@@ -145,18 +145,25 @@ public class I18NextNet : II18Next
         };
     }
 
+    private string GetCurrentLanguage()
+    {
+        if (!DetectLanguageOnEachTranslation || LanguageDetector == null)
+            return _language;
+
+        var detectedLanguage = LanguageDetector.GetLanguage();
+
+        return string.IsNullOrWhiteSpace(detectedLanguage) ? _language : detectedLanguage;
+    }
+
     private void OnLanguageChanged(LanguageChangedEventArgs e)
     {
         LanguageChanged?.Invoke(this, e);
     }
 
-    private async Task<string> Ta(string language, string key, object args, TranslationOptions options)
+    private Task<string> Ta(string language, string key, object args, TranslationOptions options)
     {
-        if (DetectLanguageOnEachTranslation)
-            UseDetectedLanguage();
-
         var argsDict = args.ToDictionary();
 
-        return await Translator.TranslateAsync(language, key, argsDict, options);
+        return Translator.TranslateAsync(language, key, argsDict, options);
     }
 }

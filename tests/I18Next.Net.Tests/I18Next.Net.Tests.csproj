@@ -1,15 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFrameworks>net5.0;net6.0;net48;netcoreapp3.1</TargetFrameworks>
+        <TargetFrameworks>net6.0;net8.0;net10.0</TargetFrameworks>
+        <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">$(TargetFrameworks);net48</TargetFrameworks>
         <IsPackable>false</IsPackable>
         <LangVersion>Latest</LangVersion>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="FluentAssertions" Version="6.6.0" />
-        <PackageReference Include="NSubstitute" Version="4.3.0" />
-        <PackageReference Include="nunit" Version="3.13.3" />
-        <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
+        <PackageReference Include="coverlet.collector" Version="6.0.2" />
+        <PackageReference Include="FluentAssertions" Version="6.12.2" />
+        <PackageReference Include="NSubstitute" Version="5.3.0" />
+        <PackageReference Include="nunit" Version="3.14.0" />
+        <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\..\src\I18Next.Net\I18Next.Net.csproj" />

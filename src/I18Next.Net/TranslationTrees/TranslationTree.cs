@@ -1,31 +1,42 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace I18Next.Net.TranslationTrees;
 
 public class TranslationTree : ITranslationTree
 {
+    private TranslationTreeNode _root;
+    private Dictionary<string, Translation> _translations;
+
     public TranslationTree(TranslationGroup rootNode)
     {
         Root = rootNode;
     }
 
-    public TranslationTreeNode Root { get; set; }
+    public TranslationTreeNode Root
+    {
+        get => _root;
+        set
+        {
+            _root = value;
+            _translations = BuildTranslationIndex(value);
+        }
+    }
 
     public IDictionary<string, string> GetAllValues()
     {
-        var result = new Dictionary<string, string>();
+        var result = new Dictionary<string, string>(_translations.Count);
 
-        if (Root == null)
-            return result;
-
-        MapTranslationGroup(result, (TranslationGroup) Root);
+        foreach (var translation in _translations)
+            result.Add(translation.Key, translation.Value.Value);
 
         return result;
     }
 
     public string GetValue(string key, IDictionary<string, object> args)
     {
+        if (_translations.TryGetValue(key, out var indexedTranslation))
+            return indexedTranslation.Value;
+
         var parts = key.Split('.');
 
         var node = Root;
@@ -36,9 +47,7 @@ public class TranslationTree : ITranslationTree
 
             if (node is TranslationGroup group)
             {
-                var foundNode = group.Children.FirstOrDefault(c => c.Name == part);
-
-                if (foundNode != null)
+                if (group.TryGetChild(part, out var foundNode))
                     node = foundNode;
                 else
                     return null;
@@ -46,9 +55,8 @@ public class TranslationTree : ITranslationTree
                 continue;
             }
 
-            if (i < parts.Length)
-                throw new TranslationKeyInvalidException(key,
-                    $"The key `{key}` ends up in a final translation at part `{part}`. Cannot go down further the translation tree. Please check the key you've provided.");
+            throw new TranslationKeyInvalidException(key,
+                $"The key `{key}` ends up in a final translation at part `{part}`. Cannot go down further the translation tree. Please check the key you've provided.");
         }
 
         if (node is TranslationGroup)
@@ -62,14 +70,26 @@ public class TranslationTree : ITranslationTree
 
     public string Namespace { get; set; }
 
-    private void MapTranslationGroup(IDictionary<string, string> result, TranslationGroup group)
+    private static Dictionary<string, Translation> BuildTranslationIndex(TranslationTreeNode root)
+    {
+        var result = new Dictionary<string, Translation>();
+
+        if (root is TranslationGroup group)
+            MapTranslationGroup(result, null, group);
+
+        return result;
+    }
+
+    private static void MapTranslationGroup(IDictionary<string, Translation> result, string path, TranslationGroup group)
     {
         foreach (var node in group.Children)
         {
+            var key = path == null ? node.Name : path + "." + node.Name;
+
             if (node is TranslationGroup subGroup)
-                MapTranslationGroup(result, subGroup);
-            else if (node is Translation translation)
-                result.Add(translation.Name, translation.Value);
+                MapTranslationGroup(result, key, subGroup);
+            else if (node is Translation translation && !result.ContainsKey(key))
+                result.Add(key, translation);
         }
     }
 }

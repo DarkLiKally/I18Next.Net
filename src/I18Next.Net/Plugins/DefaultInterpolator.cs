@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using I18Next.Net.Formatters;
 using I18Next.Net.Internal;
 using I18Next.Net.Logging;
-using Newtonsoft.Json.Linq;
 
 namespace I18Next.Net.Plugins;
 
@@ -22,12 +22,18 @@ public class DefaultInterpolator : IInterpolator
     private const string UnescapedExpressionPrefix = @"-";
     private const string UnescapedExpressionSuffix = @"";
 
-    private static readonly Regex ExpressionRegex = new($"{ExpressionPrefix}(.+?){ExpressionSuffix}");
+    private static readonly Regex ExpressionRegex = new($"{ExpressionPrefix}(.+?){ExpressionSuffix}", RegexOptions.Compiled);
 
     private static readonly Regex UnescapedExpressionRegex =
-        new($"{ExpressionPrefix}{UnescapedExpressionPrefix}(.+?){UnescapedExpressionSuffix}{ExpressionSuffix}");
+        new($"{ExpressionPrefix}{UnescapedExpressionPrefix}(.+?){UnescapedExpressionSuffix}{ExpressionSuffix}", RegexOptions.Compiled);
 
-    private static readonly Regex NestingRegex = new($"{NestingPrefix}(.+?){NestingSuffix}");
+    private static readonly Regex NestingRegex = new($"{NestingPrefix}(.+?){NestingSuffix}", RegexOptions.Compiled);
+
+    private static readonly JsonDocumentOptions NestedArgsDocumentOptions = new()
+    {
+        AllowTrailingCommas = true,
+        CommentHandling = JsonCommentHandling.Skip
+    };
 
 
     private List<IFormatter> _formatters;
@@ -62,21 +68,25 @@ public class DefaultInterpolator : IInterpolator
         if (!source.Contains(ExpressionPrefixPlain))
             return Task.FromResult(source);
 
-        var unescapeMatches = UnescapedExpressionRegex.Matches(source);
         var matches = ExpressionRegex.Matches(source);
 
         var result = source;
         var replaces = 0;
 
-        for (var i = 0; i < unescapeMatches.Count; i++)
+        if (source.Contains(ExpressionPrefixPlain + UnescapedExpressionPrefix))
         {
-            var match = unescapeMatches[i];
-            result = HandleUnescapeRegexMatch(result, language, args, match);
+            var unescapeMatches = UnescapedExpressionRegex.Matches(source);
 
-            replaces++;
+            for (var i = 0; i < unescapeMatches.Count; i++)
+            {
+                var match = unescapeMatches[i];
+                result = HandleUnescapeRegexMatch(result, language, args, match);
 
-            if (replaces >= MaximumReplaces)
-                break;
+                replaces++;
+
+                if (replaces >= MaximumReplaces)
+                    break;
+            }
         }
 
         for (var i = 0; i < matches.Count; i++)
@@ -106,7 +116,7 @@ public class DefaultInterpolator : IInterpolator
         for (var i = 0; i < matches.Count; i++)
         {
             var match = matches[i];
-            result = await HandleNestingRegexMatchAsync(result, language, args, translateAsync, match);
+            result = await HandleNestingRegexMatchAsync(result, language, args, translateAsync, match).ConfigureAwait(false);
         }
 
         return result;
@@ -209,10 +219,10 @@ public class DefaultInterpolator : IInterpolator
             key = keyParts[0];
 
             var childArgsString = keyParts[1].Trim();
-            childArgs = await ParseNestedArgsAsync(childArgsString, language, args);
+            childArgs = await ParseNestedArgsAsync(childArgsString, language, args).ConfigureAwait(false);
         }
 
-        var value = await translateAsync(language, key, childArgs);
+        var value = await translateAsync(language, key, childArgs).ConfigureAwait(false);
 
         if (value == null)
             return source;
@@ -261,10 +271,15 @@ public class DefaultInterpolator : IInterpolator
         string language,
         IDictionary<string, object> parentArgs)
     {
-        argsString = await InterpolateAsync(argsString, null, language, parentArgs);
+        argsString = await InterpolateAsync(argsString, null, language, parentArgs).ConfigureAwait(false);
         argsString = argsString.Replace('\'', '"');
 
-        IDictionary<string, object> args = JObject.Parse(argsString).ToObject<Dictionary<string, object>>();
+        IDictionary<string, object> args;
+
+        using (var document = JsonDocument.Parse(argsString, NestedArgsDocumentOptions))
+        {
+            args = document.RootElement.ToDictionary();
+        }
 
         if (parentArgs != null)
             args = parentArgs.MergeLeft(args);

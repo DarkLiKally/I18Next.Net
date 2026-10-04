@@ -6,9 +6,8 @@ using I18Next.Net.Plugins;
 namespace I18Next.Net.Benchmarks;
 
 [SimpleJob(RuntimeMoniker.Net48)]
-[SimpleJob(RuntimeMoniker.Net50)]
-[SimpleJob(RuntimeMoniker.Net60)]
-[SimpleJob(RuntimeMoniker.NetCoreApp31)]
+[SimpleJob(RuntimeMoniker.Net80)]
+[SimpleJob(RuntimeMoniker.Net10_0)]
 [MarkdownExporter, AsciiDocExporter, HtmlExporter, CsvExporter, RPlotExporter]
 public class I18NextBenchmark
 {

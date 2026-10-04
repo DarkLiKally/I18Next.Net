@@ -28,10 +28,13 @@ public class I18NextStringLocalizer : IStringLocalizer
 
     public IEnumerable<LocalizedString> GetAllStrings(bool includeParentCultures)
     {
-        var language = _language ?? _instance.Language;
+        var language = GetLanguage();
 
-        var result = _instance.Backend.LoadNamespaceAsync(language, _instance.DefaultNamespace)
+        var result = _instance.Backend.LoadNamespaceAsync(language, _defaultNamespace)
             .ConfigureAwait(false).GetAwaiter().GetResult();
+
+        if (result == null)
+            return Enumerable.Empty<LocalizedString>();
 
         return result.GetAllValues().Select(t => new LocalizedString(t.Key, t.Value));
     }
@@ -54,11 +57,24 @@ public class I18NextStringLocalizer : IStringLocalizer
         if (arguments != null && arguments.Length > 0)
             args = arguments[0];
 
-        if (_instance.DetectLanguageOnEachTranslation)
-            _instance.UseDetectedLanguage();
-
-        var language = _language ?? _instance.Language;
+        var language = GetLanguage();
 
         return new LocalizedString(name, _instance.T(language, _defaultNamespace, name, args));
+    }
+
+    private string GetLanguage()
+    {
+        if (_language != null)
+            return _language;
+
+        if (_instance.DetectLanguageOnEachTranslation && _instance.LanguageDetector != null)
+        {
+            var detectedLanguage = _instance.LanguageDetector.GetLanguage();
+
+            if (!string.IsNullOrWhiteSpace(detectedLanguage))
+                return detectedLanguage;
+        }
+
+        return _instance.Language;
     }
 }
