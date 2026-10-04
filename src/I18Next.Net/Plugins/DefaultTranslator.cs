@@ -19,7 +19,7 @@ public class DefaultTranslator : ITranslator
     private readonly ILogger _logger;
     private readonly IPluralResolver _pluralResolver;
 
-    private readonly ConcurrentDictionary<(string Language, string Namespace), ITranslationTree> _treeCache = new();
+    private readonly ConcurrentDictionary<(string Language, string Namespace), CachedTree> _treeCache = new();
 
     public DefaultTranslator(ITranslationBackend backend, ILogger logger, IPluralResolver pluralResolver, IInterpolator interpolator)
     {
@@ -540,19 +540,47 @@ public class DefaultTranslator : ITranslator
         return options?.FallbackLanguages;
     }
 
+    protected virtual DateTimeOffset UtcNow => DateTimeOffset.UtcNow;
+
     private async Task<ITranslationTree> ResolveTranslationTreeAsync(string language, string ns)
     {
         var cacheKey = (language, ns);
 
-        if (_treeCache.TryGetValue(cacheKey, out var tree))
-            return tree;
+        if (_treeCache.TryGetValue(cacheKey, out var cached) && (cached.ExpiresAt == DateTimeOffset.MaxValue || cached.ExpiresAt > UtcNow))
+            return cached.Tree;
 
         if (_logger.IsEnabled(LogLevel.Debug))
             _logger.LogDebug("Trying to resolve translation tree {language}.{ns}", language, ns);
 
-        tree = await _backend.LoadNamespaceAsync(language, ns).ConfigureAwait(false);
+        var expiration = (_backend as IExpiringTranslationBackend)?.CacheExpiration;
 
-        return _treeCache.GetOrAdd(cacheKey, tree);
+        if (expiration == null)
+            return _treeCache.GetOrAdd(cacheKey, new CachedTree(await _backend.LoadNamespaceAsync(language, ns).ConfigureAwait(false), DateTimeOffset.MaxValue)).Tree;
+
+        ITranslationTree tree;
+
+        try
+        {
+            tree = await _backend.LoadNamespaceAsync(language, ns).ConfigureAwait(false);
+        }
+        catch (Exception ex) when (cached != null)
+        {
+            if (_logger.IsEnabled(LogLevel.Warning))
+                _logger.LogWarning(ex, "Reloading the translation tree {language}.{ns} failed, the expired tree is used.", language, ns);
+
+            tree = cached.Tree;
+        }
+
+        _treeCache[cacheKey] = new CachedTree(tree, UtcNow + expiration.Value);
+
+        return tree;
+    }
+
+    private sealed class CachedTree(ITranslationTree tree, DateTimeOffset expiresAt)
+    {
+        public DateTimeOffset ExpiresAt { get; } = expiresAt;
+
+        public ITranslationTree Tree { get; } = tree;
     }
 
     private readonly struct PluralSuffixes(string suffix, string zeroSuffix, string ordinalFallbackSuffix)
