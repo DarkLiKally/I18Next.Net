@@ -93,6 +93,11 @@ public class DefaultInterpolator : IInterpolator
 
     public IFormatter DefaultFormatter { get; set; }
 
+    public ISet<string> ChainableFormats { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        "number", "currency", "datetime", "relativetime", "list", "lowercase", "uppercase"
+    };
+
     public bool EscapeValues { get; set; } = true;
 
     public string FormatSeparator { get; set; } = ",";
@@ -266,7 +271,54 @@ public class DefaultInterpolator : IInterpolator
         var format = keyParts[1].Trim();
         var value = GetValue(actualKey, args);
 
-        return Format(value, format, language);
+        var formats = SplitChainedFormats(format);
+
+        if (formats == null)
+            return Format(value, format, language);
+
+        var result = Format(value, formats[0], language);
+
+        for (var i = 1; i < formats.Count; i++)
+            result = Format(result, formats[i], language);
+
+        return result;
+    }
+
+    private List<string> SplitChainedFormats(string format)
+    {
+        if (format.IndexOf(FormatSeparator, StringComparison.Ordinal) < 0)
+            return null;
+
+        var formats = new List<string>();
+        var depth = 0;
+        var start = 0;
+
+        for (var i = 0; i < format.Length; i++)
+        {
+            if (format[i] == '(')
+                depth++;
+            else if (format[i] == ')' && depth > 0)
+                depth--;
+            else if (depth == 0 && string.CompareOrdinal(format, i, FormatSeparator, 0, FormatSeparator.Length) == 0)
+            {
+                formats.Add(format.Substring(start, i - start).Trim());
+                start = i + FormatSeparator.Length;
+                i = start - 1;
+            }
+        }
+
+        formats.Add(format.Substring(start).Trim());
+
+        foreach (var chainedFormat in formats)
+        {
+            var optionsIndex = chainedFormat.IndexOf('(');
+            var name = (optionsIndex > -1 ? chainedFormat.Substring(0, optionsIndex) : chainedFormat).Trim();
+
+            if (!ChainableFormats.Contains(name))
+                return null;
+        }
+
+        return formats;
     }
 
     protected virtual async Task<string> HandleNestingRegexMatchAsync(

@@ -263,6 +263,24 @@ public class IntlFormatter : IFormatter
         }
     }
 
+    internal static bool IsFormatName(string format)
+    {
+        if (format == null)
+            return false;
+
+        switch (GetFormatName(format))
+        {
+            case "number":
+            case "currency":
+            case "datetime":
+            case "relativetime":
+            case "list":
+                return true;
+            default:
+                return false;
+        }
+    }
+
     private static string GetFormatName(string format)
     {
         var optionsIndex = format.IndexOf('(');

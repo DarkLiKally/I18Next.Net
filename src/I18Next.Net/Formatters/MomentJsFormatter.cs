@@ -98,7 +98,7 @@ public class MomentJsFormatter : IFormatter
 
     public bool CanFormat(object value, string format, string language)
     {
-        return value is DateTime || value is DateTimeOffset;
+        return (value is DateTime || value is DateTimeOffset) && !IntlFormatter.IsFormatName(format);
     }
 
     public string Format(object value, string format, string language)
