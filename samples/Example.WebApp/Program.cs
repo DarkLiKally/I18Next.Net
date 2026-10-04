@@ -1,16 +1,16 @@
 ﻿using System.Globalization;
 using System.Threading;
-using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 
 namespace Example.WebApp;
 
 public class Program
 {
-    public static IWebHostBuilder CreateWebHostBuilder(string[] args)
+    public static IHostBuilder CreateHostBuilder(string[] args)
     {
-        return WebHost.CreateDefaultBuilder(args)
-            .UseStartup<Startup>();
+        return Host.CreateDefaultBuilder(args)
+            .ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup<Startup>());
     }
 
     public static void Main(string[] args)
@@ -18,6 +18,6 @@ public class Program
         // This is usually the case for production servers 
         Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
         Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
-        CreateWebHostBuilder(args).Build().Run();
+        CreateHostBuilder(args).Build().Run();
     }
 }

@@ -41,7 +41,7 @@ public class SimpleIniParser
 
     public string GetValue(string section, string key)
     {
-        return GetValue(key, section, null);
+        return GetValue(section, key, null);
     }
 
     public string GetValue(string section, string key, string @default)

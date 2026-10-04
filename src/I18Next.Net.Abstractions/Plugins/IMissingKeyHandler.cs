@@ -12,7 +12,7 @@ public interface IMissingKeyHandler
     ///     backend.
     /// </summary>
     /// <param name="sender">Reference to the calling translator plugin.</param>
-    /// <param name="missingKey">Object containing various information about the missing key.</param>
+    /// <param name="args">Object containing various information about the missing key.</param>
     /// <returns>Awaitable Task.</returns>
     Task HandleMissingKeyAsync(object sender, MissingKeyEventArgs args);
 }

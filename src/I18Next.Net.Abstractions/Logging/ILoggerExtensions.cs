@@ -241,7 +241,7 @@ public static class ILoggerExtensions
         if (handler.IsEnabled)
         {
             var (template, arguments) = handler.GetTemplateAndArguments();
-            logger.Log(LogLevel.Warning, template, arguments);
+            logger.Log(LogLevel.Critical, template, arguments);
         }
     }
 
@@ -253,7 +253,7 @@ public static class ILoggerExtensions
         if (handler.IsEnabled)
         {
             var (template, arguments) = handler.GetTemplateAndArguments();
-            logger.Log(LogLevel.Warning, template, arguments);
+            logger.Log(LogLevel.Trace, template, arguments);
         }
     }
 
@@ -332,7 +332,7 @@ public static class ILoggerExtensions
         if (handler.IsEnabled)
         {
             var (template, arguments) = handler.GetTemplateAndArguments();
-            logger.Log(LogLevel.Warning, exception, template, arguments);
+            logger.Log(LogLevel.Critical, exception, template, arguments);
         }
     }
 
@@ -345,7 +345,7 @@ public static class ILoggerExtensions
         if (handler.IsEnabled)
         {
             var (template, arguments) = handler.GetTemplateAndArguments();
-            logger.Log(LogLevel.Warning, exception, template, arguments);
+            logger.Log(LogLevel.Trace, exception, template, arguments);
         }
     }
     #endif

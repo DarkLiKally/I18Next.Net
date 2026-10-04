@@ -23,12 +23,18 @@ public class TraceLogger : ILogger
 
     public void Log(LogLevel logLevel, Exception exception, string message, params object[] args)
     {
-        var newMessage = message + Environment.NewLine + exception;
+        if (!IsEnabled(logLevel))
+            return;
+
+        var newMessage = message + Environment.NewLine + exception?.ToString().Replace("{", "{{").Replace("}", "}}");
         Log(logLevel, newMessage, args);
     }
 
     public void Log(LogLevel logLevel, string message, params object[] args)
     {
+        if (!IsEnabled(logLevel))
+            return;
+
         var format = ConvertFormat(message);
         switch (logLevel)
         {

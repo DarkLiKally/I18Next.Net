@@ -1,4 +1,5 @@
 #if NET6_0_OR_GREATER
+#nullable enable
 using System.Runtime.CompilerServices;
 
 namespace I18Next.Net.Logging.InterpolatedStringHandlers;

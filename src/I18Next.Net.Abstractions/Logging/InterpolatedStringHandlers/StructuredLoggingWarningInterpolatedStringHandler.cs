@@ -1,4 +1,5 @@
 #if NET6_0_OR_GREATER
+#nullable enable
 using System.Runtime.CompilerServices;
 
 namespace I18Next.Net.Logging.InterpolatedStringHandlers;
@@ -10,7 +11,7 @@ public ref struct StructuredLoggingWarningInterpolatedStringHandler
 
     public StructuredLoggingWarningInterpolatedStringHandler(int literalLength, int formattedCount, ILogger logger, out bool isEnabled)
     {
-        _handler = new StructuredLoggingInterpolatedStringHandler(literalLength, formattedCount, logger, LogLevel.Error, out isEnabled);
+        _handler = new StructuredLoggingInterpolatedStringHandler(literalLength, formattedCount, logger, LogLevel.Warning, out isEnabled);
     }
 
     public bool IsEnabled => _handler.IsEnabled;
