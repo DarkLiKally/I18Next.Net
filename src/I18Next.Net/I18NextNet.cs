@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using I18Next.Net.Backends;
 using I18Next.Net.Internal;
@@ -9,6 +10,14 @@ namespace I18Next.Net;
 
 public class I18NextNet : II18Next
 {
+    private static readonly HashSet<string> RightToLeftLanguages = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "ar", "shu", "sqr", "ssh", "xaa", "yhd", "yud", "aao", "abh", "abv", "acm", "acq", "acw", "acx", "acy", "adf", "ads", "aeb", "aec", "afb",
+        "ajp", "apc", "apd", "arb", "arq", "ars", "ary", "arz", "auz", "avl", "ayh", "ayl", "ayn", "ayp", "bbz", "pga", "he", "iw", "ps", "pbt",
+        "pbu", "pst", "prp", "prd", "ug", "ur", "ydd", "yds", "yih", "ji", "yi", "hbo", "men", "xmn", "fa", "jpr", "peo", "pes", "prs", "dv", "sam",
+        "ckb"
+    };
+
     private string _language;
 
     private readonly TranslationOptions _options;
@@ -35,6 +44,12 @@ public class I18NextNet : II18Next
     {
         get => _options.FallbackNamespaces;
         set => _options.FallbackNamespaces = value;
+    }
+
+    public IDictionary<string, string[]> LanguageFallbacks
+    {
+        get => _options.LanguageFallbacks;
+        set => _options.LanguageFallbacks = value;
     }
 
     public ILogger Logger { get; set; }
@@ -109,6 +124,51 @@ public class I18NextNet : II18Next
         return Ta(language, key, args, options);
     }
 
+    public string T(string[] keys, object args = null)
+    {
+        return Ta(keys, args).ConfigureAwait(false).GetAwaiter().GetResult();
+    }
+
+    public async Task<string> Ta(string[] keys, object args = null)
+    {
+        if (keys == null || keys.Length == 0)
+            throw new ArgumentNullException(nameof(keys));
+
+        var language = GetCurrentLanguage();
+        var argsDict = args.ToDictionary();
+
+        for (var i = 0; i < keys.Length - 1; i++)
+        {
+            if (await Translator.ExistsAsync(language, keys[i], argsDict, _options).ConfigureAwait(false))
+                return await Translator.TranslateAsync(language, keys[i], argsDict, _options).ConfigureAwait(false);
+        }
+
+        return await Translator.TranslateAsync(language, keys[keys.Length - 1], argsDict, _options).ConfigureAwait(false);
+    }
+
+    public bool Exists(string key, object args = null)
+    {
+        return ExistsAsync(GetCurrentLanguage(), key, args).ConfigureAwait(false).GetAwaiter().GetResult();
+    }
+
+    public Task<bool> ExistsAsync(string language, string key, object args = null)
+    {
+        return Translator.ExistsAsync(language, key, args.ToDictionary(), _options);
+    }
+
+    public string Dir(string language = null)
+    {
+        language ??= GetCurrentLanguage();
+
+        if (string.IsNullOrEmpty(language))
+            return "ltr";
+
+        var separatorIndex = language.IndexOfAny(new[] { '-', '_' });
+        var languagePart = separatorIndex > -1 ? language.Substring(0, separatorIndex) : language;
+
+        return RightToLeftLanguages.Contains(languagePart) || language.IndexOf("-Arab", StringComparison.OrdinalIgnoreCase) > -1 ? "rtl" : "ltr";
+    }
+
     public ITranslator Translator { get; }
 
     public void UseDetectedLanguage()
@@ -126,6 +186,15 @@ public class I18NextNet : II18Next
         FallbackNamespaces = namespaces;
     }
 
+    public void SetLanguageFallbacks(string language, params string[] fallbackLanguages)
+    {
+        if (string.IsNullOrWhiteSpace(language))
+            throw new ArgumentNullException(nameof(language));
+
+        LanguageFallbacks ??= new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
+        LanguageFallbacks[language] = fallbackLanguages ?? throw new ArgumentNullException(nameof(fallbackLanguages));
+    }
+
     private TranslationOptions CreateTranslationOptions(string defaultNamespace = null)
     {
         if (_options != null)
@@ -134,6 +203,7 @@ public class I18NextNet : II18Next
             {
                 FallbackLanguages = _options.FallbackLanguages,
                 FallbackNamespaces = _options.FallbackNamespaces,
+                LanguageFallbacks = _options.LanguageFallbacks,
                 DefaultNamespace = defaultNamespace ?? _options.DefaultNamespace
             };
         }

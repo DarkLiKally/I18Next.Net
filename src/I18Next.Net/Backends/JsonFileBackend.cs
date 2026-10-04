@@ -93,27 +93,35 @@ public class JsonFileBackend : ITranslationBackend
             path = path + ".";
 
         foreach (var childNode in node.EnumerateObject())
-        {
-            var key = path + childNode.Name;
+            AddValue(path + childNode.Name, childNode.Value, builder);
+    }
 
-            switch (childNode.Value.ValueKind)
-            {
-                case JsonValueKind.Object:
-                    PopulateTreeBuilder(key, childNode.Value, builder);
-                    break;
-                case JsonValueKind.String:
-                    builder.AddTranslation(key, childNode.Value.GetString());
-                    break;
-                case JsonValueKind.Number:
-                    builder.AddTranslation(key, childNode.Value.GetRawText());
-                    break;
-                case JsonValueKind.True:
-                    builder.AddTranslation(key, bool.TrueString);
-                    break;
-                case JsonValueKind.False:
-                    builder.AddTranslation(key, bool.FalseString);
-                    break;
-            }
+    private static void AddValue(string key, JsonElement value, ITranslationTreeBuilder builder)
+    {
+        switch (value.ValueKind)
+        {
+            case JsonValueKind.Object:
+                PopulateTreeBuilder(key, value, builder);
+                break;
+            case JsonValueKind.Array:
+                var index = 0;
+
+                foreach (var item in value.EnumerateArray())
+                    AddValue($"{key}.{index++}", item, builder);
+
+                break;
+            case JsonValueKind.String:
+                builder.AddTranslation(key, value.GetString());
+                break;
+            case JsonValueKind.Number:
+                builder.AddTranslation(key, value.GetRawText());
+                break;
+            case JsonValueKind.True:
+                builder.AddTranslation(key, bool.TrueString);
+                break;
+            case JsonValueKind.False:
+                builder.AddTranslation(key, bool.FalseString);
+                break;
         }
     }
 }

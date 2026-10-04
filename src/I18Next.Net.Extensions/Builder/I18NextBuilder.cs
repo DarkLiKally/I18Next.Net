@@ -692,6 +692,32 @@ public class I18NextBuilder
         return this;
     }
 
+    /// <summary>
+    ///     Sets one or more fallback languages which are only used for the given language. They take precedence over the
+    ///     globally configured fallback languages. Region specific languages (e.g. de-CH) also use the fallbacks configured
+    ///     for their language part (e.g. de) if no specific ones are configured.
+    /// </summary>
+    /// <param name="language">The language the fallback languages apply to.</param>
+    /// <param name="fallbackLanguages">One or more fallback language identifiers.</param>
+    /// <returns>The current I18Next builder instance.</returns>
+    /// <exception cref="ArgumentException">
+    ///     If the language is null or empty, no fallback language was provided or any of the provided values is null or
+    ///     empty.
+    /// </exception>
+    public I18NextBuilder UseFallbackLanguagesFor(string language, params string[] fallbackLanguages)
+    {
+        if (string.IsNullOrEmpty(language))
+            throw new ArgumentException("Language cannot be null or empty.", nameof(language));
+        if (fallbackLanguages.Length == 0)
+            throw new ArgumentException("Please supply at least one fallback language", nameof(fallbackLanguages));
+        if (fallbackLanguages.Any(string.IsNullOrEmpty))
+            throw new ArgumentException("None of fallback languages can be null or empty.", nameof(fallbackLanguages));
+
+        Services.Configure<I18NextOptions>(options => options.LanguageFallbacks[language] = fallbackLanguages);
+
+        return this;
+    }
+
     private void AddSingletonIfNotPresent<TService, TImplementation>()
         where TImplementation : class, TService
         where TService : class

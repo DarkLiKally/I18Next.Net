@@ -101,6 +101,46 @@ public interface II18Next
     Task<string> Ta(string language, string defaultNamespace, string key, object args = null);
 
     /// <summary>
+    ///     Translates the first of the given keys which exists in the default language.
+    /// </summary>
+    /// <param name="keys">Keys to be translated in order of preference.</param>
+    /// <param name="args">Additional arguments used to translate the key.</param>
+    /// <returns>Translation value.</returns>
+    string T(string[] keys, object args = null);
+
+    /// <summary>
+    ///     Translates the first of the given keys which exists in the default language.
+    /// </summary>
+    /// <param name="keys">Keys to be translated in order of preference.</param>
+    /// <param name="args">Additional arguments used to translate the key.</param>
+    /// <returns>Translation value.</returns>
+    Task<string> Ta(string[] keys, object args = null);
+
+    /// <summary>
+    ///     Checks whether a translation exists for the given key in the default language.
+    /// </summary>
+    /// <param name="key">Key to be checked.</param>
+    /// <param name="args">Additional arguments used to resolve the key, e.g. count or context.</param>
+    /// <returns>Whether a translation exists.</returns>
+    bool Exists(string key, object args = null);
+
+    /// <summary>
+    ///     Checks whether a translation exists for the given key in the provided language.
+    /// </summary>
+    /// <param name="language">Target language override.</param>
+    /// <param name="key">Key to be checked.</param>
+    /// <param name="args">Additional arguments used to resolve the key, e.g. count or context.</param>
+    /// <returns>Whether a translation exists.</returns>
+    Task<bool> ExistsAsync(string language, string key, object args = null);
+
+    /// <summary>
+    ///     Gets the text direction of the given language.
+    /// </summary>
+    /// <param name="language">The language to check. Uses the default language if not provided.</param>
+    /// <returns>"rtl" for right-to-left languages, otherwise "ltr".</returns>
+    string Dir(string language = null);
+
+    /// <summary>
     ///     Uses the registered language detector to detect the language and set it as the default language.
     /// </summary>
     void UseDetectedLanguage();

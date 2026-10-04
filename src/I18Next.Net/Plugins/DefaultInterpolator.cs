@@ -12,22 +12,17 @@ namespace I18Next.Net.Plugins;
 public class DefaultInterpolator : IInterpolator
 {
     private readonly ILogger _logger;
-    private const string ExpressionPrefixPlain = @"{{";
-    private const string ExpressionPrefix = @"\{\{";
-    private const string ExpressionSuffix = @"\}\}";
-    private const string NestingPrefix = @"\$t\(";
-    private const string NestingPrefixPlain = @"$t(";
-    private const string NestingSuffix = @"\)";
+    private const string DefaultPrefix = "{{";
+    private const string DefaultSuffix = "}}";
+    private const string DefaultUnescapePrefix = "-";
+    private const string DefaultNestingPrefix = "$t(";
+    private const string DefaultNestingSuffix = ")";
 
-    private const string UnescapedExpressionPrefix = @"-";
-    private const string UnescapedExpressionSuffix = @"";
+    private static readonly Regex DefaultExpressionRegex = CreateExpressionRegex(DefaultPrefix, DefaultSuffix);
 
-    private static readonly Regex ExpressionRegex = new($"{ExpressionPrefix}(.+?){ExpressionSuffix}", RegexOptions.Compiled);
+    private static readonly Regex DefaultUnescapedExpressionRegex = CreateExpressionRegex(DefaultPrefix + DefaultUnescapePrefix, DefaultSuffix);
 
-    private static readonly Regex UnescapedExpressionRegex =
-        new($"{ExpressionPrefix}{UnescapedExpressionPrefix}(.+?){UnescapedExpressionSuffix}{ExpressionSuffix}", RegexOptions.Compiled);
-
-    private static readonly Regex NestingRegex = new($"{NestingPrefix}(.+?){NestingSuffix}", RegexOptions.Compiled);
+    private static readonly Regex DefaultNestingRegex = CreateExpressionRegex(DefaultNestingPrefix, DefaultNestingSuffix);
 
     private static readonly JsonDocumentOptions NestedArgsDocumentOptions = new()
     {
@@ -37,6 +32,64 @@ public class DefaultInterpolator : IInterpolator
 
 
     private List<IFormatter> _formatters;
+    private Regex _expressionRegex = DefaultExpressionRegex;
+    private Regex _unescapedExpressionRegex = DefaultUnescapedExpressionRegex;
+    private Regex _nestingRegex = DefaultNestingRegex;
+    private string _prefix = DefaultPrefix;
+    private string _suffix = DefaultSuffix;
+    private string _unescapePrefix = DefaultUnescapePrefix;
+    private string _nestingPrefix = DefaultNestingPrefix;
+    private string _nestingSuffix = DefaultNestingSuffix;
+
+    public string Prefix
+    {
+        get => _prefix;
+        set
+        {
+            _prefix = ValidateDelimiter(value);
+            UpdateExpressionRegexes();
+        }
+    }
+
+    public string Suffix
+    {
+        get => _suffix;
+        set
+        {
+            _suffix = ValidateDelimiter(value);
+            UpdateExpressionRegexes();
+        }
+    }
+
+    public string UnescapePrefix
+    {
+        get => _unescapePrefix;
+        set
+        {
+            _unescapePrefix = ValidateDelimiter(value);
+            UpdateExpressionRegexes();
+        }
+    }
+
+    public string NestingPrefix
+    {
+        get => _nestingPrefix;
+        set
+        {
+            _nestingPrefix = ValidateDelimiter(value);
+            _nestingRegex = CreateExpressionRegex(_nestingPrefix, _nestingSuffix);
+        }
+    }
+
+    public string NestingSuffix
+    {
+        get => _nestingSuffix;
+        set
+        {
+            _nestingSuffix = ValidateDelimiter(value);
+            _nestingRegex = CreateExpressionRegex(_nestingPrefix, _nestingSuffix);
+        }
+    }
 
     public IFormatter DefaultFormatter { get; set; }
 
@@ -58,24 +111,24 @@ public class DefaultInterpolator : IInterpolator
 
     public virtual bool CanNest(string source)
     {
-        return UseFastNestingMatch ? source.Contains(NestingPrefixPlain) : NestingRegex.IsMatch(source);
+        return UseFastNestingMatch ? source.Contains(_nestingPrefix) : _nestingRegex.IsMatch(source);
     }
 
     public List<IFormatter> Formatters => _formatters ?? (_formatters = new List<IFormatter>());
 
     public virtual Task<string> InterpolateAsync(string source, string key, string language, IDictionary<string, object> args)
     {
-        if (!source.Contains(ExpressionPrefixPlain))
+        if (!source.Contains(_prefix))
             return Task.FromResult(source);
 
-        var matches = ExpressionRegex.Matches(source);
+        var matches = _expressionRegex.Matches(source);
 
         var result = source;
         var replaces = 0;
 
-        if (source.Contains(ExpressionPrefixPlain + UnescapedExpressionPrefix))
+        if (source.Contains(_prefix + _unescapePrefix))
         {
-            var unescapeMatches = UnescapedExpressionRegex.Matches(source);
+            var unescapeMatches = _unescapedExpressionRegex.Matches(source);
 
             for (var i = 0; i < unescapeMatches.Count; i++)
             {
@@ -109,7 +162,7 @@ public class DefaultInterpolator : IInterpolator
         IDictionary<string, object> args,
         TranslateAsyncDelegate translateAsync)
     {
-        var matches = NestingRegex.Matches(source);
+        var matches = _nestingRegex.Matches(source);
 
         var result = source;
 
@@ -120,6 +173,25 @@ public class DefaultInterpolator : IInterpolator
         }
 
         return result;
+    }
+
+    private static Regex CreateExpressionRegex(string prefix, string suffix)
+    {
+        return new Regex($"{Regex.Escape(prefix)}(.+?){Regex.Escape(suffix)}", RegexOptions.Compiled);
+    }
+
+    private static string ValidateDelimiter(string value)
+    {
+        if (string.IsNullOrEmpty(value))
+            throw new ArgumentNullException(nameof(value));
+
+        return value;
+    }
+
+    private void UpdateExpressionRegexes()
+    {
+        _expressionRegex = CreateExpressionRegex(_prefix, _suffix);
+        _unescapedExpressionRegex = CreateExpressionRegex(_prefix + _unescapePrefix, _suffix);
     }
 
     protected virtual string EscapeValue(string value)

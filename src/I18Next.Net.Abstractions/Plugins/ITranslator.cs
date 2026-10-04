@@ -11,4 +11,6 @@ public interface ITranslator
     event EventHandler<MissingKeyEventArgs> MissingKey;
 
     Task<string> TranslateAsync(string language, string key, IDictionary<string, object> args, TranslationOptions options);
+
+    Task<bool> ExistsAsync(string language, string key, IDictionary<string, object> args, TranslationOptions options);
 }

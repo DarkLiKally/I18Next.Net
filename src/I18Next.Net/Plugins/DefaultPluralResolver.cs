@@ -190,9 +190,45 @@ public class DefaultPluralResolver : IPluralResolver
         // @formatter:on
     };
 
+    private static readonly PluralCategorySet[] OrdinalCategorySets =
+    {
+        // @formatter:off
+        new() { Languages = new[] { "en", "dev" }, Filter = n => n % 10 == 1 && n % 100 != 11 ? One : n % 10 == 2 && n % 100 != 12 ? Two : n % 10 == 3 && n % 100 != 13 ? Few : Other },
+        new() { Languages = new[] { "bal", "fil", "fr", "ga", "hy", "lo", "mo", "ms", "ro", "tl", "vi" }, Filter = n => n == 1 ? One : Other },
+        new() { Languages = new[] { "hu" }, Filter = n => n == 1 || n == 5 ? One : Other },
+        new() { Languages = new[] { "ne" }, Filter = n => n >= 1 && n <= 4 ? One : Other },
+        new() { Languages = new[] { "sv" }, Filter = n => (n % 10 == 1 || n % 10 == 2) && n % 100 != 11 && n % 100 != 12 ? One : Other },
+        new() { Languages = new[] { "it", "lld", "sc", "scn", "vec" }, Filter = n => n == 11 || n == 8 || n == 80 || n == 800 ? Many : Other },
+        new() { Languages = new[] { "kk" }, Filter = n => n % 10 == 6 || n % 10 == 9 || n % 10 == 0 && n != 0 ? Many : Other },
+        new() { Languages = new[] { "ka" }, Filter = n => n == 1 ? One : n == 0 || n % 100 >= 2 && n % 100 <= 20 || n % 100 == 40 || n % 100 == 60 || n % 100 == 80 ? Many : Other },
+        new() { Languages = new[] { "sq" }, Filter = n => n == 1 ? One : n % 10 == 4 && n % 100 != 14 ? Many : Other },
+        new() { Languages = new[] { "uk" }, Filter = n => n % 10 == 3 && n % 100 != 13 ? Few : Other },
+        new() { Languages = new[] { "be" }, Filter = n => (n % 10 == 2 || n % 10 == 3) && n % 100 != 12 && n % 100 != 13 ? Few : Other },
+        new() { Languages = new[] { "tk" }, Filter = n => n % 10 == 6 || n % 10 == 9 || n == 10 ? Few : Other },
+        new() { Languages = new[] { "mk" }, Filter = n => n % 10 == 1 && n % 100 != 11 ? One : n % 10 == 2 && n % 100 != 12 ? Two : (n % 10 == 7 || n % 10 == 8) && n % 100 != 17 && n % 100 != 18 ? Many : Other },
+        new() { Languages = new[] { "ca" }, Filter = n => n == 1 || n == 3 ? One : n == 2 ? Two : n == 4 ? Few : Other },
+        new() { Languages = new[] { "mr" }, Filter = n => n == 1 ? One : n == 2 || n == 3 ? Two : n == 4 ? Few : Other },
+        new() { Languages = new[] { "gu", "hi" }, Filter = n => n == 1 ? One : n == 2 || n == 3 ? Two : n == 4 ? Few : n == 6 ? Many : Other },
+        new() { Languages = new[] { "as", "bn" }, Filter = n => n == 1 || n == 5 || n >= 7 && n <= 10 ? One : n == 2 || n == 3 ? Two : n == 4 ? Few : n == 6 ? Many : Other },
+        new() { Languages = new[] { "or" }, Filter = n => n == 1 || n == 5 || n >= 7 && n <= 9 ? One : n == 2 || n == 3 ? Two : n == 4 ? Few : n == 6 ? Many : Other },
+        new() { Languages = new[] { "gd" }, Filter = n => n == 1 || n == 11 ? One : n == 2 || n == 12 ? Two : n == 3 || n == 13 ? Few : Other },
+        new() { Languages = new[] { "cy" }, Filter = n => n == 0 || n == 7 || n == 8 || n == 9 ? Zero : n == 1 ? One : n == 2 ? Two : n == 3 || n == 4 ? Few : n == 5 || n == 6 ? Many : Other },
+        new()
+        {
+            Languages = new[] { "az" },
+            Filter = n => n % 10 == 1 || n % 10 == 2 || n % 10 == 5 || n % 10 == 7 || n % 10 == 8 || n % 100 == 20 || n % 100 == 50 || n % 100 == 70 || n % 100 == 80 ? One
+                : n % 10 == 3 || n % 10 == 4 || n % 1000 >= 100 && n % 1000 <= 900 && n % 100 == 0 ? Few
+                : n == 0 || n % 10 == 6 || n % 100 == 40 || n % 100 == 60 || n % 100 == 90 ? Many
+                : Other
+        }
+        // @formatter:on
+    };
+
     private static readonly ConcurrentDictionary<string, PluralizationRule> Rules;
 
     private static readonly Dictionary<string, Func<long, string>> CategoryRules;
+
+    private static readonly Dictionary<string, Func<long, string>> OrdinalCategoryRules;
 
     static DefaultPluralResolver()
     {
@@ -221,6 +257,14 @@ public class DefaultPluralResolver : IPluralResolver
             {
                 foreach (var language in set.Languages)
                     CategoryRules[language] = set.Filter;
+            }
+
+            OrdinalCategoryRules = new Dictionary<string, Func<long, string>>();
+
+            foreach (var set in OrdinalCategorySets)
+            {
+                foreach (var language in set.Languages)
+                    OrdinalCategoryRules[language] = set.Filter;
             }
         }
     }
@@ -305,6 +349,33 @@ public class DefaultPluralResolver : IPluralResolver
         var n = Math.Abs((long) count);
 
         if (CategoryRules.TryGetValue(language, out var rule) || CategoryRules.TryGetValue(GetLanguagePart(language), out rule))
+            return rule(n);
+
+        return Other;
+    }
+
+    /// <summary>
+    ///     Gets the suffix for ordinal plurals (e.g. "_ordinal_one") of the given count for the given language.
+    /// </summary>
+    /// <param name="language">The target language.</param>
+    /// <param name="count">Count of items.</param>
+    /// <returns>Suffix to be used to look for ordinal plural handling.</returns>
+    public string GetOrdinalPluralSuffix(string language, int count)
+    {
+        return $"{PluralSeparator}ordinal{PluralSeparator}{GetOrdinalPluralCategory(language, count)}";
+    }
+
+    /// <summary>
+    ///     Gets the CLDR ordinal plural category (zero, one, two, few, many or other) of the given count for the given language.
+    /// </summary>
+    /// <param name="language">The target language.</param>
+    /// <param name="count">Count of items.</param>
+    /// <returns>The ordinal plural category. Falls back to "other" for unknown languages.</returns>
+    public static string GetOrdinalPluralCategory(string language, int count)
+    {
+        var n = Math.Abs((long) count);
+
+        if (OrdinalCategoryRules.TryGetValue(language, out var rule) || OrdinalCategoryRules.TryGetValue(GetLanguagePart(language), out rule))
             return rule(n);
 
         return Other;

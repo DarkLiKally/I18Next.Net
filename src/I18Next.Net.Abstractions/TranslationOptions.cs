@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace I18Next.Net;
 
@@ -21,4 +22,6 @@ public class TranslationOptions
     public string[] FallbackLanguages { get; set; }
 
     public string[] FallbackNamespaces { get; set; }
+
+    public IDictionary<string, string[]> LanguageFallbacks { get; set; }
 }

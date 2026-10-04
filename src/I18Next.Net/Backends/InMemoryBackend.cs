@@ -45,4 +45,23 @@ public class InMemoryBackend : ITranslationBackend
 
         nsDict[key] = value;
     }
+
+    public void AddTranslations(string language, string @namespace, IDictionary<string, string> translations)
+    {
+        if (translations == null)
+            throw new ArgumentNullException(nameof(translations));
+
+        foreach (var translation in translations)
+            AddTranslation(language, @namespace, translation.Key, translation.Value);
+    }
+
+    public bool HasNamespace(string language, string @namespace)
+    {
+        return _namespaces.ContainsKey(language + "_" + @namespace);
+    }
+
+    public bool RemoveNamespace(string language, string @namespace)
+    {
+        return _namespaces.Remove(language + "_" + @namespace);
+    }
 }

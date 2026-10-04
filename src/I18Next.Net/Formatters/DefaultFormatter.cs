@@ -7,6 +7,8 @@ namespace I18Next.Net.Formatters;
 
 public class DefaultFormatter : IFormatter
 {
+    private static readonly IntlFormatter IntlFormatter = new();
+
     private readonly ILogger _logger;
 
     public DefaultFormatter(ILogger logger)
@@ -26,6 +28,9 @@ public class DefaultFormatter : IFormatter
 
         if (format == null)
             return value.ToString();
+
+        if (IntlFormatter.CanFormat(value, format, language))
+            return IntlFormatter.Format(value, format, language);
         
         var formatString = $"{{0:{format}}}";
 

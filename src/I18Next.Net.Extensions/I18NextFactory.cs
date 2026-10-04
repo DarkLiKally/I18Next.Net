@@ -37,6 +37,9 @@ public class I18NextFactory : II18NextFactory
         instance.SetFallbackLanguages(_options.Value.FallbackLanguages.ToArray());
         instance.SetFallbackNamespaces(_options.Value.FallbackNamespaces.ToArray());
 
+        foreach (var languageFallback in _options.Value.LanguageFallbacks)
+            instance.SetLanguageFallbacks(languageFallback.Key, languageFallback.Value);
+
         return instance;
     }
 }

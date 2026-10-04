@@ -52,7 +52,8 @@ public class FileBackendsFixture
         tree.GetValue("False", null).Should().Be("False");
         tree.GetValue("Null", null).Should().BeNull();
         tree.GetValue("Date", null).Should().Be("2018-01-25T07:37:59Z");
-        tree.GetValue("Array", null).Should().BeNull();
+        tree.GetValue("Array.0", null).Should().Be("a");
+        tree.GetValue("Array.1", null).Should().Be("b");
         tree.GetValue("Nested.Value", null).Should().Be("Nested text");
     }
 
