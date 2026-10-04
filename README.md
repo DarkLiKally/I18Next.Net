@@ -176,6 +176,8 @@ var interpolator = new DefaultInterpolator(logger)
 
 The i18next built-in formats are available without any registration. They use the culture of the target language and
 the bundled [CLDR](https://cldr.unicode.org/) 47 data, so the results match the browser `Intl` APIs used by i18next.
+Currency symbols and number separators come from the culture data of the runtime, which is ICU on .NET 5 and later. On
+.NET Framework the Windows culture data is used, so a few symbols can differ from the browser.
 
 ```json
 {

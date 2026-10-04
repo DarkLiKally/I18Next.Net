@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -45,6 +45,11 @@ public class IntlFormatterFixture
     public void Format_Numbers_ShouldFormatLikeIntl(double value, string format, string language, string expected)
     {
         _formatter.CanFormat(value, format, language).ShouldBeTrue();
+
+#if NETFRAMEWORK
+        // The Windows culture data of .NET Framework uses the half-width yen sign.
+        expected = expected.Replace('\uFFE5', '\u00A5');
+#endif
 
         Normalize(_formatter.Format(value, format, language)).ShouldBe(expected);
     }
