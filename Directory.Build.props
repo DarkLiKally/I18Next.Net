@@ -14,7 +14,8 @@
 
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
         <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-        <PackageProjectUrl>https://github.com/DarkLiKally/I18Next.Net</PackageProjectUrl>
+        <PackageProjectUrl>https://darklikally.github.io/I18Next.Net/</PackageProjectUrl>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
 
         <CheckEolTargetFramework>false</CheckEolTargetFramework>
 
@@ -22,5 +23,9 @@
         <NuGetAuditMode>all</NuGetAuditMode>
         <NuGetAuditLevel>low</NuGetAuditLevel>
     </PropertyGroup>
+
+    <ItemGroup Condition="'$(IsPackable)' != 'false'">
+        <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" Visible="false" />
+    </ItemGroup>
 
 </Project>
