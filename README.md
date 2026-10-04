@@ -862,6 +862,8 @@ Compared to version 1.0.0:
 - `CompositeBackend` is obsolete, use `ChainedBackend`.
 - The missing key event is raised once per language, fallback languages equal to the requested language are skipped.
 - `uppercase` and `lowercase` are handled by the `DefaultFormatter` without registering a formatter.
+- Numbers inserted without a format are written culture invariant like in i18next (`1.5`), use `{{value, number}}` for
+  localized numbers.
 
 ## Performance
 

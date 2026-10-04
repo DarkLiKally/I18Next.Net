@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 
+using I18Next.Net.Internal;
 using I18Next.Net.Logging;
 using I18Next.Net.Plugins;
 
@@ -23,7 +24,7 @@ public class DefaultFormatter(ILogger logger) : IFormatter
             return null;
 
         if (format == null)
-            return value.ToString();
+            return value.ToInvariantString();
 
         if (IntlFormatter.CanFormat(value, format, language))
             return IntlFormatter.Format(value, format, language);

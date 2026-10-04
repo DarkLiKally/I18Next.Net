@@ -242,7 +242,7 @@ public class IntlFormatter : IFormatter
         var items = new List<string>();
 
         foreach (var item in value)
-            items.Add(item?.ToString() ?? string.Empty);
+            items.Add(item.ToInvariantString() ?? string.Empty);
 
         if (items.Count == 0)
             return string.Empty;

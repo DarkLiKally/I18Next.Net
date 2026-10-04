@@ -336,7 +336,7 @@ public class DefaultInterpolator : IInterpolator
         {
             var plainValue = GetValue(actualKey, args);
 
-            return AlwaysFormat && plainValue != null ? Format(plainValue, null, language) : plainValue?.ToString();
+            return AlwaysFormat && plainValue != null ? Format(plainValue, null, language) : plainValue.ToInvariantString();
         }
 
         var value = GetValue(actualKey, args);

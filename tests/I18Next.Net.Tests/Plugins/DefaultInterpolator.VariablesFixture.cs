@@ -1,4 +1,5 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Globalization;
 using System.Threading.Tasks;
 
 using I18Next.Net.Backends;
@@ -68,6 +69,26 @@ public class DefaultInterpolator_VariablesFixture
 
         _interpolator.Interpolate("a {{missing, uppercase}} b", "key", "en", null).ShouldBe("a ? b");
         matched.ShouldBe("{{missing, uppercase}}");
+    }
+
+    [Fact]
+    public void Interpolate_Numbers_ShouldNotDependOnTheCurrentCulture()
+    {
+        var culture = CultureInfo.CurrentCulture;
+
+        try
+        {
+            CultureInfo.CurrentCulture = new CultureInfo("de-DE");
+
+            var args = new Dictionary<string, object> { ["a"] = 1.5, ["b"] = 1234.5m, ["c"] = new[] { 2.5, 3 } };
+
+            _interpolator.Interpolate("{{a}} {{b}} {{c, list}}", "key", "en", args).ShouldBe("1.5 1234.5 2.5 and 3");
+            _interpolator.Interpolate("{{a, number}}", "key", "de", args).ShouldBe("1,5");
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = culture;
+        }
     }
 
     [Fact]

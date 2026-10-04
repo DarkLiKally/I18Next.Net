@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -26,6 +27,13 @@ public static class ObjectExtensions
             result.Add(accessors[i].Name, accessors[i].Getter(value));
 
         return result;
+    }
+
+    internal static string ToInvariantString(this object value)
+    {
+        return value is sbyte or byte or short or ushort or int or uint or long or ulong or float or double or decimal
+            ? ((IFormattable)value).ToString(null, CultureInfo.InvariantCulture)
+            : value?.ToString();
     }
 
     public static IDictionary<string, object> ToDictionary(this object value)
