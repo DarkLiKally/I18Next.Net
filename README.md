@@ -851,6 +851,12 @@ Compared to version 1.0.0:
 - JSON v1 plural suffixes for numbers use `_plural_N` like i18next and negative counts use the absolute value.
 - `TraceLogger` respects its `LogLevel`.
 - .NET Standard 2.1 and .NET 5 are no longer separate targets, they use the .NET Standard 2.0 build.
+- `DefaultInterpolator.HandleRegexMatch` and `HandleUnescapeRegexMatch` were removed, interpolation runs in a single pass.
+  Override `GetValueForExpression` or `EscapeValue` to customize values.
+- Values inserted by interpolation are not interpolated or nested again (`SkipOnVariables`, like i18next).
+- `CompositeBackend` is obsolete, use `ChainedBackend`.
+- The missing key event is raised once per language, fallback languages equal to the requested language are skipped.
+- `uppercase` and `lowercase` are handled by the `DefaultFormatter` without registering a formatter.
 
 ## Samples
 
@@ -884,6 +890,18 @@ The CLDR data for relative times, lists and the plural rule tests is generated f
 ```
 python3 tools/cldr/generate.py
 ```
+
+### Releasing
+
+Pushing a version tag builds, tests and packs all packages with that version, publishes them to nuget.org with NuGet
+trusted publishing and creates a GitHub release with the packages:
+
+```
+git tag v2.0.0
+git push origin v2.0.0
+```
+
+Tags with a suffix like `v2.0.0-beta.1` are published as prereleases.
 
 ## License
 
