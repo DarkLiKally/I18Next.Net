@@ -60,3 +60,13 @@ jobs:
         with:
           name: packages
           path: artifacts/packages
+
+  netframework:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Test on .NET Framework 4.8
+        run: dotnet test tests/I18Next.Net.Tests -c Release -f net48

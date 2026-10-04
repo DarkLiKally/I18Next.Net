@@ -88,9 +88,9 @@ public class YamlFileBackendFixture
 
         try
         {
-            File.WriteAllText(Path.Combine(directory, "de", "translation.yaml"), "text: Grüße", Encoding.Latin1);
+            File.WriteAllText(Path.Combine(directory, "de", "translation.yaml"), "text: Grüße", Encoding.GetEncoding("iso-8859-1"));
 
-            var backend = new YamlFileBackend(directory) { Encoding = Encoding.Latin1 };
+            var backend = new YamlFileBackend(directory) { Encoding = Encoding.GetEncoding("iso-8859-1") };
 
             (await backend.LoadNamespaceAsync("de", "translation")).GetValue("text", null).ShouldBe("Grüße");
         }
