@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using I18Next.Net.Backends;
@@ -29,6 +29,11 @@ public class DefaultTranslatorVersion4Fixture
         backend.AddTranslation("ru", "translation", "item_one", "one");
         backend.AddTranslation("ru", "translation", "item_few", "few");
         backend.AddTranslation("ru", "translation", "item_many", "many");
+        backend.AddTranslation("ru", "translation", "item_other", "other");
+        backend.AddTranslation("fr", "translation", "item_one", "{{count}} élément");
+        backend.AddTranslation("fr", "translation", "item_other", "{{count}} éléments");
+        backend.AddTranslation("en", "translation", "place_ordinal_one", "{{count}}st");
+        backend.AddTranslation("en", "translation", "place_ordinal_other", "{{count}}th");
 
         var pluralResolver = new DefaultPluralResolver { JsonFormatVersion = JsonFormat.Version4 };
         var logger = new TraceLogger();
@@ -124,5 +129,32 @@ public class DefaultTranslatorVersion4Fixture
         var result = await TranslateAsync("CIMODE", "item", null);
 
         result.ShouldBe("translation:item");
+    }
+
+    [Theory]
+    [InlineData("en", 1.5, "1.5 items")]
+    [InlineData("en", 1.0, "1 item")]
+    [InlineData("fr", 1.5, "1.5 élément")]
+    [InlineData("fr", 2.5, "2.5 éléments")]
+    [InlineData("ru", 1.5, "other")]
+    [InlineData("ru", 21.0, "one")]
+    public async Task TranslateAsync_DecimalCount_ShouldUseCldrCategories(string language, double count, string expected)
+    {
+        (await TranslateAsync(language, "item", new Dictionary<string, object> { ["count"] = count })).ShouldBe(expected);
+    }
+
+    [Fact]
+    public async Task TranslateAsync_DecimalAndFloatCounts_ShouldBeSupported()
+    {
+        (await TranslateAsync("en", "item", new Dictionary<string, object> { ["count"] = 0.5m })).ShouldBe("0.5 items");
+        (await TranslateAsync("en", "item", new Dictionary<string, object> { ["count"] = 1f })).ShouldBe("1 item");
+        (await TranslateAsync("en", "item", new Dictionary<string, object> { ["count"] = (short)1 })).ShouldBe("1 item");
+    }
+
+    [Fact]
+    public async Task TranslateAsync_DecimalOrdinal_ShouldUseOther()
+    {
+        (await TranslateAsync("en", "place", new Dictionary<string, object> { ["count"] = 1.5, ["ordinal"] = true })).ShouldBe("1.5th");
+        (await TranslateAsync("en", "place", new Dictionary<string, object> { ["count"] = 1.0, ["ordinal"] = true })).ShouldBe("1st");
     }
 }

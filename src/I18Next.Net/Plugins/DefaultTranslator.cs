@@ -290,15 +290,31 @@ public class DefaultTranslator : ITranslator
 
     private bool NeedsPluralHandling(string language, IDictionary<string, object> args)
     {
-        return CheckForSpecialArg(args, "count", typeof(int), typeof(long)) && _pluralResolver.NeedsPlural(language);
+        return CheckForSpecialArg(args, "count", typeof(int), typeof(long), typeof(short), typeof(double), typeof(float), typeof(decimal))
+               && _pluralResolver.NeedsPlural(language);
     }
 
     private PluralSuffixes GetPluralSuffixes(string language, IDictionary<string, object> args)
     {
-        var count = (int)Convert.ChangeType(args["count"], typeof(int));
+        var value = args["count"];
+        var count = (int)Convert.ChangeType(value, typeof(int), CultureInfo.InvariantCulture);
 
         if (_pluralResolver is not DefaultPluralResolver { JsonFormatVersion: JsonFormat.Version4 } pluralResolver)
             return new PluralSuffixes(_pluralResolver.GetPluralSuffix(language, count), null, null);
+
+        if (value is double or float or decimal)
+        {
+            var number = Convert.ToDecimal(value, CultureInfo.InvariantCulture);
+
+            if (number != decimal.Truncate(number))
+            {
+                var ordinalArg = args.TryGetValue("ordinal", out var ordinalValue) && ordinalValue is true;
+                var category = ordinalArg ? "other" : DefaultPluralResolver.GetPluralCategory(language, number);
+
+                return new PluralSuffixes($"{pluralResolver.PluralSeparator}{(ordinalArg ? "ordinal" + pluralResolver.PluralSeparator : "")}{category}", null,
+                    ordinalArg ? $"{pluralResolver.PluralSeparator}{category}" : null);
+            }
+        }
 
         if (args.TryGetValue("ordinal", out var ordinal) && ordinal is true)
         {

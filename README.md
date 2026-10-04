@@ -774,7 +774,7 @@ public class HomeController : Controller
 | Plurals JSON v1, v2, v3 | ✅ | |
 | Plurals JSON v4 | ✅ | CLDR categories incl. `_zero` lookup |
 | Ordinal plurals | ✅ | `ordinal = true` |
-| Plurals with decimal counts | ❌ | `count` must be an integer |
+| Plurals with decimal counts | ✅ | `double`, `float` and `decimal` counts use the CLDR rules like `Intl.PluralRules` |
 | Context | ✅ | Including plural combinations |
 | `defaultValue` incl. plural variants | ✅ | |
 | Multiple fallback keys `t([...])` | ✅ | |

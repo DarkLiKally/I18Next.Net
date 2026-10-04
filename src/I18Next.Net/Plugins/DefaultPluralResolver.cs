@@ -2,6 +2,8 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 
+using I18Next.Net.Internal;
+
 namespace I18Next.Net.Plugins;
 
 public enum JsonFormat
@@ -358,6 +360,21 @@ public class DefaultPluralResolver : IPluralResolver
         return CategoryRules.TryGetValue(language, out var rule) || CategoryRules.TryGetValue(GetLanguagePart(language), out rule)
             ? rule(n)
             : Other;
+    }
+
+    /// <summary>
+    ///     Gets the CLDR plural category of a count with fraction digits like <c>Intl.PluralRules</c>. The scale of the decimal
+    ///     counts as visible fraction digits, so <c>1.0m</c> and <c>1m</c> can have different categories.
+    /// </summary>
+    /// <param name="language">The target language.</param>
+    /// <param name="count">Count of items.</param>
+    /// <returns>The plural category. Falls back to "other" for unknown languages.</returns>
+    public static string GetPluralCategory(string language, decimal count)
+    {
+        if (decimal.GetBits(count)[3] == decimal.GetBits(decimal.Truncate(count))[3] && count >= int.MinValue && count <= int.MaxValue)
+            return GetPluralCategory(language, (int)count);
+
+        return CldrPluralRules.GetCategory(language, count);
     }
 
     /// <summary>

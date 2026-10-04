@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -24,15 +24,18 @@ internal sealed class CldrData
     private readonly ConcurrentDictionary<string, IReadOnlyDictionary<string, object>> _resolvedCalendars = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, Dictionary<string, string[]>> _lists;
     private readonly Dictionary<string, string> _parents;
+    private readonly Dictionary<string, Dictionary<string, string>> _pluralRules;
     private readonly Dictionary<string, Dictionary<string, RelativeTimeData>> _relativeTimes;
 
     private CldrData(Dictionary<string, string> parents, Dictionary<string, Dictionary<string, RelativeTimeData>> relativeTimes,
-        Dictionary<string, Dictionary<string, string[]>> lists, Dictionary<string, Dictionary<string, object>> calendars)
+        Dictionary<string, Dictionary<string, string[]>> lists, Dictionary<string, Dictionary<string, object>> calendars,
+        Dictionary<string, Dictionary<string, string>> pluralRules)
     {
         _parents = parents;
         _relativeTimes = relativeTimes;
         _lists = lists;
         _calendars = calendars;
+        _pluralRules = pluralRules;
     }
 
     public static CldrData Default => Instance.Value;
@@ -45,6 +48,19 @@ internal sealed class CldrData
     public string[] GetListPatterns(string language, string type, string style)
     {
         return Find(_lists, language, type, style);
+    }
+
+    public IReadOnlyDictionary<string, string> GetPluralRules(string language)
+    {
+        if (language == null)
+            return null;
+
+        if (_pluralRules.TryGetValue(language, out var rules))
+            return rules;
+
+        var separator = language.IndexOfAny(['-', '_']);
+
+        return separator > 0 && _pluralRules.TryGetValue(language.Substring(0, separator), out rules) ? rules : null;
     }
 
     public RelativeTimeData GetRelativeTime(string language, string unit, string style)
@@ -136,7 +152,12 @@ internal sealed class CldrData
             calendars[locale.Name] = entries;
         }
 
-        return new CldrData(parents, relativeTimes, lists, calendars);
+        var pluralRules = new Dictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var locale in root.GetProperty("pluralRules").EnumerateObject())
+            pluralRules[locale.Name] = ReadStrings(locale.Value);
+
+        return new CldrData(parents, relativeTimes, lists, calendars, pluralRules);
     }
 
     private IReadOnlyDictionary<string, object> ResolveCalendar(string language)
