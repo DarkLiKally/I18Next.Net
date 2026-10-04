@@ -15,6 +15,7 @@
     </ItemGroup>
     <ItemGroup>
         <EmbeddedResource Include="Resources\cldr.json.gz" LogicalName="I18Next.Net.Resources.cldr.json.gz" />
+        <EmbeddedResource Include="Resources\date-fns.json.gz" LogicalName="I18Next.Net.Resources.date-fns.json.gz" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\I18Next.Net.Abstractions\I18Next.Net.Abstractions.csproj" />
