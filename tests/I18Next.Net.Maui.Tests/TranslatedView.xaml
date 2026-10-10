@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:i18n="https://github.com/DarkLiKally/I18Next.Net"
+             xmlns:tests="clr-namespace:I18Next.Net.Maui.Tests"
+             x:Class="I18Next.Net.Maui.Tests.TranslatedView"
+             x:DataType="tests:ViewModel">
+    <VerticalStackLayout>
+        <Label x:Name="TitleLabel" Text="{i18n:T menu.title}" />
+        <Label x:Name="ItemsLabel" Text="{i18n:T item, Args={Binding User}, Count={Binding Count}}" />
+    </VerticalStackLayout>
+</ContentView>
