@@ -51,6 +51,7 @@ public sealed class I18NextResourcesGenerator : IIncrementalGenerator
         foreach (var sourceFile in sourceFiles.Where(f => f.Error == null))
         {
             var sourceIndex = ResourceModel.GetKeyIndex(sourceFile.Entries, target.JsonFormatVersion);
+            var sourceEntries = sourceFile.Entries.ToLookup(e => ResourceModel.GetIndexKey(e.Key, target.JsonFormatVersion));
 
             foreach (var language in languages)
             {
@@ -71,7 +72,9 @@ public sealed class I18NextResourcesGenerator : IIncrementalGenerator
                 {
                     if (!index.TryGetValue(entry.Key, out var placeholders))
                     {
-                        context.ReportDiagnostic(Diagnostic.Create(Diagnostics.MissingKey, file.GetLocation(), entry.Key, file.Namespace, language));
+                        context.ReportDiagnostic(Diagnostic.Create(Diagnostics.MissingKey, file.GetLocation(),
+                            GetMissingKeyProperties(entry.Key, language, target.SourceLanguage, sourceFile.Path, sourceEntries[entry.Key]), entry.Key, file.Namespace,
+                            language));
                         continue;
                     }
 
@@ -85,6 +88,24 @@ public sealed class I18NextResourcesGenerator : IIncrementalGenerator
                 }
             }
         }
+    }
+
+    private static ImmutableDictionary<string, string> GetMissingKeyProperties(string key, string language, string sourceLanguage, string sourcePath,
+        IEnumerable<ResourceEntry> sourceEntries)
+    {
+        var properties = ImmutableDictionary.CreateBuilder<string, string>();
+
+        properties[DiagnosticProperties.Key] = key;
+        properties[DiagnosticProperties.Language] = language;
+        properties[DiagnosticProperties.SourceLanguage] = sourceLanguage;
+        properties[DiagnosticProperties.SourceFile] = sourcePath;
+
+        var entries = sourceEntries.ToList();
+
+        DiagnosticProperties.AddList(properties, DiagnosticProperties.EntryKeys, entries.Select(e => e.Key));
+        DiagnosticProperties.AddList(properties, DiagnosticProperties.EntryValues, entries.Select(e => e.Value));
+
+        return properties.ToImmutable();
     }
 
     private static string GetTypeName(string declaration)

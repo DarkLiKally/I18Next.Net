@@ -8,6 +8,7 @@
     <ItemGroup>
         <ProjectReference Include="..\..\src\I18Next.Net\I18Next.Net.csproj" />
         <ProjectReference Include="..\..\src\I18Next.Net.Generators\I18Next.Net.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\..\src\I18Next.Net.Generators.CodeFixes\I18Next.Net.Generators.CodeFixes.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     </ItemGroup>
 
     <ItemGroup>

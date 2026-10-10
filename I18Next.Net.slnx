@@ -22,6 +22,7 @@
   <Project Path="src/I18Next.Net.Blazor/I18Next.Net.Blazor.csproj" />
   <Project Path="src/I18Next.Net.EntityFrameworkCore/I18Next.Net.EntityFrameworkCore.csproj" />
   <Project Path="src/I18Next.Net.Extensions/I18Next.Net.Extensions.csproj" />
+  <Project Path="src/I18Next.Net.Generators.CodeFixes/I18Next.Net.Generators.CodeFixes.csproj" />
   <Project Path="src/I18Next.Net.Generators/I18Next.Net.Generators.csproj" />
   <Project Path="src/I18Next.Net.Gettext/I18Next.Net.Gettext.csproj" />
   <Project Path="src/I18Next.Net.ICU/I18Next.Net.ICU.csproj" />

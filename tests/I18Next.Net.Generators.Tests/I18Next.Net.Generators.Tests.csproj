@@ -7,6 +7,7 @@
     <ItemGroup>
         <PackageReference Include="coverlet.collector" Version="6.0.2" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.14.0" />
         <PackageReference Include="Shouldly" Version="4.3.0" />
         <PackageReference Include="xunit" Version="2.9.3" />
         <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
@@ -15,6 +16,7 @@
     <ItemGroup>
         <ProjectReference Include="..\..\src\I18Next.Net\I18Next.Net.csproj" />
         <ProjectReference Include="..\..\src\I18Next.Net.Generators\I18Next.Net.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true" />
+        <ProjectReference Include="..\..\src\I18Next.Net.Generators.CodeFixes\I18Next.Net.Generators.CodeFixes.csproj" />
     </ItemGroup>
     <ItemGroup>
         <AdditionalFiles Include="Locales\**\*.json" />

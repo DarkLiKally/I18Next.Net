@@ -19,7 +19,11 @@
         <AdditionalFiles Include="AnalyzerReleases.Unshipped.md" />
     </ItemGroup>
     <ItemGroup>
+        <ProjectReference Include="..\I18Next.Net.Generators.CodeFixes\I18Next.Net.Generators.CodeFixes.csproj" ReferenceOutputAssembly="false" PrivateAssets="all" />
+    </ItemGroup>
+    <ItemGroup>
         <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
         <None Include="build\I18Next.Net.Generators.targets" Pack="true" PackagePath="build" />
+        <None Include="..\I18Next.Net.Generators.CodeFixes\$(OutputPath)\I18Next.Net.Generators.CodeFixes.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
     </ItemGroup>
 </Project>
