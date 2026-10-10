@@ -214,6 +214,88 @@ public class ChainedBackendFixture
         await _backendB.Received(2).LoadNamespaceAsync("en", "backB");
     }
 
+    [Fact]
+    public async Task LoadNamespaceAsync_SaveToEarlierBackendsDisabled_ShouldNotSave()
+    {
+        var cache = CreateWritableBackend();
+        var backend = new ChainedBackend(cache, _backendB);
+
+        backend.SaveToEarlierBackends.ShouldBeFalse();
+
+        (await backend.LoadNamespaceAsync("en", "backB")).ShouldNotBeNull();
+
+        await cache.DidNotReceiveWithAnyArgs().SaveNamespaceAsync(null, null, null);
+    }
+
+    [Fact]
+    public async Task LoadNamespaceAsync_SaveToEarlierBackends_ShouldSaveToEarlierWritableBackends()
+    {
+        var first = CreateWritableBackend();
+        var second = CreateWritableBackend();
+        var last = CreateWritableBackend();
+        var backend = new ChainedBackend(first, _backendA, second, _backendB, last) { SaveToEarlierBackends = true };
+
+        var tree = await backend.LoadNamespaceAsync("en", "backB");
+
+        tree.ShouldNotBeNull();
+        await first.Received(1).SaveNamespaceAsync("en", "backB", tree);
+        await second.Received(1).SaveNamespaceAsync("en", "backB", tree);
+        await last.DidNotReceiveWithAnyArgs().SaveNamespaceAsync(null, null, null);
+        await last.DidNotReceiveWithAnyArgs().LoadNamespaceAsync(null, null);
+    }
+
+    [Fact]
+    public async Task LoadNamespaceAsync_SaveToEarlierBackendsProvidedByFirstBackend_ShouldNotSave()
+    {
+        var cache = CreateWritableBackend();
+        cache.LoadNamespaceAsync("en", "cached").Returns(_ => Substitute.For<ITranslationTree>());
+        var source = CreateWritableBackend();
+        var backend = new ChainedBackend(cache, source) { SaveToEarlierBackends = true };
+
+        (await backend.LoadNamespaceAsync("en", "cached")).ShouldNotBeNull();
+
+        await cache.DidNotReceiveWithAnyArgs().SaveNamespaceAsync(null, null, null);
+        await source.DidNotReceiveWithAnyArgs().SaveNamespaceAsync(null, null, null);
+        await source.DidNotReceiveWithAnyArgs().LoadNamespaceAsync(null, null);
+    }
+
+    [Fact]
+    public async Task LoadNamespaceAsync_SaveToEarlierBackendsNoBackendProvidesNamespace_ShouldNotSave()
+    {
+        var cache = CreateWritableBackend();
+        var backend = new ChainedBackend(cache, _backendA) { SaveToEarlierBackends = true };
+        _backendA.LoadNamespaceAsync("en", "missing").Returns((ITranslationTree)null);
+
+        (await backend.LoadNamespaceAsync("en", "missing")).ShouldBeNull();
+
+        await cache.DidNotReceiveWithAnyArgs().SaveNamespaceAsync(null, null, null);
+    }
+
+    [Fact]
+    public async Task LoadNamespaceAsync_SaveThrows_ShouldPropagate()
+    {
+        var cache = CreateWritableBackend();
+        cache.SaveNamespaceAsync("en", "backB", Arg.Any<ITranslationTree>()).ThrowsAsync(new InvalidOperationException("offline"));
+        var backend = new ChainedBackend(cache, _backendB) { SaveToEarlierBackends = true };
+
+        await Should.ThrowAsync<InvalidOperationException>(() => backend.LoadNamespaceAsync("en", "backB"));
+    }
+
+    [Fact]
+    public async Task LoadNamespaceAsync_SaveToEarlierInMemoryBackend_ShouldProvideNamespaceFromMemory()
+    {
+        var cache = new InMemoryBackend();
+        var source = new SequenceBackend();
+        var backend = new ChainedBackend(cache, source) { SaveToEarlierBackends = true };
+
+        (await backend.LoadNamespaceAsync("de-AT", "translation")).GetValue("key", null).ShouldBe("value 1");
+        (await backend.LoadNamespaceAsync("de-AT", "translation")).GetValue("key", null).ShouldBe("value 1");
+
+        source.Loads.ShouldBe(1);
+        cache.HasNamespace("de-AT", "translation").ShouldBeTrue();
+        cache.HasNamespace("de", "translation").ShouldBeFalse();
+    }
+
 #pragma warning disable CS0618
     [Fact]
     public async Task CompositeBackend_ShouldBehaveLikeChainedBackend()
@@ -293,6 +375,14 @@ public class ChainedBackendFixture
         translator.ClearCache("en", "translation");
 
         (await Translate(translator)).ShouldBe("value 2");
+    }
+
+    private static IWritableTranslationBackend CreateWritableBackend()
+    {
+        var backend = Substitute.For<IWritableTranslationBackend>();
+        backend.LoadNamespaceAsync(null, null).ReturnsForAnyArgs((ITranslationTree)null);
+
+        return backend;
     }
 
     private static Task<string> Translate(ITranslator translator)

@@ -45,6 +45,14 @@ public class ChainedBackend : IExpiringTranslationBackend, INotifyingTranslation
     /// </summary>
     public bool UseExpiredCacheOnFailure { get; set; } = true;
 
+    /// <summary>
+    ///     Stores a namespace provided by a later backend in all earlier backends implementing
+    ///     <see cref="IWritableTranslationBackend" />, like the i18next-chained-backend does, e.g. to fill a distributed cache
+    ///     in front of a HTTP backend. Disabled by default because the earlier backends provide the stored namespaces from
+    ///     then on, so changes of the later backends are only picked up when the stored namespaces expire.
+    /// </summary>
+    public bool SaveToEarlierBackends { get; set; }
+
     protected virtual DateTimeOffset UtcNow => DateTimeOffset.UtcNow;
 
     public async Task<ITranslationTree> LoadNamespaceAsync(string language, string @namespace)
@@ -99,15 +107,29 @@ public class ChainedBackend : IExpiringTranslationBackend, INotifyingTranslation
 
     private async Task<ITranslationTree> LoadFromBackendsAsync(string language, string @namespace)
     {
-        foreach (var backend in _backends)
+        for (var i = 0; i < _backends.Length; i++)
         {
-            var tree = await backend.LoadNamespaceAsync(language, @namespace).ConfigureAwait(false);
+            var tree = await _backends[i].LoadNamespaceAsync(language, @namespace).ConfigureAwait(false);
 
-            if (tree != null)
-                return tree;
+            if (tree == null)
+                continue;
+
+            if (SaveToEarlierBackends)
+                await SaveToEarlierBackendsAsync(language, @namespace, tree, i).ConfigureAwait(false);
+
+            return tree;
         }
 
         return null;
+    }
+
+    private async Task SaveToEarlierBackendsAsync(string language, string @namespace, ITranslationTree tree, int index)
+    {
+        for (var i = 0; i < index; i++)
+        {
+            if (_backends[i] is IWritableTranslationBackend writableBackend)
+                await writableBackend.SaveNamespaceAsync(language, @namespace, tree).ConfigureAwait(false);
+        }
     }
 
     private sealed class CacheEntry(ITranslationTree tree, DateTimeOffset expiresAt)
