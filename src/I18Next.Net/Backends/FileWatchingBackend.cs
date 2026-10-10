@@ -16,7 +16,6 @@ namespace I18Next.Net.Backends;
 public class FileWatchingBackend : INotifyingTranslationBackend, IDisposable
 {
     private readonly ITranslationBackend _backend;
-    private readonly string _basePath;
     private readonly HashSet<(string Language, string Namespace)> _pendingChanges = [];
     private readonly Timer _timer;
     private readonly FileSystemWatcher _watcher;
@@ -24,15 +23,15 @@ public class FileWatchingBackend : INotifyingTranslationBackend, IDisposable
     public FileWatchingBackend(ITranslationBackend backend, string basePath, string filter = "*.*")
     {
         _backend = backend ?? throw new ArgumentNullException(nameof(backend));
-        _basePath = Path.GetFullPath(basePath ?? throw new ArgumentNullException(nameof(basePath)));
         _timer = new Timer(_ => RaisePendingChanges(), null, Timeout.Infinite, Timeout.Infinite);
 
         if (_backend is INotifyingTranslationBackend notifyingBackend)
             notifyingBackend.TranslationsChanged += (_, e) => TranslationsChanged?.Invoke(this, e);
 
-        Directory.CreateDirectory(_basePath);
+        var path = Path.GetFullPath(basePath ?? throw new ArgumentNullException(nameof(basePath)));
+        Directory.CreateDirectory(path);
 
-        _watcher = new FileSystemWatcher(_basePath, filter)
+        _watcher = new FileSystemWatcher(path, filter)
         {
             IncludeSubdirectories = true,
             NotifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName | NotifyFilters.LastWrite | NotifyFilters.Size
@@ -68,9 +67,9 @@ public class FileWatchingBackend : INotifyingTranslationBackend, IDisposable
     /// <summary>
     ///     Maps a changed file to the language and namespace it contains. Returns <c>(null, null)</c> to reload everything.
     /// </summary>
-    protected virtual (string Language, string Namespace) GetChangedNamespace(string path)
+    /// <param name="relativePath">The path of the changed file relative to the watched directory.</param>
+    protected virtual (string Language, string Namespace) GetChangedNamespace(string relativePath)
     {
-        var relativePath = path.Substring(_basePath.Length).TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         var parts = relativePath.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
         if (parts.Length != 2 || Path.GetExtension(parts[1]).Length == 0)
@@ -81,13 +80,16 @@ public class FileWatchingBackend : INotifyingTranslationBackend, IDisposable
 
     private void OnFileChanged(object sender, FileSystemEventArgs e)
     {
-        AddPendingChange(e.FullPath);
+        if (e.ChangeType == WatcherChangeTypes.Changed && Directory.Exists(e.FullPath))
+            return;
+
+        AddPendingChange(e.Name);
     }
 
     private void OnFileRenamed(object sender, RenamedEventArgs e)
     {
-        AddPendingChange(e.OldFullPath);
-        AddPendingChange(e.FullPath);
+        AddPendingChange(e.OldName);
+        AddPendingChange(e.Name);
     }
 
     private void AddPendingChange(string path)
