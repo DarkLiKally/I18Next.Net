@@ -18,6 +18,10 @@ The documentation is available at [darklikally.github.io/I18Next.Net](https://da
 - [Built-in plugins](#built-in-plugins)
 - [Typed keys with the source generator](#typed-keys-with-the-source-generator)
 - [Dependency injection and ASP.NET Core](#dependency-injection-and-aspnet-core)
+- [Blazor, WPF and .NET MAUI](#blazor-wpf-and-net-maui)
+- [Validation messages](#validation-messages)
+- [Command-line tool and machine translation](#command-line-tool-and-machine-translation)
+- [Trimming and Native AOT](#trimming-and-native-aot)
 - [Feature parity with i18next](#feature-parity-with-i18next)
 - [Breaking changes](#breaking-changes)
 - [Performance](#performance)
@@ -31,16 +35,25 @@ The documentation is available at [darklikally.github.io/I18Next.Net](https://da
 | `I18Next.Net` | Core library with translator, interpolation, plurals, formats and the JSON, XML, INI, HTTP, in-memory, delegate and chained backends |
 | `I18Next.Net.Abstractions` | Interfaces for writing your own backends, translators, interpolators, formatters and loggers |
 | `I18Next.Net.Extensions` | Registration in `IServiceCollection` and `IStringLocalizer` support |
-| `I18Next.Net.AspNetCore` | ASP.NET Core integration including view localization |
+| `I18Next.Net.AspNetCore` | ASP.NET Core integration including view localization, a translations endpoint for i18next in the browser and localized routes |
+| `I18Next.Net.Blazor` | Blazor components and a language per user for interactive server, WebAssembly and static rendering |
+| `I18Next.Net.Wpf` | WPF markup extension `{i18n:T key}` updating on language and translation changes |
+| `I18Next.Net.Maui` | .NET MAUI markup extension `{i18n:T key}` and `UseI18Next()` |
+| `I18Next.Net.DataAnnotations` | Translated DataAnnotations messages and display names for MVC, minimal APIs and `Validator` |
+| `I18Next.Net.FluentValidation` | FluentValidation messages and display names from i18next |
+| `I18Next.Net.EntityFrameworkCore` | Backend and missing key handler storing translations in a database |
+| `I18Next.Net.MachineTranslation` | Machine translation with DeepL, Azure AI Translator or your own delegate, e.g. an LLM |
+| `I18Next.Net.Tool` | The `dotnet i18next` tool to extract, check, sort, convert, migrate and machine translate translation files |
 | `I18Next.Net.ICU` | Interpolator for ICU message format strings |
 | `I18Next.Net.PolyglotJs` | Interpolator for Polyglot.js style translations |
 | `I18Next.Net.Gettext` | Backend for gettext `.mo` files |
 | `I18Next.Net.Yaml` | Backend and reader for YAML translation files |
 | `I18Next.Net.Serilog` | Logger forwarding I18Next.Net log messages to Serilog |
-| `I18Next.Net.Generators` | Source generator for typed keys and translation methods, plus analyzers for the translation files |
+| `I18Next.Net.Generators` | Source generator for typed keys and translation methods, analyzers and code fixes for the translation files and Native AOT support |
 
 The packages target .NET Standard 2.0 (including .NET Framework 4.6.2 and later), .NET 6, .NET 8 and .NET 10. A .NET 11
-build is added automatically when building with a .NET 11 SDK.
+build is added automatically when building with a .NET 11 SDK. The Blazor, MAUI, Entity Framework Core and tool packages
+target .NET 8 and .NET 10, the WPF package .NET 8 and .NET 10 on Windows.
 
 ## Installation
 
@@ -397,7 +410,7 @@ i18n.UseDetectedLanguage();   // sets i18n.Language to the detected language
 
 ```csharp
 translator.MissingKey += (sender, e) => Console.WriteLine($"{e.Language} {e.Namespace}:{e.Key} ({string.Join(", ", e.PossibleKeys)})");
-translator.MissingKeyHandlers.Add(new MyMissingKeyHandler());   // IMissingKeyHandler, e.g. to report missing keys
+translator.MissingKeyHandlers.Add(new FileMissingKeyHandler());   // writes locales/{{lng}}/{{ns}}.missing.json
 ```
 
 ### Post processors
@@ -476,7 +489,10 @@ to the language part of a regional language (`de` for `de-CH`).
 | `HttpBackend` | `I18Next.Net` | JSON over HTTP, the equivalent of i18next-http-backend |
 | `FuncBackend` | `I18Next.Net` | Whatever a delegate returns, the equivalent of i18next-resources-to-backend |
 | `InMemoryBackend` | `I18Next.Net` | Translations added in code |
-| `ChainedBackend` | `I18Next.Net` | Asks several backends in order, with optional caching and expiry |
+| `ChainedBackend` | `I18Next.Net` | Asks several backends in order, with optional caching, expiry and saving to earlier backends |
+| `FileWatchingBackend` | `I18Next.Net` | Wraps a file based backend and reloads changed files without restarting the application |
+| `DistributedCacheBackend` | `I18Next.Net.Extensions` | An `IDistributedCache` like Redis as cache in front of other backends |
+| `EntityFrameworkBackend<TContext>` | `I18Next.Net.EntityFrameworkCore` | A database table, editable at runtime |
 | `GettextBackend` | `I18Next.Net.Gettext` | Compiled gettext `.mo` files from `{basePath}/{lng}/{ns}.mo` |
 | `YamlFileBackend` | `I18Next.Net.Yaml` | YAML files from `{basePath}/{lng}/{ns}.yaml` or `.yml`, mappings and sequences like the JSON backend |
 
@@ -551,6 +567,46 @@ translators share the backend. `CacheExpiration` also tells the translator to re
 updated translations are picked up while the application runs. When reloading fails or no backend provides the
 namespace anymore, the expired namespace is used until the next expiry. `ClearCache()` and `ClearCache(lng, ns)` drop
 cached namespaces.
+
+With `SaveToEarlierBackends = true` a namespace provided by a later backend is saved into the earlier backends which
+implement `IWritableTranslationBackend`, like the i18next-chained-backend does with cache backends. `UseDistributedCache()`
+puts a `DistributedCacheBackend` in front of the registered backend this way:
+
+```csharp
+services.AddStackExchangeRedisCache(o => o.Configuration = "localhost:6379");
+services.AddI18NextLocalization(i18n => i18n
+    .AddHttpBackend("https://cdn.example.com/locales/{{lng}}/{{ns}}.json")
+    .UseDistributedCache(cache => cache.KeyPrefix = "myapp:i18next:"));
+```
+
+#### FileWatchingBackend
+
+```csharp
+var backend = new FileWatchingBackend(new JsonFileBackend("locales"), "locales");
+
+services.AddI18NextLocalization(i18n => i18n
+    .AddBackend(new JsonFileBackend("locales"))
+    .WatchTranslationFiles("locales"));
+```
+
+Changed `{lng}/{ns}.*` files are reloaded on the next translation. Backends implementing `INotifyingTranslationBackend`
+report changed namespaces; translators, the `ChainedBackend`, Blazor and XAML integrations react to them.
+
+#### EntityFrameworkBackend
+
+```csharp
+protected override void OnModelCreating(ModelBuilder modelBuilder) => modelBuilder.ApplyI18NextTranslations();
+
+services.AddDbContextFactory<AppDbContext>(o => o.UseSqlServer(connectionString));
+services.AddI18NextLocalization(i18n => i18n
+    .AddEntityFrameworkBackend<AppDbContext>(b => b.CacheExpiration = TimeSpan.FromMinutes(5))
+    .AddEntityFrameworkMissingKeyHandler<AppDbContext>("en"));
+
+await backend.SetValueAsync("de", "translation", "greeting", "Hallo {{name}}");   // e.g. in an admin UI
+```
+
+Changes made through the backend are used immediately, other servers pick them up after `CacheExpiration`. The missing
+key handler inserts missing keys without value to translate them later.
 
 ### Translation tree builders
 
@@ -648,8 +704,22 @@ with `UseRequestLocalization`.
 
 ### Missing key handlers
 
-There is no built-in handler. Subscribe to `DefaultTranslator.MissingKey` or add an `IMissingKeyHandler` to
-`MissingKeyHandlers` to log, collect or save missing keys.
+| Handler | Package | Description |
+|---|---|---|
+| `FileMissingKeyHandler` | `I18Next.Net` | Writes missing keys into `locales/{{lng}}/{{ns}}.missing.json` like the i18next-fs-backend `saveMissing` |
+| `HttpMissingKeyHandler` | `I18Next.Net` | Posts missing keys to `locales/add/{{lng}}/{{ns}}` like the i18next-http-backend `saveMissing` |
+| `MetricsMissingKeyHandler` | `I18Next.Net.Extensions` | Counts missing keys with the `i18next.missing_keys` counter of the `I18Next.Net` meter (OpenTelemetry) |
+| `EntityFrameworkMissingKeyHandler<TContext>` | `I18Next.Net.EntityFrameworkCore` | Inserts missing keys into the translation table |
+| `MachineTranslationMissingKeyHandler` | `I18Next.Net.MachineTranslation` | Machine translates missing keys from a source language while developing |
+
+```csharp
+services.AddI18NextLocalization(i18n => i18n
+    .SaveMissingKeysToFiles()
+    .SaveMissingKeysOverHttp("https://translations.example.com/add/{{lng}}/{{ns}}")
+    .AddMissingKeyMetrics());
+```
+
+Every key is reported once per language and namespace, with the `defaultValue` of the call or the key as value.
 
 ## Typed keys with the source generator
 
@@ -726,8 +796,16 @@ The package also checks the translation files and the code using them:
 | `I18N004` | Warning | A namespace of the source language is missing in another language |
 | `I18N005` | Warning | No files of the source language were found |
 | `I18N010` | Warning | A string literal passed to `T`, `Ta`, `TObject` or `Exists` is not a key of the source language |
+| `I18N011` | Warning | An anonymous object passed as arguments lacks a placeholder of the translation (`new { nam = "Jane" }` for `{{name}}`) |
+| `I18N012` | Info | An argument is not used by any variant of the translation |
 
 The severities can be changed in `.editorconfig`, e.g. `dotnet_diagnostic.I18N002.severity = suggestion`.
+
+Code fixes change an unknown key to a similar existing key (`welcom` → `welcome`), add unknown or missing keys to the
+translation files, keeping their formatting, and rename an argument to the missing placeholder.
+
+In trimmed and Native AOT applications the generator also converts anonymous arguments into dictionaries at compile
+time, see [Trimming and Native AOT](#trimming-and-native-aot).
 
 ## Dependency injection and ASP.NET Core
 
@@ -787,6 +865,110 @@ public class HomeController : Controller
 <h1>@Localizer["about.title"]</h1>
 ```
 
+### Translations for the browser and localized routes
+
+```csharp
+app.MapI18NextResources();                                        // GET /locales/{lng}/{ns}.json with ETag
+app.MapI18NextMissingKeys().RequireAuthorization();               // POST /locales/add/{lng}/{ns} from saveMissing
+app.UseI18NextLocalizedRoutes(o => o.Languages = ["en", "de"]);   // /de/produkte/42 → /products/42
+app.UseRouting();
+
+var link = HttpContext.GetLocalizedPath("/products/42", "de");    // /de/produkte/42
+```
+
+`MapI18NextResources` serves the namespaces of the registered backend as i18next JSON, so i18next with the
+i18next-http-backend in the browser uses the same translations as the server. The localized routes translate path
+segments with the `routes` namespace (`{ "products": "produkte" }` in `de/routes.json`) and set the request culture.
+See [ASP.NET Core](https://darklikally.github.io/I18Next.Net/integrations/aspnetcore).
+
+## Blazor, WPF and .NET MAUI
+
+```csharp
+builder.Services.AddI18NextLocalization(i18n => i18n
+    .IntegrateToBlazor(o => o.SupportedLanguages = ["en", "de"])
+    .AddBackend(new JsonFileBackend(Path.Combine(builder.Environment.WebRootPath, "locales")))
+    .UseDefaultLanguage("en"));
+```
+
+```razor
+@inherits I18NextComponentBase
+
+<h1>@T("title")</h1>
+<Trans Key="intro" Args="@(new { name })" AllowHtml="true" />
+<LanguageSelector />
+```
+
+Every circuit or browser tab has its own language (`IBlazorI18Next`), stored in the request culture cookie and local
+storage. Components render again when the language or the translation files change. WebAssembly apps load the
+translations with `AddHttpBackend()` and `await IBlazorI18Next.InitializeAsync()` before running.
+
+WPF and .NET MAUI use a markup extension which updates the texts when the language or the translation files change:
+
+```xml
+<TextBlock xmlns:i18n="https://github.com/DarkLiKally/I18Next.Net"
+           Text="{i18n:T inbox, Count={Binding UnreadCount}}" />
+```
+
+Set `I18NextXaml.Instance = i18n;` at startup in WPF, MAUI apps call `builder.UseI18Next(i18n => i18n.AddBackend(...))`.
+See [Blazor](https://darklikally.github.io/I18Next.Net/integrations/blazor) and
+[WPF and .NET MAUI](https://darklikally.github.io/I18Next.Net/integrations/xaml).
+
+## Validation messages
+
+```csharp
+services.AddI18NextLocalization(i18n => i18n
+    .IntegrateToAspNetCore()
+    .AddDataAnnotationsLocalization()          // [Required], [StringLength], ... without ErrorMessage
+    .AddFluentValidationLocalization());
+services.AddControllers().AddI18NextDataAnnotationsLocalization();
+builder.Services.AddValidation();              // .NET 10 minimal APIs
+
+new I18NextValidator(i18n).TryValidateObject(model, new ValidationContext(model), results, true);
+```
+
+The messages are looked up in the `validation` namespace (`validation:required`, `validation:stringLength`, ...) with
+i18next placeholders like `{{- field}}` and `{{max}}`, display names are translated as well. English and German messages
+are built in. See [Validation](https://darklikally.github.io/I18Next.Net/integrations/validation) for all keys.
+
+## Command-line tool and machine translation
+
+```
+dotnet tool install I18Next.Net.Tool
+dotnet i18next extract --source src --path locales      # add the keys used in C# and Razor to all languages
+dotnet i18next check --source src                       # missing, empty, unused keys and placeholder mismatches
+dotnet i18next sort --check                             # formatting check for CI
+dotnet i18next convert Strings.de.resx locales/de/translation.json
+dotnet i18next migrate                                  # i18next JSON v3 plurals to v4
+DEEPL_AUTH_KEY=... dotnet i18next translate --source-language en
+```
+
+The commands exit with `1` when they find problems, so they can run in CI. Keys used through the generated typed members
+are recognized.
+
+`I18Next.Net.MachineTranslation` translates texts while keeping placeholders, nesting and HTML intact:
+
+```csharp
+IMachineTranslator deepL = new DeepLTranslator(httpClient, authKey);
+IMachineTranslator azure = new AzureTranslator(httpClient, key, "westeurope");
+IMachineTranslator llm = new FuncMachineTranslator((texts, from, to, cancellationToken) => TranslateWithLlmAsync(texts, from, to));
+```
+
+See [Command-line tool](https://darklikally.github.io/I18Next.Net/tooling/cli).
+
+## Trimming and Native AOT
+
+`I18Next.Net`, `I18Next.Net.Abstractions`, `I18Next.Net.Extensions` and `I18Next.Net.Yaml` are trimming and Native AOT
+compatible. Anonymous arguments like `new { name = "Jane" }` are read with reflection, which doesn't work in trimmed
+applications. With `I18Next.Net.Generators` referenced, they are converted into dictionaries at compile time when
+`PublishAot`, `PublishTrimmed` or `IsAotCompatible` is set (.NET 9 SDK or later). `T<TModel>` maps string arrays and
+dictionaries without reflection, other models use a source generated `JsonSerializerContext`:
+
+```csharp
+i18n.ModelSerializerOptions = new JsonSerializerOptions { TypeInfoResolver = AppJsonContext.Default };
+```
+
+See [Trimming and Native AOT](https://darklikally.github.io/I18Next.Net/guide/native-aot).
+
 ## Feature parity with i18next
 
 | i18next feature | Status | Notes |
@@ -828,19 +1010,22 @@ public class HomeController : Controller
 | `changeLanguage`, `languageChanged` event | ✅ | `Language` setter, `LanguageChanged` |
 | Language detection | ✅ | `ILanguageDetector`, `ThreadLanguageDetector`, ASP.NET Core request culture |
 | Missing key handling | ✅ | `MissingKey` event, `IMissingKeyHandler` |
-| `saveMissing` to backend | ❌ | Implement an `IMissingKeyHandler` |
+| `saveMissing` to backend | ✅ | `FileMissingKeyHandler`, `HttpMissingKeyHandler`, `MapI18NextMissingKeys` |
 | Post processors | ✅ | sprintf, interval, pseudo localization, custom `IPostProcessor` |
 | Backends | ✅ | JSON, YAML, XML, INI, gettext, in-memory, custom `ITranslationBackend` |
 | i18next-http-backend | ✅ | `HttpBackend`, `AddHttpBackend` with `IHttpClientFactory` |
-| i18next-chained-backend | ✅ | `ChainedBackend` with in-memory caching and expiry |
+| i18next-chained-backend | ✅ | `ChainedBackend` with in-memory caching, expiry and saving to cache backends |
+| i18next-localstorage-backend | ✅ | `DistributedCacheBackend` |
 | i18next-resources-to-backend | ✅ | `FuncBackend` |
 | `addResource`, `addResourceBundle`, `hasResourceBundle`, `removeResourceBundle` | ✅ | `InMemoryBackend` |
-| `reloadResources` | ✅ | `DefaultTranslator.ClearCache` |
+| `reloadResources` | ✅ | `DefaultTranslator.ClearCache`, `FileWatchingBackend` reloads changed files |
 | `getFixedT` | ✅ | `GetFixedT(language, namespace, keyPrefix)` |
 | `keyPrefix` | ✅ | `keyPrefix` argument and `GetFixedT` |
 | ICU message format | ✅ | `I18Next.Net.ICU` |
 | Typed keys (TypeScript `CustomTypeOptions`) | ✅ | `I18Next.Net.Generators` source generator |
-| Missing key and placeholder checks (i18next-parser, linters) | ✅ | `I18Next.Net.Generators` analyzers |
+| Missing key and placeholder checks (linters) | ✅ | `I18Next.Net.Generators` analyzers and code fixes |
+| i18next-parser | ✅ | `dotnet i18next extract` |
+| react-i18next `Trans` | ✅ | `I18Next.Net.Blazor` |
 | Logging | ✅ | `TraceLogger`, Microsoft.Extensions.Logging, Serilog |
 
 ## Breaking changes
@@ -904,8 +1089,12 @@ npm run bench
 | [`Example.Features`](samples/Example.Features) | Interpolation, nesting, plurals, ordinals, context, objects, Intl and date-fns formats, fixed translators, fallbacks and post processors in English and German |
 | [`Example.Backends`](samples/Example.Backends) | YAML files, embedded resources and objects through the `FuncBackend`, the `HttpBackend` and a cached `ChainedBackend` |
 | [`Example.SourceGenerator`](samples/Example.SourceGenerator) | Typed keys and translation methods generated from the JSON files |
-| [`Example.MinimalApi`](samples/Example.MinimalApi) | ASP.NET Core minimal API with request localization, `II18Next` and `IStringLocalizer` |
+| [`Example.MinimalApi`](samples/Example.MinimalApi) | ASP.NET Core minimal API with request localization, `II18Next`, `IStringLocalizer`, the translations endpoint and localized routes |
 | [`Example.WebApp`](samples/Example.WebApp) | ASP.NET Core MVC with view localization |
+| [`Example.Blazor`](samples/Example.Blazor) | Blazor Web App with interactive server and WebAssembly pages, `Trans`, `LanguageSelector` and hot reload |
+| [`Example.Wpf`](samples/Example.Wpf) | WPF window with a language switcher and hot reload |
+| [`Example.Validation`](samples/Example.Validation) | Translated DataAnnotations and FluentValidation messages in MVC and minimal APIs |
+| [`Example.NativeAot`](samples/Example.NativeAot) | Native AOT application with anonymous arguments and typed models |
 | [`Example.ConsoleApp.NetCore`](samples/Example.ConsoleApp.NetCore) | Console application with and without dependency injection |
 | [`Example.ConsoleApp.NetFramework`](samples/Example.ConsoleApp.NetFramework) | .NET Framework 4.6.2 console application |
 
@@ -921,8 +1110,9 @@ dotnet test tests/I18Next.Net.Tests
 dotnet run -c Release --project tests/I18Next.Net.Benchmarks
 ```
 
-The tests use xUnit, Shouldly and NSubstitute. The code style follows the default .NET rules in `.editorconfig`
-(`dotnet format`), and the CI fails on NuGet packages with known vulnerabilities.
+Every package has a `tests/*.Tests` project, the WPF tests need Windows. The tests use xUnit, Shouldly and NSubstitute.
+The code style follows the default .NET rules in `.editorconfig` (`dotnet format`), and the CI fails on NuGet packages
+with known vulnerabilities.
 
 The CLDR data for relative times, lists and the plural rule tests is generated from the official CLDR JSON packages:
 

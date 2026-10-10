@@ -13,8 +13,16 @@ integrates with `Microsoft.Extensions.DependencyInjection`, `IStringLocalizer` a
 | `I18Next.Net` | Translator, interpolation, plurals, formats and the JSON, XML, INI, HTTP, delegate, in-memory and chained backends |
 | `I18Next.Net.Abstractions` | Interfaces for custom backends, translators, interpolators, formatters and loggers |
 | `I18Next.Net.Extensions` | Registration in `IServiceCollection` and `IStringLocalizer` support |
-| `I18Next.Net.AspNetCore` | ASP.NET Core integration including request language detection and view localization |
-| `I18Next.Net.Generators` | Source generator for typed keys and translation methods, plus analyzers for the translation files |
+| `I18Next.Net.AspNetCore` | ASP.NET Core integration including request language detection, view localization, a translations endpoint for i18next in the browser and localized routes |
+| `I18Next.Net.Blazor` | Blazor components and a language per user |
+| `I18Next.Net.Wpf` | WPF markup extension `{i18n:T key}` updating on language and translation changes |
+| `I18Next.Net.Maui` | .NET MAUI markup extension `{i18n:T key}` |
+| `I18Next.Net.DataAnnotations` | Translated DataAnnotations messages and display names |
+| `I18Next.Net.FluentValidation` | FluentValidation messages from i18next |
+| `I18Next.Net.EntityFrameworkCore` | Backend and missing key handler storing translations in a database |
+| `I18Next.Net.MachineTranslation` | Machine translation with DeepL, Azure AI Translator or your own delegate |
+| `I18Next.Net.Tool` | The `dotnet i18next` tool to extract, check, sort, convert, migrate and machine translate translation files |
+| `I18Next.Net.Generators` | Source generator for typed keys and translation methods, analyzers and code fixes, Native AOT support |
 | `I18Next.Net.Yaml` | Backend for YAML translation files |
 | `I18Next.Net.Gettext` | Backend for gettext `.mo` files |
 | `I18Next.Net.ICU` | Interpolator for ICU message format strings |
@@ -62,8 +70,12 @@ services.AddI18NextLocalization(i18n => i18n
 - `number`, `currency`, `datetime`, `relativetime` and `list` formats matching the browser `Intl` APIs, date-fns and
   Moment.js formats
 - `getFixedT`, `keyPrefix`, `formatParams`, `returnObjects`, `joinArrays` and post processors
-- JSON, YAML, XML, INI, gettext, HTTP, delegate and in-memory backends, chained with caching and expiry
+- JSON, YAML, XML, INI, gettext, HTTP, delegate, in-memory, distributed cache and Entity Framework Core backends, chained
+  with caching and expiry
+- Hot reload of changed translation files and saving missing keys to files, over HTTP or as metrics
 - Typed keys and translation methods generated from the translation files
+- Blazor, WPF, .NET MAUI, DataAnnotations and FluentValidation integrations
+- Trimming and Native AOT support
 - .NET Standard 2.0, .NET 6, .NET 8 and .NET 10
 
 See the [documentation](https://darklikally.github.io/I18Next.Net/) for all features, the

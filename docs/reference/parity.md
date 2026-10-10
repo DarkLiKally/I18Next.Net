@@ -39,17 +39,20 @@
 | `changeLanguage`, `languageChanged` event | ✅ | `Language` setter, `LanguageChanged` |
 | Language detection | ✅ | `ILanguageDetector`, `ThreadLanguageDetector`, ASP.NET Core request culture |
 | Missing key handling | ✅ | `MissingKey` event, `IMissingKeyHandler` |
-| `saveMissing` to backend | ❌ | Implement an `IMissingKeyHandler` |
+| `saveMissing` to backend | ✅ | `FileMissingKeyHandler`, `HttpMissingKeyHandler`, `MapI18NextMissingKeys` |
 | Post processors | ✅ | sprintf, interval, pseudo localization, custom `IPostProcessor` |
 | Backends | ✅ | JSON, YAML, XML, INI, gettext, in-memory, custom `ITranslationBackend` |
 | i18next-http-backend | ✅ | `HttpBackend`, `AddHttpBackend` with `IHttpClientFactory` |
-| i18next-chained-backend | ✅ | `ChainedBackend` with in-memory caching and expiry |
+| i18next-chained-backend | ✅ | `ChainedBackend` with in-memory caching, expiry and saving to cache backends |
+| i18next-localstorage-backend | ✅ | `DistributedCacheBackend` |
 | i18next-resources-to-backend | ✅ | `FuncBackend` |
 | `addResource`, `addResourceBundle`, `hasResourceBundle`, `removeResourceBundle` | ✅ | `InMemoryBackend` |
-| `reloadResources` | ✅ | `DefaultTranslator.ClearCache` |
+| `reloadResources` | ✅ | `DefaultTranslator.ClearCache`, `FileWatchingBackend` reloads changed files |
 | `getFixedT` | ✅ | `GetFixedT(language, namespace, keyPrefix)` |
 | `keyPrefix` | ✅ | `keyPrefix` argument and `GetFixedT` |
 | ICU message format | ✅ | `I18Next.Net.ICU` |
 | Typed keys (TypeScript `CustomTypeOptions`) | ✅ | `I18Next.Net.Generators` source generator |
-| Missing key and placeholder checks (i18next-parser, linters) | ✅ | `I18Next.Net.Generators` analyzers |
+| Missing key and placeholder checks (linters) | ✅ | `I18Next.Net.Generators` analyzers and code fixes |
+| i18next-parser | ✅ | `dotnet i18next extract` |
+| react-i18next `Trans` | ✅ | `I18Next.Net.Blazor` |
 | Logging | ✅ | `TraceLogger`, Microsoft.Extensions.Logging, Serilog |

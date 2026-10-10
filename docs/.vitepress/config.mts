@@ -31,7 +31,9 @@ export default defineConfig({
                     { text: "Plurals", link: "/guide/plurals" },
                     { text: "Language detection", link: "/guide/language-detection" },
                     { text: "Post processors", link: "/guide/post-processors" },
-                    { text: "Missing keys and logging", link: "/guide/missing-keys-and-logging" }
+                    { text: "Missing keys and logging", link: "/guide/missing-keys-and-logging" },
+                    { text: "Hot reload", link: "/guide/hot-reload" },
+                    { text: "Trimming and Native AOT", link: "/guide/native-aot" }
                 ]
             },
             {
@@ -45,7 +47,17 @@ export default defineConfig({
                 text: "Integrations",
                 items: [
                     { text: "Dependency injection", link: "/integrations/dependency-injection" },
+                    { text: "ASP.NET Core", link: "/integrations/aspnetcore" },
+                    { text: "Blazor", link: "/integrations/blazor" },
+                    { text: "WPF and .NET MAUI", link: "/integrations/xaml" },
+                    { text: "Validation", link: "/integrations/validation" },
                     { text: "Source generator", link: "/integrations/source-generator" }
+                ]
+            },
+            {
+                text: "Tooling",
+                items: [
+                    { text: "Command-line tool", link: "/tooling/cli" }
                 ]
             },
             {

@@ -19,11 +19,13 @@ features:
   - title: Browser identical formatting
     details: number, currency, datetime, relativetime and list formats produce the output of the browser Intl APIs, based on bundled CLDR data.
   - title: Many backends
-    details: JSON, YAML, XML, INI, gettext, HTTP, in-memory and delegate backends, chained with caching and expiry.
+    details: JSON, YAML, XML, INI, gettext, HTTP, in-memory, delegate, distributed cache and Entity Framework Core backends, chained with caching and expiry and reloaded when files change.
   - title: Typed keys
-    details: A source generator creates key constants and typed translation methods from your JSON files and checks them for missing keys.
+    details: A source generator creates key constants and typed translation methods from your JSON files, checks them with analyzers and fixes them with code fixes.
+  - title: Integrations
+    details: ASP.NET Core, Blazor, WPF, .NET MAUI, DataAnnotations and FluentValidation, plus the dotnet i18next tool with machine translation.
   - title: Fast
     details: Translations are resolved synchronously from cached namespaces with few allocations, many times faster than i18next on Node.
   - title: .NET Standard 2.0 to .NET 10
-    details: Runs on .NET Framework 4.6.2 and later, .NET 6, .NET 8, .NET 10 and .NET 11.
+    details: Runs on .NET Framework 4.6.2 and later, .NET 6, .NET 8, .NET 10 and .NET 11, trimmed and as Native AOT application.
 ---
