@@ -24,6 +24,7 @@
   <Project Path="src/I18Next.Net.Serilog/I18Next.Net.Serilog.csproj" />
   <Project Path="src/I18Next.Net.Yaml/I18Next.Net.Yaml.csproj" />
   <Project Path="src/I18Next.Net/I18Next.Net.csproj" />
+  <Project Path="tests/I18Next.Net.AspNetCore.Tests/I18Next.Net.AspNetCore.Tests.csproj" />
   <Project Path="tests/I18Next.Net.Benchmarks/I18Next.Net.Benchmarks.csproj" />
   <Project Path="tests/I18Next.Net.Generators.Tests/I18Next.Net.Generators.Tests.csproj" />
   <Project Path="tests/I18Next.Net.Tests/I18Next.Net.Tests.csproj" />
