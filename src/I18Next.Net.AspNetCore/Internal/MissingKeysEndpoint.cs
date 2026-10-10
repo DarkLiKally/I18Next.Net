@@ -66,9 +66,9 @@ internal sealed class MissingKeysEndpoint(I18NextMissingKeysOptions options)
 
         var handlers = context.RequestServices.GetServices<IMissingKeyHandler>();
 
-        foreach (var key in keys)
+        foreach (var (key, value) in keys)
         {
-            var args = new MissingKeyEventArgs(language, ns, key, [key]);
+            var args = new MissingKeyEventArgs(language, ns, key, [key]) { DefaultValue = value };
 
             foreach (var handler in handlers)
                 await handler.HandleMissingKeyAsync(context, args);
@@ -94,7 +94,7 @@ internal sealed class MissingKeysEndpoint(I18NextMissingKeysOptions options)
         return stream.ToArray();
     }
 
-    private List<string> ReadKeys(byte[] body)
+    private List<(string Key, string Value)> ReadKeys(byte[] body)
     {
         try
         {
@@ -103,7 +103,7 @@ internal sealed class MissingKeysEndpoint(I18NextMissingKeysOptions options)
             if (document.RootElement.ValueKind != JsonValueKind.Object)
                 return null;
 
-            var keys = new List<string>();
+            var keys = new List<(string Key, string Value)>();
             var seenKeys = new HashSet<string>(StringComparer.Ordinal);
 
             foreach (var property in document.RootElement.EnumerateObject())
@@ -112,7 +112,7 @@ internal sealed class MissingKeysEndpoint(I18NextMissingKeysOptions options)
                     return null;
 
                 if (seenKeys.Add(property.Name))
-                    keys.Add(property.Name);
+                    keys.Add((property.Name, property.Value.ValueKind == JsonValueKind.String ? property.Value.GetString() : null));
 
                 if (keys.Count > _maxKeys)
                     return null;

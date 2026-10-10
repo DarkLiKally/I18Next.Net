@@ -53,8 +53,8 @@ public class MissingKeysEndpointFixture
         {
             await handler.Received(2).HandleMissingKeyAsync(Arg.Any<object>(), Arg.Any<MissingKeyEventArgs>());
             await handler.Received(1).HandleMissingKeyAsync(Arg.Any<HttpContext>(),
-                Arg.Is<MissingKeyEventArgs>(a => a.Language == "de" && a.Namespace == "translation" && a.Key == "title" && a.PossibleKeys.Length == 1));
-            await handler.Received(1).HandleMissingKeyAsync(Arg.Any<HttpContext>(), Arg.Is<MissingKeyEventArgs>(a => a.Key == "menu.home"));
+                Arg.Is<MissingKeyEventArgs>(a => a.Language == "de" && a.Namespace == "translation" && a.Key == "title" && a.PossibleKeys.Length == 1 && a.DefaultValue == "Title"));
+            await handler.Received(1).HandleMissingKeyAsync(Arg.Any<HttpContext>(), Arg.Is<MissingKeyEventArgs>(a => a.Key == "menu.home" && a.DefaultValue == "Home"));
         }
     }
 
