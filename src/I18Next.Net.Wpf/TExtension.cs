@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows.Data;
 using System.Windows.Markup;
+using System.Xaml;
 
 using I18Next.Net.Xaml;
 
@@ -11,6 +12,7 @@ namespace I18Next.Net.Wpf;
 ///     of <see cref="I18NextXaml.Instance" /> change.
 /// </summary>
 [MarkupExtensionReturnType(typeof(object))]
+[XamlSetMarkupExtension(nameof(ReceiveMarkupExtension))]
 public class TExtension : MarkupExtension
 {
     public TExtension()
@@ -43,6 +45,28 @@ public class TExtension : MarkupExtension
     ///     The namespace to translate the key from instead of the default namespace.
     /// </summary>
     public string Namespace { get; set; }
+
+    /// <summary>
+    ///     Keeps bindings set on <see cref="Args" /> and <see cref="Count" /> instead of letting XAML evaluate them, as
+    ///     bindings can only be evaluated on dependency properties.
+    /// </summary>
+    public static void ReceiveMarkupExtension(object targetObject, XamlSetMarkupExtensionEventArgs eventArgs)
+    {
+        if (targetObject is not TExtension extension || eventArgs.MarkupExtension is not BindingBase binding)
+            return;
+
+        switch (eventArgs.Member.Name)
+        {
+            case nameof(Args):
+                extension.Args = binding;
+                eventArgs.Handled = true;
+                break;
+            case nameof(Count):
+                extension.Count = binding;
+                eventArgs.Handled = true;
+                break;
+        }
+    }
 
     public override object ProvideValue(IServiceProvider serviceProvider)
     {
