@@ -1,0 +1,46 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Description>Translates the DataAnnotations validation messages and display names of ASP.NET Core MVC, minimal APIs and the Validator with I18Next.Net.</Description>
+        <TargetFrameworks>netstandard2.0;net6.0;net8.0;net10.0</TargetFrameworks>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <NoWarn>CS1591</NoWarn>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <DocumentationFile>bin\Debug\I18Next.Net.DataAnnotations.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DocumentationFile>bin\Release\I18Next.Net.DataAnnotations.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net10.0'))">
+      <NoWarn>$(NoWarn);ASP0029</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+      <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
+      <Compile Remove="Mvc\**" />
+      <Compile Remove="MvcBuilderExtensions.cs" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.0'">
+      <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+
+    <ItemGroup Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net10.0'))">
+      <Compile Remove="MinimalApis\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="Resources\de\validation.json" LogicalName="I18Next.Net.DataAnnotations.Resources.de.validation.json" />
+      <EmbeddedResource Include="Resources\en\validation.json" LogicalName="I18Next.Net.DataAnnotations.Resources.en.validation.json" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\I18Next.Net.Extensions\I18Next.Net.Extensions.csproj" />
+      <ProjectReference Include="..\I18Next.Net\I18Next.Net.csproj" />
+    </ItemGroup>
+
+</Project>
