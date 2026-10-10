@@ -48,16 +48,18 @@ internal static class ExtractCommand
 
             output.WriteLine($"Found {keys.Select(k => (k.Namespace, k.Key)).Distinct().Count()} keys in {extractor.FileCount} files.");
 
-            return Task.FromResult(Update(files, keys, settings, output));
+            return Task.FromResult(Update(files, keys, extractor.GeneratedMemberChains, settings, output));
         });
 
         return command;
     }
 
-    private static int Update(TranslationFiles files, List<ExtractedKey> keys, ExtractSettings settings, TextWriter output)
+    private static int Update(TranslationFiles files, List<ExtractedKey> keys, IReadOnlyCollection<string> generatedMemberChains, ExtractSettings settings,
+        TextWriter output)
     {
         var usage = new KeyUsage(files.KeySeparator, settings.NamespaceSeparator);
         usage.AddRange(keys);
+        usage.AddGeneratedMemberChains(generatedMemberChains);
 
         var namespaces = keys.Select(k => k.Namespace);
 

@@ -93,6 +93,48 @@ public class CheckCommandFixture : IDisposable
     }
 
     [Fact]
+    public async Task Check_GeneratedMembers_ShouldCountAsUsed()
+    {
+        _context.Write("src/Texts.cs", """[I18Next.Net.I18NextResources("locales")] public static partial class L;""");
+        _context.Write("src/App.cs", """
+                                     var texts = i18n.Translation();
+                                     texts.Welcome("Jane");
+                                     texts.Cart.Items(count: 3);
+                                     texts.Friend(context: "female");
+                                     texts.Steps();
+                                     var key = L.Keys.Translation.Errors._404;
+                                     var name = L.Keys.Common.UserName;
+                                     """);
+        _context.Write("locales/en/translation.json", """
+                                                      {
+                                                        "welcome": "Hi", "cart": { "items_one": "1", "items_other": "n", "total": "T" },
+                                                        "friend": "F", "friend_female": "Fe", "steps": [ "a", "b" ], "errors": { "404": "N" }, "old": "O"
+                                                      }
+                                                      """);
+        _context.Write("locales/en/common.json", """{ "user_name": "Name" }""");
+
+        (await Run("-s", _context.GetPath("src"))).ShouldBe(ExitCodes.ProblemsFound);
+
+        _context.Output.ShouldContain("""
+                                      Unused keys (2):
+                                        en  translation:cart.total
+                                        en  translation:old
+                                      2 problems found.
+                                      """, Case.Sensitive);
+    }
+
+    [Fact]
+    public async Task Check_MemberChainsWithoutGenerator_ShouldNotCountAsUsed()
+    {
+        _context.Write("src/App.cs", """var title = page.Welcome;""");
+        _context.Write("locales/en/translation.json", """{ "welcome": "Hi" }""");
+
+        (await Run("-s", _context.GetPath("src"))).ShouldBe(ExitCodes.ProblemsFound);
+
+        _context.Output.ShouldContain("en  translation:welcome");
+    }
+
+    [Fact]
     public async Task Check_ReferenceLanguage_ShouldBeUsed()
     {
         _context.Write("locales/de/translation.json", """{ "a": "A", "b": "B" }""");

@@ -156,6 +156,7 @@ internal static class CheckCommand
         var keys = extractor.Extract(sourcePaths);
         var usage = new KeyUsage(files.KeySeparator, namespaceSeparator);
         usage.AddRange(keys);
+        usage.AddGeneratedMemberChains(extractor.GeneratedMemberChains);
 
         foreach (var namespaces in resources.Values)
         {
