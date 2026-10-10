@@ -90,14 +90,11 @@ internal sealed class ResourceModel
     /// </summary>
     public static Dictionary<string, HashSet<string>> GetKeyIndex(IReadOnlyList<ResourceEntry> entries, int jsonFormatVersion)
     {
-        var model = new ResourceModel(jsonFormatVersion);
         var index = new Dictionary<string, HashSet<string>>();
 
         foreach (var entry in entries)
         {
-            var dot = entry.Key.LastIndexOf('.');
-            var name = dot < 0 ? entry.Key : entry.Key.Substring(dot + 1);
-            var key = model.TryStripPluralSuffix(name, out var stem, out _) ? entry.Key.Substring(0, dot + 1) + stem : entry.Key;
+            var key = GetIndexKey(entry.Key, jsonFormatVersion);
 
             if (!index.TryGetValue(key, out var placeholders))
                 index[key] = placeholders = [];
@@ -106,6 +103,17 @@ internal sealed class ResourceModel
         }
 
         return index;
+    }
+
+    /// <summary>
+    ///     Returns the key without its plural suffix.
+    /// </summary>
+    public static string GetIndexKey(string key, int jsonFormatVersion)
+    {
+        var dot = key.LastIndexOf('.');
+        var name = dot < 0 ? key : key.Substring(dot + 1);
+
+        return TryStripPluralSuffix(name, jsonFormatVersion, out var stem, out _) ? key.Substring(0, dot + 1) + stem : key;
     }
 
     /// <summary>
@@ -139,7 +147,7 @@ internal sealed class ResourceModel
 
         foreach (var leaf in leaves)
         {
-            var plural = TryStripPluralSuffix(leaf.Name, out var stem, out var ordinal);
+            var plural = TryStripPluralSuffix(leaf.Name, JsonFormatVersion, out var stem, out var ordinal);
             stems[leaf] = (plural ? stem : leaf.Name, plural, ordinal);
         }
 
@@ -209,9 +217,9 @@ internal sealed class ResourceModel
         }
     }
 
-    private bool TryStripPluralSuffix(string name, out string stem, out bool ordinal)
+    public static bool TryStripPluralSuffix(string name, int jsonFormatVersion, out string stem, out bool ordinal)
     {
-        var match = (JsonFormatVersion >= 4 ? Version4PluralRegex : LegacyPluralRegex).Match(name);
+        var match = (jsonFormatVersion >= 4 ? Version4PluralRegex : LegacyPluralRegex).Match(name);
 
         if (!match.Success)
         {
@@ -222,7 +230,7 @@ internal sealed class ResourceModel
         }
 
         stem = match.Groups[1].Value;
-        ordinal = JsonFormatVersion >= 4 && match.Groups[2].Success;
+        ordinal = jsonFormatVersion >= 4 && match.Groups[2].Success;
 
         return true;
     }

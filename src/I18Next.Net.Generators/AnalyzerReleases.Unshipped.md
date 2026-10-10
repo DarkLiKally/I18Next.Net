@@ -11,3 +11,5 @@ I18N003 | I18Next | Warning | Unknown placeholder
 I18N004 | I18Next | Warning | Missing namespace
 I18N005 | I18Next | Warning | No translation files
 I18N010 | I18Next | Warning | Unknown translation key
+I18N011 | I18Next | Warning | Missing translation argument
+I18N012 | I18Next | Info | Unused translation argument

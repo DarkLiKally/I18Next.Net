@@ -26,4 +26,11 @@ internal static class Diagnostics
 
     public static readonly DiagnosticDescriptor UnknownKey = new(
         "I18N010", "Unknown translation key", "The translation key '{0}' does not exist in the namespace '{1}'", Category, DiagnosticSeverity.Warning, true);
+
+    public static readonly DiagnosticDescriptor MissingArgument = new(
+        "I18N011", "Missing translation argument", "The translation '{0}' uses the placeholder '{1}' which is not passed in the arguments", Category,
+        DiagnosticSeverity.Warning, true);
+
+    public static readonly DiagnosticDescriptor UnusedArgument = new(
+        "I18N012", "Unused translation argument", "The argument '{0}' is not used by the translation '{1}'", Category, DiagnosticSeverity.Info, true);
 }

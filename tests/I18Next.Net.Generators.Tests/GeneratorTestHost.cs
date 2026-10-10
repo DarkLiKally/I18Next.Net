@@ -16,7 +16,7 @@ namespace I18Next.Net.Generators.Tests;
 
 internal static class GeneratorTestHost
 {
-    private static readonly Lazy<MetadataReference[]> References = new(() =>
+    public static readonly Lazy<MetadataReference[]> References = new(() =>
     [
         .. ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES"))!.Split(Path.PathSeparator).Select(p => MetadataReference.CreateFromFile(p)),
         MetadataReference.CreateFromFile(typeof(II18Next).Assembly.Location),
@@ -45,15 +45,25 @@ internal static class GeneratorTestHost
             output.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ToImmutableArray());
     }
 
-    public static async Task<ImmutableArray<Diagnostic>> AnalyzeAsync(string source, IDictionary<string, string> files)
+    public static async Task<ImmutableArray<Diagnostic>> AnalyzeAsync(string source, IDictionary<string, string> files, DiagnosticAnalyzer analyzer = null)
     {
         var compilation = CreateCompilation(source);
         var options = new AnalyzerOptions(CreateAdditionalTexts(files));
-        var analyzers = compilation.WithAnalyzers([new UnknownKeyAnalyzer()], options);
+        var analyzers = compilation.WithAnalyzers([analyzer ?? new UnknownKeyAnalyzer()], options);
 
         var diagnostics = await analyzers.GetAnalyzerDiagnosticsAsync();
 
         return [.. diagnostics.OrderBy(d => d.Location.SourceSpan.Start)];
+    }
+
+    public static List<string> GetList(ImmutableDictionary<string, string> properties, string name)
+    {
+        var values = new List<string>();
+
+        while (properties.TryGetValue(name + values.Count, out var value))
+            values.Add(value);
+
+        return values;
     }
 
     public static ImmutableArray<AdditionalText> CreateAdditionalTexts(IDictionary<string, string> files)
