@@ -29,6 +29,7 @@
   <Project Path="src/I18Next.Net.Maui/I18Next.Net.Maui.csproj" />
   <Project Path="src/I18Next.Net.PolyglotJs/I18Next.Net.PolyglotJs.csproj" />
   <Project Path="src/I18Next.Net.Serilog/I18Next.Net.Serilog.csproj" />
+  <Project Path="src/I18Next.Net.Tool/I18Next.Net.Tool.csproj" />
   <Project Path="src/I18Next.Net.Wpf/I18Next.Net.Wpf.csproj" />
   <Project Path="src/I18Next.Net.Yaml/I18Next.Net.Yaml.csproj" />
   <Project Path="src/I18Next.Net/I18Next.Net.csproj" />
@@ -40,6 +41,7 @@
   <Project Path="tests/I18Next.Net.MachineTranslation.Tests/I18Next.Net.MachineTranslation.Tests.csproj" />
   <Project Path="tests/I18Next.Net.Maui.Tests/I18Next.Net.Maui.Tests.csproj" />
   <Project Path="tests/I18Next.Net.Tests/I18Next.Net.Tests.csproj" />
+  <Project Path="tests/I18Next.Net.Tool.Tests/I18Next.Net.Tool.Tests.csproj" />
   <Project Path="tests/I18Next.Net.Wpf.Tests/I18Next.Net.Wpf.Tests.csproj" />
   <Project Path="tests/I18Next.Net.Xaml.Tests/I18Next.Net.Xaml.Tests.csproj" />
 </Solution>

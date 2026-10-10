@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Description>The dotnet i18next command-line tool to extract, check, sort, convert, migrate and machine translate i18next translation files.</Description>
+        <OutputType>Exe</OutputType>
+        <AssemblyName>dotnet-i18next</AssemblyName>
+        <RootNamespace>I18Next.Net.Tool</RootNamespace>
+        <PackageId>I18Next.Net.Tool</PackageId>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackAsTool>true</PackAsTool>
+        <ToolCommandName>dotnet-i18next</ToolCommandName>
+        <RollForward>Major</RollForward>
+        <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+        <NoWarn>CS1591</NoWarn>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <DocumentationFile>bin\Debug\I18Next.Net.Tool.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DocumentationFile>bin\Release\I18Next.Net.Tool.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\I18Next.Net.MachineTranslation\I18Next.Net.MachineTranslation.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
+      <PackageReference Include="System.CommandLine" Version="2.0.12" />
+      <PackageReference Include="YamlDotNet" Version="18.1.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <InternalsVisibleTo Include="I18Next.Net.Tool.Tests" />
+    </ItemGroup>
+
+</Project>

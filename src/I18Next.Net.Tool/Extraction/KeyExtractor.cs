@@ -1,0 +1,76 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+
+namespace I18Next.Net.Tool.Extraction;
+
+/// <summary>
+///     Finds translation keys in C# files with Roslyn and in Razor files with regular expressions.
+/// </summary>
+internal sealed class KeyExtractor(ExtractionOptions options)
+{
+    private static readonly HashSet<string> IgnoredDirectories = new(StringComparer.OrdinalIgnoreCase) { "bin", "obj", "node_modules", ".git", ".vs" };
+
+    private readonly CSharpKeyExtractor _csharpExtractor = new(options);
+    private readonly MarkupKeyExtractor _markupExtractor = new(options);
+
+    public int FileCount { get; private set; }
+
+    public IReadOnlyList<ExtractedKey> Extract(IEnumerable<string> paths)
+    {
+        var keys = new List<ExtractedKey>();
+
+        foreach (var file in paths.SelectMany(GetFiles).Distinct(StringComparer.Ordinal))
+        {
+            FileCount++;
+            keys.AddRange(ExtractFile(file));
+        }
+
+        return keys;
+    }
+
+    public IEnumerable<ExtractedKey> ExtractFile(string file)
+    {
+        var text = File.ReadAllText(file);
+
+        return Path.GetExtension(file).Equals(".cs", StringComparison.OrdinalIgnoreCase)
+            ? _csharpExtractor.Extract(text, file)
+            : _markupExtractor.Extract(text, file);
+    }
+
+    private static IEnumerable<string> GetFiles(string path)
+    {
+        if (File.Exists(path))
+            return [path];
+
+        if (!Directory.Exists(path))
+            throw new ToolException($"The source {path} does not exist.");
+
+        return EnumerateDirectory(path).OrderBy(f => f, StringComparer.Ordinal);
+    }
+
+    private static IEnumerable<string> EnumerateDirectory(string directory)
+    {
+        foreach (var file in Directory.EnumerateFiles(directory))
+        {
+            var extension = Path.GetExtension(file);
+
+            if (extension.Equals(".cs", StringComparison.OrdinalIgnoreCase)
+                || extension.Equals(".cshtml", StringComparison.OrdinalIgnoreCase)
+                || extension.Equals(".razor", StringComparison.OrdinalIgnoreCase))
+            {
+                yield return file;
+            }
+        }
+
+        foreach (var subdirectory in Directory.EnumerateDirectories(directory))
+        {
+            if (IgnoredDirectories.Contains(Path.GetFileName(subdirectory)))
+                continue;
+
+            foreach (var file in EnumerateDirectory(subdirectory))
+                yield return file;
+        }
+    }
+}

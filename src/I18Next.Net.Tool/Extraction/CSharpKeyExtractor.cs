@@ -1,0 +1,320 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+
+namespace I18Next.Net.Tool.Extraction;
+
+/// <summary>
+///     Finds translation keys in C# code by its syntax: calls of the translation methods, <c>GetFixedT</c> and
+///     <c>FixedT</c> variables with their namespace and key prefix and localizer indexers.
+/// </summary>
+internal sealed class CSharpKeyExtractor(ExtractionOptions options)
+{
+    private static readonly CSharpParseOptions ParseOptions = new(LanguageVersion.Preview);
+
+    private static readonly HashSet<string> ObjectFunctionNames = new(StringComparer.Ordinal) { "TObject", "TaObject" };
+
+    public IEnumerable<ExtractedKey> Extract(string code, string file)
+    {
+        var root = CSharpSyntaxTree.ParseText(code, ParseOptions, file).GetRoot();
+        var fixedTs = CollectFixedTs(root);
+
+        foreach (var node in root.DescendantNodes())
+        {
+            var key = node switch
+            {
+                InvocationExpressionSyntax invocation => ExtractInvocation(invocation, fixedTs, file),
+                ElementAccessExpressionSyntax elementAccess => ExtractIndexer(elementAccess, file),
+                _ => null
+            };
+
+            if (key != null)
+                yield return key;
+        }
+    }
+
+    private static Dictionary<string, FixedTScope> CollectFixedTs(SyntaxNode root)
+    {
+        var result = new Dictionary<string, FixedTScope>(StringComparer.Ordinal);
+
+        foreach (var node in root.DescendantNodes())
+        {
+            var (name, value, type) = node switch
+            {
+                VariableDeclaratorSyntax { Initializer: { } initializer } declarator =>
+                    (declarator.Identifier.ValueText, initializer.Value, (declarator.Parent as VariableDeclarationSyntax)?.Type),
+                PropertyDeclarationSyntax property => (property.Identifier.ValueText, property.Initializer?.Value ?? property.ExpressionBody?.Expression,
+                    property.Type),
+                AssignmentExpressionSyntax assignment when assignment.IsKind(SyntaxKind.SimpleAssignmentExpression) =>
+                    (GetName(assignment.Left), assignment.Right, null),
+                _ => default((string, ExpressionSyntax, TypeSyntax))
+            };
+
+            if (name != null && value != null && GetFixedTScope(value, type) is { } scope)
+                result[name] = scope;
+        }
+
+        return result;
+    }
+
+    private static FixedTScope GetFixedTScope(ExpressionSyntax value, TypeSyntax declaredType)
+    {
+        switch (value)
+        {
+            case InvocationExpressionSyntax invocation when GetMethodName(invocation.Expression, out var receiver) == "GetFixedT":
+                var offset = GetName(receiver) == "FixedTExtensions" ? 1 : 0;
+                var arguments = new CallArguments(invocation.ArgumentList);
+
+                return new FixedTScope(
+                    GetString(arguments.Get("namespace", offset + 1)),
+                    GetString(arguments.Get("keyPrefix", offset + 2)));
+            case ObjectCreationExpressionSyntax creation when GetName(creation.Type) == "FixedT":
+                return CreateFixedTScope(creation.ArgumentList);
+            case ImplicitObjectCreationExpressionSyntax creation when declaredType != null && GetName(declaredType) == "FixedT":
+                return CreateFixedTScope(creation.ArgumentList);
+            default:
+                return null;
+        }
+    }
+
+    private static FixedTScope CreateFixedTScope(ArgumentListSyntax argumentList)
+    {
+        var arguments = new CallArguments(argumentList);
+
+        return new FixedTScope(GetString(arguments.Get("namespace", 2)), GetString(arguments.Get("keyPrefix", 3)));
+    }
+
+    private ExtractedKey ExtractInvocation(InvocationExpressionSyntax invocation, Dictionary<string, FixedTScope> fixedTs, string file)
+    {
+        var name = GetMethodName(invocation.Expression, out var receiver);
+
+        if (name == null || !options.FunctionNames.Contains(name))
+            return null;
+
+        var receiverName = GetName(receiver);
+
+        if (name is "Exists" or "ExistsAsync" && receiverName is "File" or "Directory")
+            return null;
+
+        var scope = receiverName != null && fixedTs.TryGetValue(receiverName, out var fixedT) ? fixedT : null;
+        var arguments = new CallArguments(invocation.ArgumentList);
+        var keyExpression = arguments.Get("key") ?? arguments.Get("keys");
+        var argsExpression = arguments.Get("args");
+        var namespaceExpression = arguments.Get("defaultNamespace");
+
+        if (keyExpression == null)
+        {
+            var positional = arguments.Positional;
+            var keyIndex = scope != null || name == "Exists" ? 0
+                : name == "ExistsAsync" ? 1
+                : positional.Count >= 3 && IsKey(positional[2]) ? 2
+                : positional.Count >= 2 && IsKey(positional[1]) ? 1
+                : 0;
+
+            keyExpression = keyIndex < positional.Count ? positional[keyIndex] : null;
+            argsExpression ??= keyIndex + 1 < positional.Count ? positional[keyIndex + 1] : null;
+
+            if (keyIndex == 2)
+                namespaceExpression ??= positional[1];
+        }
+
+        var key = GetKey(keyExpression);
+
+        if (key == null)
+            return null;
+
+        var result = CreateKey(key, GetString(namespaceExpression) ?? scope?.Namespace, scope?.KeyPrefix, argsExpression, invocation, file);
+        result.ReturnsObject = ObjectFunctionNames.Contains(name) || (name is "T" or "Ta" && GetTypeArguments(invocation.Expression) > 0);
+
+        return result;
+    }
+
+    private ExtractedKey ExtractIndexer(ElementAccessExpressionSyntax elementAccess, string file)
+    {
+        var receiverName = GetName(elementAccess.Expression);
+
+        if (receiverName == null
+            || (receiverName.IndexOf("localizer", StringComparison.OrdinalIgnoreCase) < 0 && !options.LocalizerNames.Contains(receiverName)))
+        {
+            return null;
+        }
+
+        var arguments = elementAccess.ArgumentList.Arguments;
+        var key = arguments.Count > 0 ? GetString(arguments[0].Expression) : null;
+
+        return key == null ? null : CreateKey(key, null, null, arguments.Count > 1 ? arguments[1].Expression : null, elementAccess, file);
+    }
+
+    private ExtractedKey CreateKey(string key, string @namespace, string keyPrefix, ExpressionSyntax argsExpression, SyntaxNode node, string file)
+    {
+        var args = GetArgs(argsExpression);
+        var separatorIndex = string.IsNullOrEmpty(options.NamespaceSeparator) ? -1 : key.IndexOf(options.NamespaceSeparator, StringComparison.Ordinal);
+
+        if (separatorIndex > 0)
+        {
+            @namespace = key.Substring(0, separatorIndex);
+            key = key.Substring(separatorIndex + options.NamespaceSeparator.Length);
+        }
+
+        keyPrefix = GetString(args.GetValueOrDefault("keyPrefix")) ?? keyPrefix;
+
+        if (!string.IsNullOrEmpty(keyPrefix))
+            key = keyPrefix + "." + key;
+
+        var line = node.GetLocation().GetLineSpan().StartLinePosition.Line + 1;
+
+        return new ExtractedKey(@namespace ?? options.DefaultNamespace, key, file, line)
+        {
+            HasCount = args.ContainsKey("count"),
+            Ordinal = args.GetValueOrDefault("ordinal")?.IsKind(SyntaxKind.TrueLiteralExpression) == true,
+            Context = GetString(args.GetValueOrDefault("context"))
+        };
+    }
+
+    private static Dictionary<string, ExpressionSyntax> GetArgs(ExpressionSyntax expression)
+    {
+        var result = new Dictionary<string, ExpressionSyntax>(StringComparer.Ordinal);
+
+        switch (expression)
+        {
+            case AnonymousObjectCreationExpressionSyntax anonymous:
+                foreach (var initializer in anonymous.Initializers)
+                {
+                    var name = initializer.NameEquals?.Name.Identifier.ValueText ?? GetName(initializer.Expression);
+
+                    if (name != null)
+                        result[name] = initializer.Expression;
+                }
+
+                break;
+            case BaseObjectCreationExpressionSyntax { Initializer: { } initializer }:
+                foreach (var item in initializer.Expressions)
+                {
+                    switch (item)
+                    {
+                        case InitializerExpressionSyntax { Expressions.Count: 2 } pair when GetString(pair.Expressions[0]) is { } name:
+                            result[name] = pair.Expressions[1];
+                            break;
+                        case AssignmentExpressionSyntax { Left: ImplicitElementAccessSyntax access } assignment
+                            when access.ArgumentList.Arguments.Count == 1 && GetString(access.ArgumentList.Arguments[0].Expression) is { } name:
+                            result[name] = assignment.Right;
+                            break;
+                    }
+                }
+
+                break;
+        }
+
+        return result;
+    }
+
+    private static bool IsKey(ExpressionSyntax expression)
+    {
+        return GetKey(expression) != null;
+    }
+
+    private static string GetKey(ExpressionSyntax expression)
+    {
+        var items = expression switch
+        {
+            ArrayCreationExpressionSyntax creation => creation.Initializer?.Expressions.ToList(),
+            ImplicitArrayCreationExpressionSyntax creation => creation.Initializer.Expressions.ToList(),
+            CollectionExpressionSyntax collection => collection.Elements.OfType<ExpressionElementSyntax>().Select(e => e.Expression).ToList(),
+            _ => null
+        };
+
+        if (items == null)
+            return GetString(expression);
+
+        return items.Count == 0 ? null : GetString(items[items.Count - 1]);
+    }
+
+    private static string GetString(ExpressionSyntax expression)
+    {
+        switch (expression)
+        {
+            case LiteralExpressionSyntax literal when literal.IsKind(SyntaxKind.StringLiteralExpression):
+                return literal.Token.ValueText;
+            case ParenthesizedExpressionSyntax parenthesized:
+                return GetString(parenthesized.Expression);
+            case BinaryExpressionSyntax binary when binary.IsKind(SyntaxKind.AddExpression):
+                var left = GetString(binary.Left);
+                var right = left == null ? null : GetString(binary.Right);
+
+                return right == null ? null : left + right;
+            case InterpolatedStringExpressionSyntax interpolated when interpolated.Contents.All(c => c is InterpolatedStringTextSyntax):
+                return string.Concat(interpolated.Contents.Cast<InterpolatedStringTextSyntax>().Select(c => c.TextToken.ValueText));
+            default:
+                return null;
+        }
+    }
+
+    private static string GetMethodName(ExpressionSyntax expression, out ExpressionSyntax receiver)
+    {
+        switch (expression)
+        {
+            case MemberAccessExpressionSyntax memberAccess:
+                receiver = memberAccess.Expression;
+                return memberAccess.Name.Identifier.ValueText;
+            case MemberBindingExpressionSyntax memberBinding:
+                receiver = memberBinding.FirstAncestorOrSelf<ConditionalAccessExpressionSyntax>()?.Expression;
+                return memberBinding.Name.Identifier.ValueText;
+            case SimpleNameSyntax simpleName:
+                receiver = null;
+                return simpleName.Identifier.ValueText;
+            default:
+                receiver = null;
+                return null;
+        }
+    }
+
+    private static int GetTypeArguments(ExpressionSyntax expression)
+    {
+        var name = expression switch
+        {
+            MemberAccessExpressionSyntax memberAccess => memberAccess.Name,
+            MemberBindingExpressionSyntax memberBinding => memberBinding.Name,
+            SimpleNameSyntax simpleName => simpleName,
+            _ => null
+        };
+
+        return name is GenericNameSyntax generic ? generic.TypeArgumentList.Arguments.Count : 0;
+    }
+
+    private static string GetName(SyntaxNode node)
+    {
+        return node switch
+        {
+            SimpleNameSyntax simpleName => simpleName.Identifier.ValueText,
+            MemberAccessExpressionSyntax memberAccess => memberAccess.Name.Identifier.ValueText,
+            QualifiedNameSyntax qualifiedName => qualifiedName.Right.Identifier.ValueText,
+            _ => null
+        };
+    }
+
+    private sealed class FixedTScope(string @namespace, string keyPrefix)
+    {
+        public string Namespace { get; } = @namespace;
+
+        public string KeyPrefix { get; } = keyPrefix;
+    }
+
+    private sealed class CallArguments(ArgumentListSyntax argumentList)
+    {
+        public List<ExpressionSyntax> Positional { get; } = argumentList.Arguments.Where(a => a.NameColon == null).Select(a => a.Expression).ToList();
+
+        public ExpressionSyntax Get(string name, int position = -1)
+        {
+            var named = argumentList.Arguments.FirstOrDefault(a => a.NameColon?.Name.Identifier.ValueText == name);
+
+            if (named != null)
+                return named.Expression;
+
+            return position >= 0 && position < Positional.Count ? Positional[position] : null;
+        }
+    }
+}
