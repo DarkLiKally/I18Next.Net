@@ -1,7 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
+#if !NET6_0
+using System.Text.Json.Serialization.Metadata;
+#endif
 using System.Threading.Tasks;
 
 using I18Next.Net.Backends;
@@ -20,13 +26,10 @@ public class I18NextNet : II18Next
         "pbu", "pst", "prp", "prd", "ug", "ur", "ydd", "yds", "yih", "ji", "yi", "hbo", "men", "xmn", "fa", "jpr", "peo", "pes", "prs", "dv", "sam",
         "ckb"
     };
-    private static readonly JsonSerializerOptions ObjectSerializerOptions = new()
-    {
-        PropertyNameCaseInsensitive = true,
-        NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString
-    };
+    private static readonly JsonSerializerOptions ObjectSerializerOptions = CreateObjectSerializerOptions();
 
     private readonly TranslationOptions _options;
+    private JsonSerializerOptions _modelSerializerOptions;
 
     public I18NextNet(ITranslationBackend backend, ITranslator translator, ILanguageDetector languageDetector = null)
     {
@@ -59,6 +62,19 @@ public class I18NextNet : II18Next
     }
 
     public ILogger Logger { get; set; }
+
+    /// <summary>
+    ///     The options used by <see cref="T{TModel}(string, object)" /> to map translations to models other than string
+    ///     arrays and dictionaries. Set options with a <see cref="System.Text.Json.Serialization.JsonSerializerContext" /> as
+    ///     type info resolver for trimmed and Native AOT applications.
+    /// </summary>
+    public JsonSerializerOptions ModelSerializerOptions
+    {
+        get => _modelSerializerOptions;
+        set => _modelSerializerOptions = value == null
+            ? null
+            : new JsonSerializerOptions(value) { NumberHandling = value.NumberHandling | JsonNumberHandling.AllowReadingFromString };
+    }
 
     public ITranslationBackend Backend { get; }
 
@@ -199,7 +215,80 @@ public class I18NextNet : II18Next
         if (values.Count > 0 && Enumerable.Range(0, values.Count).All(i => values.ContainsKey(i.ToString())))
             root = Enumerable.Range(0, values.Count).Select(i => values[i.ToString()]).ToArray();
 
-        return JsonSerializer.Deserialize<TModel>(JsonSerializer.Serialize(root), ObjectSerializerOptions);
+        if (TryMapToModel<TModel>(root, out var model))
+            return model;
+
+#if NET6_0
+        return ToJsonNode(root).Deserialize<TModel>(ModelSerializerOptions ?? ObjectSerializerOptions);
+#else
+        var typeInfo = (JsonTypeInfo<TModel>)(ModelSerializerOptions ?? ObjectSerializerOptions).GetTypeInfo(typeof(TModel));
+
+        return ToJsonNode(root).Deserialize(typeInfo);
+#endif
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "The reflection based resolver is only used when reflection based serialization is enabled.")]
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "The reflection based resolver is only used when reflection based serialization is enabled.")]
+    private static JsonSerializerOptions CreateObjectSerializerOptions()
+    {
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true, NumberHandling = JsonNumberHandling.AllowReadingFromString };
+
+#if !NET6_0
+        if (JsonSerializer.IsReflectionEnabledByDefault)
+            options.TypeInfoResolver = new DefaultJsonTypeInfoResolver();
+#endif
+
+        return options;
+    }
+
+    private static bool TryMapToModel<TModel>(object root, out TModel model)
+    {
+        object result = null;
+
+        if (typeof(TModel) == typeof(object) || root is IDictionary<string, object> && typeof(TModel).IsAssignableFrom(typeof(Dictionary<string, object>)))
+            result = root;
+        else if (root is object[] array && array.All(v => v is string))
+            result = MapStrings(array.Cast<string>().ToArray(), typeof(TModel));
+        else if (root is IDictionary<string, object> dictionary && dictionary.Values.All(v => v is string) &&
+                 typeof(TModel).IsAssignableFrom(typeof(Dictionary<string, string>)))
+            result = dictionary.ToDictionary(e => e.Key, e => (string)e.Value);
+
+        model = result is TModel typed ? typed : default;
+
+        return result is TModel;
+    }
+
+    private static object MapStrings(string[] values, Type type)
+    {
+        if (type.IsAssignableFrom(typeof(string[])))
+            return values;
+
+        return type.IsAssignableFrom(typeof(List<string>)) ? values.ToList() : null;
+    }
+
+    private static JsonNode ToJsonNode(object value)
+    {
+        switch (value)
+        {
+            case IDictionary<string, object> dictionary:
+                var jsonObject = new JsonObject();
+
+                foreach (var entry in dictionary)
+                    jsonObject[entry.Key] = ToJsonNode(entry.Value);
+
+                return jsonObject;
+            case object[] array:
+                var jsonArray = new JsonArray();
+
+                foreach (var item in array)
+                    jsonArray.Add(ToJsonNode(item));
+
+                return jsonArray;
+            case null:
+                return null;
+            default:
+                return JsonValue.Create(value.ToString());
+        }
     }
 
     public bool Exists(string key, object args = null)

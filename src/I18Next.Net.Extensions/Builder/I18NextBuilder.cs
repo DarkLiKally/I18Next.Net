@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net.Http;
 
@@ -68,7 +69,7 @@ public class I18NextBuilder
     /// </remarks>
     /// <typeparam name="T">Type of the translation backend.</typeparam>
     /// <returns>The current I18Next builder instance.</returns>
-    public I18NextBuilder AddBackend<T>()
+    public I18NextBuilder AddBackend<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>()
         where T : class, ITranslationBackend
     {
         Services.AddSingleton<ITranslationBackend, T>();
@@ -158,7 +159,7 @@ public class I18NextBuilder
     /// <para>It is possible to use multiple formatters.</para>
     /// <typeparam name="T">The formatter plugin type.</typeparam>
     /// <returns>The current I18Next builder instance.</returns>
-    public I18NextBuilder AddFormatter<T>()
+    public I18NextBuilder AddFormatter<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>()
         where T : class, IFormatter
     {
         Services.AddSingleton<IFormatter, T>();
@@ -218,7 +219,7 @@ public class I18NextBuilder
     /// </remarks>
     /// <typeparam name="T">The interpolator plugin type.</typeparam>
     /// <returns>The current I18Next builder instance.</returns>
-    public I18NextBuilder AddInterpolator<T>()
+    public I18NextBuilder AddInterpolator<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>()
         where T : class, IInterpolator
     {
         Services.AddSingleton<IInterpolator, T>();
@@ -276,7 +277,7 @@ public class I18NextBuilder
     /// </remarks>
     /// <typeparam name="T">The language detector plugin type.</typeparam>
     /// <returns>The current I18Next builder instance.</returns>
-    public I18NextBuilder AddLanguageDetector<T>()
+    public I18NextBuilder AddLanguageDetector<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>()
         where T : class, ILanguageDetector
     {
         Services.AddSingleton<ILanguageDetector, T>();
@@ -334,7 +335,7 @@ public class I18NextBuilder
     /// </remarks>
     /// <typeparam name="T">The logger plugin type.</typeparam>
     /// <returns>The current I18Next builder instance.</returns>
-    public I18NextBuilder AddLogger<T>()
+    public I18NextBuilder AddLogger<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>()
         where T : class, ILogger
     {
         Services.AddSingleton<ILogger, T>();
@@ -393,7 +394,7 @@ public class I18NextBuilder
     /// </remarks>
     /// <typeparam name="T">The missing key handler plugin type.</typeparam>
     /// <returns>The current I18Next builder instance.</returns>
-    public I18NextBuilder AddMissingKeyHandler<T>()
+    public I18NextBuilder AddMissingKeyHandler<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>()
         where T : class, IMissingKeyHandler
     {
         Services.AddSingleton<IMissingKeyHandler, T>();
@@ -514,7 +515,7 @@ public class I18NextBuilder
     /// </remarks>
     /// <typeparam name="T">The plural resolver plugin type.</typeparam>
     /// <returns>The current I18Next builder instance.</returns>
-    public I18NextBuilder AddPluralResolver<T>()
+    public I18NextBuilder AddPluralResolver<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>()
         where T : class, IPluralResolver
     {
         Services.AddSingleton<IPluralResolver, T>();
@@ -577,7 +578,7 @@ public class I18NextBuilder
     /// </remarks>
     /// <typeparam name="T">The post processor plugin type.</typeparam>
     /// <returns>The current I18Next builder instance.</returns>
-    public I18NextBuilder AddPostProcessor<T>()
+    public I18NextBuilder AddPostProcessor<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>()
         where T : class, IPostProcessor
     {
         Services.AddSingleton<IPostProcessor, T>();
@@ -617,7 +618,7 @@ public class I18NextBuilder
     ///     </para>
     /// </remarks>
     /// <returns>The current I18Next builder instance.</returns>
-    public I18NextBuilder AddTranslator<T>()
+    public I18NextBuilder AddTranslator<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>()
         where T : class, ITranslator
     {
         Services.AddSingleton<ITranslator, T>();
@@ -847,7 +848,7 @@ public class I18NextBuilder
         return (T)ActivatorUtilities.CreateInstance(c, descriptor.ImplementationType);
     }
 
-    private void AddSingletonIfNotPresent<TService, TImplementation>()
+    private void AddSingletonIfNotPresent<TService, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TImplementation>()
         where TImplementation : class, TService
         where TService : class
     {

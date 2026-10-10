@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -454,12 +455,13 @@ public class DefaultTranslator : ITranslator
         return result;
     }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "DefaultInterpolator keeps the public methods of all derived types.")]
     private static DefaultInterpolator GetSyncInterpolator(IInterpolator interpolator)
     {
         if (interpolator is not DefaultInterpolator defaultInterpolator)
             return null;
 
-        var method = interpolator.GetType().GetMethod(nameof(IInterpolator.InterpolateAsync),
+        var method = defaultInterpolator.GetType().GetMethod(nameof(IInterpolator.InterpolateAsync),
             [typeof(string), typeof(string), typeof(string), typeof(IDictionary<string, object>)]);
 
         return method?.DeclaringType == typeof(DefaultInterpolator) ? defaultInterpolator : null;

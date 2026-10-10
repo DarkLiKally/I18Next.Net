@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
@@ -41,6 +42,8 @@ public static class ObjectExtensions
         return ObjectToDictionary(value);
     }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2070",
+        Justification = "Trimmed applications pass dictionaries or get anonymous arguments converted to dictionaries by the I18Next.Net.Generators package.")]
     private static PropertyAccessor[] CreateAccessors(Type type)
     {
         return

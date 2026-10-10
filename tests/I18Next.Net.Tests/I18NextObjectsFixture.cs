@@ -1,6 +1,8 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 using I18Next.Net.Backends;
@@ -12,7 +14,7 @@ using Xunit;
 
 namespace I18Next.Net.Tests;
 
-public class I18NextObjectsFixture
+public partial class I18NextObjectsFixture
 {
     public I18NextObjectsFixture()
     {
@@ -114,6 +116,38 @@ public class I18NextObjectsFixture
     }
 
     [Fact]
+    public void TModel_StringCollectionsAndDictionaries_ShouldBeMappedWithoutSerializer()
+    {
+        _i18Next.T<IEnumerable<string>>("list").ShouldBe(["first", "second", "third"]);
+        _i18Next.T<IReadOnlyList<string>>("list").ShouldBeOfType<string[]>();
+        _i18Next.T<IList<string>>("list").Count.ShouldBe(3);
+        _i18Next.T<Dictionary<string, string>>("onlyEnglish")["value"].ShouldBe("English fallback");
+        _i18Next.T<IReadOnlyDictionary<string, string>>("onlyEnglish")["value"].ShouldBe("English fallback");
+        _i18Next.T<IDictionary<string, object>>("menu", new { name = "Jane" })["title"].ShouldBe("Hello Jane");
+        _i18Next.T<object>("list").ShouldBeOfType<object[]>().Length.ShouldBe(3);
+        _i18Next.T<HashSet<string>>("list").Count.ShouldBe(3);
+    }
+
+#if !NET6_0
+    [Fact]
+    public void TModel_ModelSerializerOptions_ShouldBeUsed()
+    {
+        _i18Next.ModelSerializerOptions = new JsonSerializerOptions { TypeInfoResolver = ObjectsJsonContext.Default, PropertyNameCaseInsensitive = true };
+
+        var menu = _i18Next.T<Menu>("menu", new { name = "Stefan", year = 2026 });
+
+        menu.Title.ShouldBe("Hello Stefan");
+        menu.Footer.Links[1].Label.ShouldBe("Imprint");
+        _i18Next.ModelSerializerOptions.NumberHandling.ShouldBe(JsonNumberHandling.AllowReadingFromString);
+        Should.Throw<System.NotSupportedException>(() => _i18Next.T<Unrelated>("onlyEnglish"));
+
+        _i18Next.ModelSerializerOptions = null;
+        _i18Next.ModelSerializerOptions.ShouldBeNull();
+        _i18Next.T<Unrelated>("onlyEnglish").Value.ShouldBe("English fallback");
+    }
+#endif
+
+    [Fact]
     public async Task TModel_Missing_ShouldReturnDefault()
     {
         _i18Next.T<Menu>("missing").ShouldBeNull();
@@ -185,4 +219,14 @@ public class I18NextObjectsFixture
 
         public string Url { get; set; }
     }
+
+    private class Unrelated
+    {
+        public string Value { get; set; }
+    }
+
+#if !NET6_0
+    [JsonSerializable(typeof(Menu))]
+    private partial class ObjectsJsonContext : JsonSerializerContext;
+#endif
 }

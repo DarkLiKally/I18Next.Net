@@ -25,7 +25,8 @@ public class I18NextFactory(ITranslationBackend backend, ITranslator translator,
             Language = _options.Value.DefaultLanguage,
             DefaultNamespace = _options.Value.DefaultNamespace,
             Logger = _logger,
-            DetectLanguageOnEachTranslation = _options.Value.DetectLanguageOnEachTranslation
+            DetectLanguageOnEachTranslation = _options.Value.DetectLanguageOnEachTranslation,
+            ModelSerializerOptions = _options.Value.ModelSerializerOptions
         };
         instance.SetFallbackLanguages([.. _options.Value.FallbackLanguages]);
         instance.SetFallbackNamespaces([.. _options.Value.FallbackNamespaces]);

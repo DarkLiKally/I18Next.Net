@@ -5,6 +5,9 @@
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <NoWarn>CS1591</NoWarn>
     </PropertyGroup>
+    <PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
+        <IsAotCompatible>true</IsAotCompatible>
+    </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
         <DocumentationFile>bin\Debug\I18Next.Net.xml</DocumentationFile>
     </PropertyGroup>

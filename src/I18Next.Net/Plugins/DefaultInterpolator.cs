@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
 using System.Text.Json;
@@ -12,6 +13,7 @@ using I18Next.Net.Logging;
 
 namespace I18Next.Net.Plugins;
 
+[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)]
 public class DefaultInterpolator : IInterpolator
 {
     private readonly ILogger _logger;
