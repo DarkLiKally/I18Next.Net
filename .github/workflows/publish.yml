@@ -50,7 +50,8 @@ jobs:
           echo "tag=v$version" >> "$GITHUB_OUTPUT"
       - name: Test
         run: >-
-          for project in tests/I18Next.Net.Tests tests/I18Next.Net.Generators.Tests; do
+          for project in tests/*.Tests; do
+          [ "$project" = tests/I18Next.Net.Wpf.Tests ] && continue;
           dotnet test "$project" -c Release || exit 1;
           done
       - name: Pack

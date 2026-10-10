@@ -46,9 +46,17 @@ jobs:
           exit $failed
       - name: Test
         run: >-
-          for project in tests/I18Next.Net.Tests tests/I18Next.Net.Generators.Tests; do
+          for project in tests/*.Tests; do
+          [ "$project" = tests/I18Next.Net.Wpf.Tests ] && continue;
           dotnet test "$project" -c Release --no-build --logger trx --results-directory artifacts/test-results || exit 1;
           done
+      - name: Native AOT
+        run: |
+          dotnet publish samples/Example.NativeAot -c Release -r linux-x64 -o artifacts/nativeaot
+          output=$(artifacts/nativeaot/Example.NativeAot)
+          echo "$output"
+          echo "$output" | grep -q "Hallo Jane!"
+          echo "$output" | grep -q "Order of Jane from Oct 4, 2026"
       - name: Collect packages
         run: mkdir -p artifacts/packages && cp src/*/bin/Release/*.nupkg artifacts/packages/
       - uses: actions/upload-artifact@v4
@@ -67,6 +75,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: |
+            8.0.x
+            10.0.x
       - name: Test on .NET Framework 4.8
         run: dotnet test tests/I18Next.Net.Tests -c Release -f net48
+      - name: Test WPF
+        run: dotnet test tests/I18Next.Net.Wpf.Tests -c Release
