@@ -3,5 +3,6 @@
     "orders_zero": "Du hast keine Bestellungen",
     "orders_one": "Du hast {{count}} Bestellung",
     "orders_other": "Du hast {{count}} Bestellungen",
+    "product": "Produkt {{id}}",
     "total": "Summe: {{value, currency(EUR)}}"
 }
