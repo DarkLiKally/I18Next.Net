@@ -423,6 +423,61 @@ public class I18NextBuilder
     }
 
     /// <summary>
+    ///     Writes missing keys into JSON files like the <c>saveMissing</c> option of the i18next-fs-backend. Meant for
+    ///     development.
+    /// </summary>
+    /// <param name="addPath">
+    ///     The file the missing keys are written to. <c>{{lng}}</c> and <c>{{ns}}</c> are replaced with the language and the
+    ///     namespace.
+    /// </param>
+    /// <returns>The current I18Next builder instance.</returns>
+    public I18NextBuilder SaveMissingKeysToFiles(string addPath = FileMissingKeyHandler.DefaultAddPath)
+    {
+        return AddMissingKeyHandler(new FileMissingKeyHandler(addPath));
+    }
+
+    /// <summary>
+    ///     Sends missing keys to a server like the <c>saveMissing</c> option of the i18next-http-backend, using the http
+    ///     client of the <see cref="HttpBackend" />.
+    /// </summary>
+    /// <param name="addPath">
+    ///     The path or url the missing keys are posted to. <c>{{lng}}</c> and <c>{{ns}}</c> are replaced with the language
+    ///     and the namespace.
+    /// </param>
+    /// <param name="configureHandler">Configures the handler instance.</param>
+    /// <param name="configureHttpClient">Configures the named http client, e.g. its base address or message handlers.</param>
+    /// <returns>The current I18Next builder instance.</returns>
+    public I18NextBuilder SaveMissingKeysOverHttp(string addPath = HttpMissingKeyHandler.DefaultAddPath, Action<HttpMissingKeyHandler> configureHandler = null,
+        Action<IHttpClientBuilder> configureHttpClient = null)
+    {
+        var httpClientBuilder = Services.AddHttpClient(HttpBackend.HttpClientName);
+        configureHttpClient?.Invoke(httpClientBuilder);
+
+        return AddMissingKeyHandler(serviceProvider =>
+        {
+            var httpClientFactory = serviceProvider.GetRequiredService<IHttpClientFactory>();
+            var handler = new HttpMissingKeyHandler(() => httpClientFactory.CreateClient(HttpBackend.HttpClientName), addPath)
+            {
+                Logger = serviceProvider.GetRequiredService<ILogger>()
+            };
+
+            configureHandler?.Invoke(handler);
+
+            return handler;
+        });
+    }
+
+    /// <summary>
+    ///     Counts missing keys with the <c>i18next.missing_keys</c> counter of the <c>I18Next.Net</c> meter.
+    /// </summary>
+    /// <param name="includeKey">Adds the key as tag. Every key creates its own time series.</param>
+    /// <returns>The current I18Next builder instance.</returns>
+    public I18NextBuilder AddMissingKeyMetrics(bool includeKey = false)
+    {
+        return AddMissingKeyHandler(new MetricsMissingKeyHandler { IncludeKey = includeKey });
+    }
+
+    /// <summary>
     ///     Registers the provided instance of a plural resolver plugin.
     /// </summary>
     /// <remarks>

@@ -120,7 +120,7 @@ public class DefaultTranslator : ITranslator
 
         if (groupValues == null)
         {
-            await OnMissingKey(language, actualNamespace, key, [key]).ConfigureAwait(false);
+            await OnMissingKey(language, actualNamespace, key, [key], args).ConfigureAwait(false);
 
             return null;
         }
@@ -503,7 +503,7 @@ public class DefaultTranslator : ITranslator
         return result;
     }
 
-    private async Task OnMissingKey(string language, string @namespace, string key, List<string> possibleKeys)
+    private async Task OnMissingKey(string language, string @namespace, string key, List<string> possibleKeys, IDictionary<string, object> args)
     {
         if (_logger.IsEnabled(LogLevel.Information))
             _logger.LogInformation("Missing translation for {namespace}:{key} in language {language}.", @namespace, key, language);
@@ -511,9 +511,9 @@ public class DefaultTranslator : ITranslator
         if (MissingKey == null && MissingKeyHandlers.Count == 0)
             return;
 
-        var args = new MissingKeyEventArgs(language, @namespace, key, [.. possibleKeys]);
+        var eventArgs = new MissingKeyEventArgs(language, @namespace, key, [.. possibleKeys]) { DefaultValue = GetDefaultValue(language, args) };
 
-        MissingKey?.Invoke(this, args);
+        MissingKey?.Invoke(this, eventArgs);
 
         if (MissingKeyHandlers.Count > 0)
         {
@@ -521,7 +521,7 @@ public class DefaultTranslator : ITranslator
                 _logger.LogDebug("Invoking missing key handlers for {namespace}:{key} in language {language}.", @namespace, key, language);
 
             foreach (var missingKeyHandler in MissingKeyHandlers)
-                await missingKeyHandler.HandleMissingKeyAsync(this, args).ConfigureAwait(false);
+                await missingKeyHandler.HandleMissingKeyAsync(this, eventArgs).ConfigureAwait(false);
         }
     }
 
@@ -584,7 +584,7 @@ public class DefaultTranslator : ITranslator
         }
 
         if (result == null && notifyMissingKey && !foundGroup)
-            await OnMissingKey(language, ns, key, possibleKeys ?? [key]).ConfigureAwait(false);
+            await OnMissingKey(language, ns, key, possibleKeys ?? [key], args).ConfigureAwait(false);
 
         if (_logger.IsEnabled(LogLevel.Information))
             _logger.LogInformation("The resolved translation for {ns}:{key} on language {language} was \"{result}\"", ns, key, language, result);
