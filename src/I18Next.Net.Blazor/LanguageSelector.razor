@@ -1,0 +1,60 @@
+@inherits I18NextComponentBase
+
+<select @attributes="AdditionalAttributes" value="@I18n.Language" @onchange="OnChangeAsync">
+    @foreach (var language in GetLanguages())
+    {
+        <option value="@language">@GetDisplayName(language)</option>
+    }
+</select>
+
+@code {
+    [Inject]
+    private IOptions<I18NextBlazorOptions> Options { get; set; }
+
+    /// <summary>
+    ///     The languages to choose from. Uses the supported languages if not provided.
+    /// </summary>
+    [Parameter]
+    public IEnumerable<string> Languages { get; set; }
+
+    /// <summary>
+    ///     Returns the displayed name of a language. Uses the native name of the culture if not provided.
+    /// </summary>
+    [Parameter]
+    public Func<string, string> DisplayName { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object> AdditionalAttributes { get; set; }
+
+    private IEnumerable<string> GetLanguages()
+    {
+        if (Languages != null)
+            return Languages;
+
+        return Options.Value.SupportedLanguages is { Count: > 0 } supportedLanguages ? supportedLanguages : [I18n.Language];
+    }
+
+    private string GetDisplayName(string language)
+    {
+        if (DisplayName != null)
+            return DisplayName(language);
+
+        try
+        {
+            var culture = CultureInfo.GetCultureInfo(language);
+            var name = culture.NativeName;
+
+            return string.IsNullOrEmpty(name) ? language : char.ToUpper(name[0], culture) + name.Substring(1);
+        }
+        catch (CultureNotFoundException)
+        {
+            return language;
+        }
+    }
+
+    private async Task OnChangeAsync(ChangeEventArgs e)
+    {
+        if (e.Value is string { Length: > 0 } language)
+            await I18n.ChangeLanguageAsync(language);
+    }
+}
