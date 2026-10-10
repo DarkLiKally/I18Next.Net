@@ -1,0 +1,8 @@
+{
+    "title": "I18Next.Net WPF Beispiel",
+    "greeting": "Hallo {{value}}!",
+    "inbox_zero": "Du hast keine Nachrichten",
+    "inbox_one": "Du hast {{count}} Nachricht",
+    "inbox_other": "Du hast {{count}} Nachrichten",
+    "hint": "Bearbeite locales/de/translation.json im Ausgabeverzeichnis, während die Anwendung läuft, um die Änderungen sofort zu sehen."
+}

@@ -16,6 +16,7 @@
   <Project Path="samples/Example.NativeAot/Example.NativeAot.csproj" />
   <Project Path="samples/Example.SourceGenerator/Example.SourceGenerator.csproj" />
   <Project Path="samples/Example.WebApp/Example.WebApp.csproj" />
+  <Project Path="samples/Example.Wpf/Example.Wpf.csproj" />
   <Project Path="src/I18Next.Net.Abstractions/I18Next.Net.Abstractions.csproj" />
   <Project Path="src/I18Next.Net.AspNetCore/I18Next.Net.AspNetCore.csproj" />
   <Project Path="src/I18Next.Net.Blazor/I18Next.Net.Blazor.csproj" />

@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net10.0-windows</TargetFramework>
+        <UseWPF>true</UseWPF>
+        <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\I18Next.Net.Extensions\I18Next.Net.Extensions.csproj" />
+        <ProjectReference Include="..\..\src\I18Next.Net.Wpf\I18Next.Net.Wpf.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.12" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="locales\**\*.json" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+
+</Project>
