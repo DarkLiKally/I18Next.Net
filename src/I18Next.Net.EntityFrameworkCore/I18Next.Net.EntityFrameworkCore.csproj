@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Description>Backend for I18Next.Net loading and storing translations in a database with Entity Framework Core, with a missing key handler adding missing keys for translation.</Description>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+        <NoWarn>CS1591</NoWarn>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <DocumentationFile>bin\Debug\I18Next.Net.EntityFrameworkCore.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DocumentationFile>bin\Release\I18Next.Net.EntityFrameworkCore.xml</DocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net10.0'))">
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.31" />
+    </ItemGroup>
+
+    <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net10.0'))">
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.12" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\I18Next.Net.Extensions\I18Next.Net.Extensions.csproj" />
+      <ProjectReference Include="..\I18Next.Net\I18Next.Net.csproj" />
+    </ItemGroup>
+
+</Project>
