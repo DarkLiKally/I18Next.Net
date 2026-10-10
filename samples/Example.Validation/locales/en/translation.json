@@ -1,0 +1,7 @@
+{
+    "fields": {
+        "email": "E-mail address",
+        "confirmEmail": "E-mail confirmation",
+        "customerNumber": "Customer number"
+    }
+}

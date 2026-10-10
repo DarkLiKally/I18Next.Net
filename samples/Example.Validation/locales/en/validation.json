@@ -1,0 +1,3 @@
+{
+    "customerNumber": "{{- field}} must consist of two capital letters and four digits, e.g. AB1234."
+}

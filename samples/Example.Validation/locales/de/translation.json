@@ -1,0 +1,12 @@
+{
+    "Age": "Alter",
+    "Email": "E-Mail-Adresse",
+    "Product": "Produkt",
+    "Quantity": "Menge",
+    "page": "Seite",
+    "fields": {
+        "email": "E-Mail-Adresse",
+        "confirmEmail": "E-Mail-Bestätigung",
+        "customerNumber": "Kundennummer"
+    }
+}

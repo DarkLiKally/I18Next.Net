@@ -1,0 +1,5 @@
+{
+    "customerNumber": "{{- field}} muss aus zwei Großbuchstaben und vier Ziffern bestehen, z. B. AB1234.",
+    "required": "Bitte geben Sie {{- field}} an.",
+    "NotEmptyValidator": "Bitte geben Sie '{{PropertyName}}' an."
+}
