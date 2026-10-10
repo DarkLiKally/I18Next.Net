@@ -1,0 +1,25 @@
+{
+    "nav": {
+        "server": "Interactive server",
+        "wasm": "WebAssembly",
+        "static": "Static rendering"
+    },
+    "language": "Language",
+    "click": "Click me",
+    "clicks_one": "Clicked {{count}} time",
+    "clicks_other": "Clicked {{count}} times",
+    "docs": "Read the <docs>documentation</docs>.",
+    "server": {
+        "title": "Interactive server",
+        "intro": "This page runs in a <strong>server circuit</strong>. Every circuit has its own language.",
+        "hotReload": "Edit wwwroot/locales/en/translation.json while the app runs and this page renders again."
+    },
+    "wasm": {
+        "title": "WebAssembly",
+        "intro": "This page runs <strong>in the browser</strong>. The translations were loaded over HTTP before the first render."
+    },
+    "static": {
+        "title": "Static rendering",
+        "intro": "This page is rendered for every request in <strong>{{language}}</strong>, the language of the request culture."
+    }
+}

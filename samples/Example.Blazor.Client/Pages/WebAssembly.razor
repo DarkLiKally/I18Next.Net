@@ -1,0 +1,18 @@
+@page "/wasm"
+@rendermode InteractiveWebAssembly
+@inherits I18NextComponentBase
+
+<h1>@T("wasm.title")</h1>
+
+<LanguageSelector aria-label="@T("language")" />
+
+<p><Trans Key="wasm.intro" AllowHtml="true" /></p>
+
+<p>
+    <button @onclick="() => _count++">@T("click")</button>
+    @T("clicks", new { count = _count })
+</p>
+
+@code {
+    private int _count;
+}

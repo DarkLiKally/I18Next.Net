@@ -1,0 +1,19 @@
+body {
+    font-family: system-ui, sans-serif;
+    margin: 0;
+}
+
+nav {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f3f3f3;
+}
+
+nav a.active {
+    font-weight: bold;
+}
+
+main {
+    padding: 1rem;
+}

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.12" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\I18Next.Net.Blazor\I18Next.Net.Blazor.csproj" />
+        <ProjectReference Include="..\Example.Blazor.Client\Example.Blazor.Client.csproj" />
+    </ItemGroup>
+
+</Project>

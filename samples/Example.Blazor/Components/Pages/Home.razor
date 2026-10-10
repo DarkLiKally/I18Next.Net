@@ -1,0 +1,31 @@
+@page "/"
+@rendermode InteractiveServer
+@inherits I18NextComponentBase
+
+<PageTitle>@T("server.title")</PageTitle>
+
+<h1>@T("server.title")</h1>
+
+<LanguageSelector aria-label="@T("language")" />
+
+<p><Trans Key="server.intro" AllowHtml="true" /></p>
+
+<p>
+    <button @onclick="() => _count++">@T("click")</button>
+    @T("clicks", new { count = _count })
+</p>
+
+<p><Trans Key="docs" Components="Links" /></p>
+
+<p>@T("server.hotReload")</p>
+
+@code {
+    private static readonly Dictionary<string, RenderFragment<RenderFragment>> Links = new()
+    {
+        ["docs"] = DocsLink
+    };
+
+    private int _count;
+
+    private static RenderFragment DocsLink(RenderFragment content) => @<a href="https://darklikally.github.io/I18Next.Net/">@content</a>;
+}

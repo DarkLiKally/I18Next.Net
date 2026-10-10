@@ -1,0 +1,12 @@
+@inherits LayoutComponentBase
+@inject IBlazorI18Next I18n
+
+<nav>
+    <NavLink href="" Match="NavLinkMatch.All">@I18n.T("nav.server")</NavLink>
+    <NavLink href="wasm">@I18n.T("nav.wasm")</NavLink>
+    <NavLink href="static">@I18n.T("nav.static")</NavLink>
+</nav>
+
+<main>
+    @Body
+</main>

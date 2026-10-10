@@ -1,0 +1,25 @@
+{
+    "nav": {
+        "server": "Interaktiver Server",
+        "wasm": "WebAssembly",
+        "static": "Statisches Rendern"
+    },
+    "language": "Sprache",
+    "click": "Klick mich",
+    "clicks_one": "{{count}} Mal geklickt",
+    "clicks_other": "{{count}} Mal geklickt",
+    "docs": "Lies die <docs>Dokumentation</docs>.",
+    "server": {
+        "title": "Interaktiver Server",
+        "intro": "Diese Seite läuft in einem <strong>Server-Circuit</strong>. Jeder Circuit hat seine eigene Sprache.",
+        "hotReload": "Bearbeite wwwroot/locales/de/translation.json während die App läuft und diese Seite wird neu gerendert."
+    },
+    "wasm": {
+        "title": "WebAssembly",
+        "intro": "Diese Seite läuft <strong>im Browser</strong>. Die Übersetzungen wurden vor dem ersten Rendern über HTTP geladen."
+    },
+    "static": {
+        "title": "Statisches Rendern",
+        "intro": "Diese Seite wird für jede Anfrage in <strong>{{language}}</strong> gerendert, der Sprache der Request-Kultur."
+    }
+}

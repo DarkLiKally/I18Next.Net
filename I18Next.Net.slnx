@@ -7,6 +7,8 @@
     <File Path="README.md" />
   </Folder>
   <Project Path="samples/Example.Backends/Example.Backends.csproj" />
+  <Project Path="samples/Example.Blazor.Client/Example.Blazor.Client.csproj" />
+  <Project Path="samples/Example.Blazor/Example.Blazor.csproj" />
   <Project Path="samples/Example.ConsoleApp.NetCore/Example.ConsoleApp.NetCore.csproj" />
   <Project Path="samples/Example.ConsoleApp.NetFramework/Example.ConsoleApp.NetFramework.csproj" />
   <Project Path="samples/Example.Features/Example.Features.csproj" />
