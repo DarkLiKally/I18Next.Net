@@ -1,0 +1,12 @@
+<Project>
+    <ItemGroup>
+        <CompilerVisibleProperty Include="PublishAot" />
+        <CompilerVisibleProperty Include="PublishTrimmed" />
+        <CompilerVisibleProperty Include="IsAotCompatible" />
+        <CompilerVisibleProperty Include="I18NextInterceptArguments" />
+    </ItemGroup>
+    <PropertyGroup>
+        <InterceptorsNamespaces>$(InterceptorsNamespaces);I18Next.Net.Generated</InterceptorsNamespaces>
+        <InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);I18Next.Net.Generated</InterceptorsPreviewNamespaces>
+    </PropertyGroup>
+</Project>

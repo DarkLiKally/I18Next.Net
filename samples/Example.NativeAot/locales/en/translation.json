@@ -1,0 +1,11 @@
+{
+  "welcome": "Hello {{name}}!",
+  "item_one": "{{count}} item",
+  "item_other": "{{count}} items",
+  "price": "Price: {{value, currency(EUR)}}",
+  "order": "Order of {{user.name}} from {{date, datetime(dateStyle: medium)}}",
+  "menu": {
+    "title": "Menu",
+    "items": [ "Home", "About" ]
+  }
+}

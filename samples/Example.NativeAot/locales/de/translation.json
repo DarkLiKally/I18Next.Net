@@ -1,0 +1,11 @@
+{
+  "welcome": "Hallo {{name}}!",
+  "item_one": "{{count}} Artikel",
+  "item_other": "{{count}} Artikel",
+  "price": "Preis: {{value, currency(EUR)}}",
+  "order": "Bestellung von {{user.name}} vom {{date, datetime(dateStyle: medium)}}",
+  "menu": {
+    "title": "Menü",
+    "items": [ "Start", "Über uns" ]
+  }
+}
