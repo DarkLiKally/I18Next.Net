@@ -5,10 +5,12 @@ using System.Linq;
 using System.Net.Http;
 
 using I18Next.Net.Backends;
+using I18Next.Net.Extensions.Backends;
 using I18Next.Net.Extensions.Configuration;
 using I18Next.Net.Logging;
 using I18Next.Net.Plugins;
 
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Localization;
@@ -21,6 +23,8 @@ namespace I18Next.Net.Extensions.Builder;
 /// </summary>
 public class I18NextBuilder
 {
+    private Action<DistributedCacheBackend> _configureDistributedCache;
+    private bool _useDistributedCache;
     private string _watchedPath;
 
     /// <summary>
@@ -676,6 +680,7 @@ public class I18NextBuilder
         AddSingletonIfNotPresent<ILanguageDetector>(DefaultLanguageDetectorFactory);
         AddSingletonIfNotPresent<ITranslationBackend, JsonFileBackend>();
         AddFileWatching();
+        AddDistributedCache();
         AddSingletonIfNotPresent<ITranslator>(DefaultTranslatorFactory);
         AddSingletonIfNotPresent<IInterpolator>(DefaultInterpolatorFactory);
 
@@ -699,6 +704,27 @@ public class I18NextBuilder
             throw new ArgumentException("Path cannot be null or empty.", nameof(basePath));
 
         _watchedPath = basePath;
+
+        return this;
+    }
+
+    /// <summary>
+    ///     Caches the namespaces of the registered backend in the <see cref="IDistributedCache" /> registered in the service
+    ///     collection, e.g. Redis shared by several servers. A <see cref="ChainedBackend" /> asks a
+    ///     <see cref="DistributedCacheBackend" /> first and saves the namespaces loaded from the registered backend into it.
+    /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///         Note: Changed translations of the registered backend are only picked up when the cached namespaces expire or
+    ///         are removed from the cache.
+    ///     </para>
+    /// </remarks>
+    /// <param name="configureBackend">Configures the cache backend, e.g. its key prefix or the expiration of namespaces.</param>
+    /// <returns>The current I18Next builder instance.</returns>
+    public I18NextBuilder UseDistributedCache(Action<DistributedCacheBackend> configureBackend = null)
+    {
+        _useDistributedCache = true;
+        _configureDistributedCache = configureBackend;
 
         return this;
     }
@@ -835,6 +861,25 @@ public class I18NextBuilder
 
         Services.Remove(descriptor);
         Services.AddSingleton<ITranslationBackend>(c => new FileWatchingBackend(CreateService<ITranslationBackend>(c, descriptor), path));
+    }
+
+    private void AddDistributedCache()
+    {
+        if (!_useDistributedCache)
+            return;
+
+        var descriptor = Services.Last(s => s.ServiceType == typeof(ITranslationBackend));
+        var configure = _configureDistributedCache;
+
+        Services.Remove(descriptor);
+        Services.AddSingleton<ITranslationBackend>(c =>
+        {
+            var cacheBackend = new DistributedCacheBackend(c.GetRequiredService<IDistributedCache>()) { Logger = c.GetRequiredService<ILogger>() };
+
+            configure?.Invoke(cacheBackend);
+
+            return new ChainedBackend(cacheBackend, CreateService<ITranslationBackend>(c, descriptor)) { SaveToEarlierBackends = true };
+        });
     }
 
     private static T CreateService<T>(IServiceProvider c, ServiceDescriptor descriptor)
