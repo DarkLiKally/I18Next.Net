@@ -29,24 +29,21 @@ public class DefaultTranslator : ITranslator
         _pluralResolver = pluralResolver;
         _interpolator = interpolator;
         _syncInterpolator = GetSyncInterpolator(interpolator);
+
+        if (backend is INotifyingTranslationBackend notifyingBackend)
+            notifyingBackend.TranslationsChanged += OnTranslationsChanged;
     }
 
     public DefaultTranslator(ITranslationBackend backend)
+        : this(backend, new TraceLogger(), new DefaultPluralResolver(), null)
     {
-        _backend = backend;
-        _logger = new TraceLogger();
-        _pluralResolver = new DefaultPluralResolver();
         _interpolator = new DefaultInterpolator(_logger);
         _syncInterpolator = (DefaultInterpolator)_interpolator;
     }
 
     public DefaultTranslator(ITranslationBackend backend, IInterpolator interpolator)
+        : this(backend, new TraceLogger(), new DefaultPluralResolver(), interpolator)
     {
-        _backend = backend;
-        _logger = new TraceLogger();
-        _pluralResolver = new DefaultPluralResolver();
-        _interpolator = interpolator;
-        _syncInterpolator = GetSyncInterpolator(interpolator);
     }
 
     public bool AllowInterpolation { get; set; } = true;
@@ -163,6 +160,15 @@ public class DefaultTranslator : ITranslator
     public void ClearCache(string language, string @namespace)
     {
         _treeCache.TryRemove((language, @namespace), out _);
+    }
+
+    private void OnTranslationsChanged(object sender, TranslationsChangedEventArgs e)
+    {
+        foreach (var cacheKey in _treeCache.Keys)
+        {
+            if (e.Affects(cacheKey.Language, cacheKey.Namespace))
+                _treeCache.TryRemove(cacheKey, out _);
+        }
     }
 
     private static void AddNestedValue(IDictionary<string, object> target, string[] path, string value)

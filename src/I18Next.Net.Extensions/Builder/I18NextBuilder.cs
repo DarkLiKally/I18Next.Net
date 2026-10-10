@@ -20,6 +20,8 @@ namespace I18Next.Net.Extensions.Builder;
 /// </summary>
 public class I18NextBuilder
 {
+    private string _watchedPath;
+
     /// <summary>
     ///     Constructor.
     /// </summary>
@@ -617,6 +619,7 @@ public class I18NextBuilder
         AddSingletonIfNotPresent<IPluralResolver, DefaultPluralResolver>();
         AddSingletonIfNotPresent<ILanguageDetector>(DefaultLanguageDetectorFactory);
         AddSingletonIfNotPresent<ITranslationBackend, JsonFileBackend>();
+        AddFileWatching();
         AddSingletonIfNotPresent<ITranslator>(DefaultTranslatorFactory);
         AddSingletonIfNotPresent<IInterpolator>(DefaultInterpolatorFactory);
 
@@ -626,6 +629,22 @@ public class I18NextBuilder
         Services.AddSingleton<IStringLocalizerFactory, I18NextStringLocalizerFactory>();
         Services.AddTransient(typeof(IStringLocalizer<>), typeof(StringLocalizer<>));
         Services.TryAddTransient(typeof(IStringLocalizer), c => c.GetRequiredService<IStringLocalizerFactory>().Create(null));
+    }
+
+    /// <summary>
+    ///     Watches the translation files of the registered file based backend and loads changed namespaces again without
+    ///     restarting the application. Meant for development.
+    /// </summary>
+    /// <param name="basePath">The directory containing the translation files in the <c>{lng}/{ns}.{extension}</c> layout.</param>
+    /// <returns>The current I18Next builder instance.</returns>
+    public I18NextBuilder WatchTranslationFiles(string basePath = "locales")
+    {
+        if (string.IsNullOrEmpty(basePath))
+            throw new ArgumentException("Path cannot be null or empty.", nameof(basePath));
+
+        _watchedPath = basePath;
+
+        return this;
     }
 
     /// <summary>
@@ -748,6 +767,29 @@ public class I18NextBuilder
         Services.Configure<I18NextOptions>(options => options.LanguageFallbacks[language] = fallbackLanguages);
 
         return this;
+    }
+
+    private void AddFileWatching()
+    {
+        if (_watchedPath == null)
+            return;
+
+        var descriptor = Services.Last(s => s.ServiceType == typeof(ITranslationBackend));
+        var path = _watchedPath;
+
+        Services.Remove(descriptor);
+        Services.AddSingleton<ITranslationBackend>(c => new FileWatchingBackend(CreateService<ITranslationBackend>(c, descriptor), path));
+    }
+
+    private static T CreateService<T>(IServiceProvider c, ServiceDescriptor descriptor)
+    {
+        if (descriptor.ImplementationInstance != null)
+            return (T)descriptor.ImplementationInstance;
+
+        if (descriptor.ImplementationFactory != null)
+            return (T)descriptor.ImplementationFactory(c);
+
+        return (T)ActivatorUtilities.CreateInstance(c, descriptor.ImplementationType);
     }
 
     private void AddSingletonIfNotPresent<TService, TImplementation>()

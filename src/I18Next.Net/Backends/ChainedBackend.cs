@@ -10,10 +10,23 @@ namespace I18Next.Net.Backends;
 /// <summary>
 ///     Combines several backends. The first backend providing a namespace wins.
 /// </summary>
-public class ChainedBackend(params ITranslationBackend[] backends) : IExpiringTranslationBackend
+public class ChainedBackend : IExpiringTranslationBackend, INotifyingTranslationBackend
 {
-    private readonly ITranslationBackend[] _backends = backends ?? throw new ArgumentNullException(nameof(backends));
+    private readonly ITranslationBackend[] _backends;
     private readonly ConcurrentDictionary<(string Language, string Namespace), CacheEntry> _cache = new();
+
+    public ChainedBackend(params ITranslationBackend[] backends)
+    {
+        _backends = backends ?? throw new ArgumentNullException(nameof(backends));
+
+        foreach (var backend in _backends)
+        {
+            if (backend is INotifyingTranslationBackend notifyingBackend)
+                notifyingBackend.TranslationsChanged += OnTranslationsChanged;
+        }
+    }
+
+    public event EventHandler<TranslationsChangedEventArgs> TranslationsChanged;
 
     public IReadOnlyList<ITranslationBackend> Backends => _backends;
 
@@ -71,6 +84,17 @@ public class ChainedBackend(params ITranslationBackend[] backends) : IExpiringTr
     public void ClearCache(string language, string @namespace)
     {
         _cache.TryRemove((language, @namespace), out _);
+    }
+
+    private void OnTranslationsChanged(object sender, TranslationsChangedEventArgs e)
+    {
+        foreach (var cacheKey in _cache.Keys)
+        {
+            if (e.Affects(cacheKey.Language, cacheKey.Namespace))
+                _cache.TryRemove(cacheKey, out _);
+        }
+
+        TranslationsChanged?.Invoke(this, e);
     }
 
     private async Task<ITranslationTree> LoadFromBackendsAsync(string language, string @namespace)
