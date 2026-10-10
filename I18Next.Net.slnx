@@ -23,6 +23,7 @@
   <Project Path="src/I18Next.Net.DataAnnotations/I18Next.Net.DataAnnotations.csproj" />
   <Project Path="src/I18Next.Net.EntityFrameworkCore/I18Next.Net.EntityFrameworkCore.csproj" />
   <Project Path="src/I18Next.Net.Extensions/I18Next.Net.Extensions.csproj" />
+  <Project Path="src/I18Next.Net.FluentValidation/I18Next.Net.FluentValidation.csproj" />
   <Project Path="src/I18Next.Net.Generators.CodeFixes/I18Next.Net.Generators.CodeFixes.csproj" />
   <Project Path="src/I18Next.Net.Generators/I18Next.Net.Generators.csproj" />
   <Project Path="src/I18Next.Net.Gettext/I18Next.Net.Gettext.csproj" />
@@ -40,6 +41,7 @@
   <Project Path="tests/I18Next.Net.Blazor.Tests/I18Next.Net.Blazor.Tests.csproj" />
   <Project Path="tests/I18Next.Net.DataAnnotations.Tests/I18Next.Net.DataAnnotations.Tests.csproj" />
   <Project Path="tests/I18Next.Net.EntityFrameworkCore.Tests/I18Next.Net.EntityFrameworkCore.Tests.csproj" />
+  <Project Path="tests/I18Next.Net.FluentValidation.Tests/I18Next.Net.FluentValidation.Tests.csproj" />
   <Project Path="tests/I18Next.Net.Generators.Tests/I18Next.Net.Generators.Tests.csproj" />
   <Project Path="tests/I18Next.Net.MachineTranslation.Tests/I18Next.Net.MachineTranslation.Tests.csproj" />
   <Project Path="tests/I18Next.Net.Maui.Tests/I18Next.Net.Maui.Tests.csproj" />
