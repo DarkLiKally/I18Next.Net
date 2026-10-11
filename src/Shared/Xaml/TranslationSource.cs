@@ -21,6 +21,7 @@ internal sealed class TranslationSource(SynchronizationContext synchronizationCo
 
     private INotifyingTranslationBackend _backend;
     private int _refreshPending;
+    private int _version;
 
     public II18Next I18Next
     {
@@ -50,6 +51,11 @@ internal sealed class TranslationSource(SynchronizationContext synchronizationCo
     }
 
     public string Language => I18Next?.Language;
+
+    /// <summary>
+    ///     Changes whenever the language or the translations change, also when the language stays the same.
+    /// </summary>
+    public int Version => _version;
 
     public event PropertyChangedEventHandler PropertyChanged;
 
@@ -108,6 +114,7 @@ internal sealed class TranslationSource(SynchronizationContext synchronizationCo
     private void OnPropertyChanged()
     {
         Interlocked.Exchange(ref _refreshPending, 0);
+        Interlocked.Increment(ref _version);
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(string.Empty));
     }
 }

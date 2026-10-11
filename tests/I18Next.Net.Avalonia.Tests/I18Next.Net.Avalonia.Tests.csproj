@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+        <IsPackable>false</IsPackable>
+        <LangVersion>Latest</LangVersion>
+        <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Avalonia.Headless" Version="12.1.4" />
+        <PackageReference Include="Avalonia.Markup.Xaml.Loader" Version="12.1.4" />
+        <PackageReference Include="coverlet.collector" Version="6.0.2" />
+        <PackageReference Include="Shouldly" Version="4.3.0" />
+        <PackageReference Include="xunit" Version="2.9.3" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\I18Next.Net.Avalonia\I18Next.Net.Avalonia.csproj" />
+    </ItemGroup>
+</Project>

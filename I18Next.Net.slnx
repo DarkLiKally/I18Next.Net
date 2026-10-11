@@ -6,6 +6,7 @@
     <File Path="Directory.Build.targets" />
     <File Path="README.md" />
   </Folder>
+  <Project Path="samples/Example.Avalonia/Example.Avalonia.csproj" />
   <Project Path="samples/Example.Backends/Example.Backends.csproj" />
   <Project Path="samples/Example.Blazor.Client/Example.Blazor.Client.csproj" />
   <Project Path="samples/Example.Blazor/Example.Blazor.csproj" />
@@ -20,6 +21,7 @@
   <Project Path="samples/Example.Wpf/Example.Wpf.csproj" />
   <Project Path="src/I18Next.Net.Abstractions/I18Next.Net.Abstractions.csproj" />
   <Project Path="src/I18Next.Net.AspNetCore/I18Next.Net.AspNetCore.csproj" />
+  <Project Path="src/I18Next.Net.Avalonia/I18Next.Net.Avalonia.csproj" />
   <Project Path="src/I18Next.Net.Blazor/I18Next.Net.Blazor.csproj" />
   <Project Path="src/I18Next.Net.DataAnnotations/I18Next.Net.DataAnnotations.csproj" />
   <Project Path="src/I18Next.Net.EntityFrameworkCore/I18Next.Net.EntityFrameworkCore.csproj" />
@@ -38,6 +40,7 @@
   <Project Path="src/I18Next.Net.Yaml/I18Next.Net.Yaml.csproj" />
   <Project Path="src/I18Next.Net/I18Next.Net.csproj" />
   <Project Path="tests/I18Next.Net.AspNetCore.Tests/I18Next.Net.AspNetCore.Tests.csproj" />
+  <Project Path="tests/I18Next.Net.Avalonia.Tests/I18Next.Net.Avalonia.Tests.csproj" />
   <Project Path="tests/I18Next.Net.Benchmarks/I18Next.Net.Benchmarks.csproj" />
   <Project Path="tests/I18Next.Net.Blazor.Tests/I18Next.Net.Blazor.Tests.csproj" />
   <Project Path="tests/I18Next.Net.DataAnnotations.Tests/I18Next.Net.DataAnnotations.Tests.csproj" />

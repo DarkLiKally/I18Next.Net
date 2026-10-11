@@ -1,0 +1,11 @@
+<UserControl x:Class="I18Next.Net.Avalonia.Tests.TranslatedView"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i18n="https://github.com/DarkLiKally/I18Next.Net"
+             xmlns:tests="clr-namespace:I18Next.Net.Avalonia.Tests"
+             x:DataType="tests:ViewModel">
+    <StackPanel>
+        <TextBlock x:Name="TitleText" Text="{i18n:T menu.title}" />
+        <TextBlock x:Name="ItemsText" Text="{i18n:T item, Args={Binding User}, Count={Binding Count}}" />
+    </StackPanel>
+</UserControl>
