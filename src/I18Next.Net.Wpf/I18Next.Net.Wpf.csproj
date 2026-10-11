@@ -6,15 +6,6 @@
         <UseWPF>true</UseWPF>
         <EnableWindowsTargeting>true</EnableWindowsTargeting>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <NoWarn>CS1591</NoWarn>
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <DocumentationFile>bin\Debug\I18Next.Net.Wpf.xml</DocumentationFile>
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-      <DocumentationFile>bin\Release\I18Next.Net.Wpf.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>

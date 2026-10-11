@@ -4,15 +4,6 @@
         <Description>Translates the DataAnnotations validation messages and display names of ASP.NET Core MVC, minimal APIs and the Validator with I18Next.Net.</Description>
         <TargetFrameworks>netstandard2.0;net6.0;net8.0;net10.0</TargetFrameworks>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <NoWarn>CS1591</NoWarn>
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <DocumentationFile>bin\Debug\I18Next.Net.DataAnnotations.xml</DocumentationFile>
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-      <DocumentationFile>bin\Release\I18Next.Net.DataAnnotations.xml</DocumentationFile>
     </PropertyGroup>
 
     <PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net10.0'))">
