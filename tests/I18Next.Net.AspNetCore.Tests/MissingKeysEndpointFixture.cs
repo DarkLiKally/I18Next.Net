@@ -45,7 +45,7 @@ public class MissingKeysEndpointFixture
     {
         using var host = await StartAsync(e => e.MapI18NextMissingKeys());
 
-        var response = await host.GetTestClient().PostAsync("/locales/add/de/translation", Json("""{ "title": "Title", "menu.home": "Home", "title": "" }"""));
+        var response = await host.GetTestClient().PostAsync("/locales/add/de/translation", Json("""{ "title": "Title", "menu.home": "Home", "title": "" }"""), TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
 
@@ -65,7 +65,7 @@ public class MissingKeysEndpointFixture
         var content = new StringContent("""{ "key": "value" }""", Encoding.UTF8);
         content.Headers.ContentType = new MediaTypeHeaderValue("application/json") { CharSet = "UTF-8" };
 
-        var response = await host.GetTestClient().PostAsync("/locales/add/en/common", content);
+        var response = await host.GetTestClient().PostAsync("/locales/add/en/common", content, TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
         await _handler.Received(1).HandleMissingKeyAsync(Arg.Any<object>(), Arg.Is<MissingKeyEventArgs>(a => a.Key == "key" && a.Namespace == "common"));
@@ -84,7 +84,7 @@ public class MissingKeysEndpointFixture
             o.Namespaces = ["translation"];
         }));
 
-        var response = await host.GetTestClient().PostAsync(path, Json("""{ "key": "value" }"""));
+        var response = await host.GetTestClient().PostAsync(path, Json("""{ "key": "value" }"""), TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
         await _handler.DidNotReceiveWithAnyArgs().HandleMissingKeyAsync(null, null);
@@ -100,7 +100,7 @@ public class MissingKeysEndpointFixture
     {
         using var host = await StartAsync(e => e.MapI18NextMissingKeys());
 
-        var response = await host.GetTestClient().PostAsync("/locales/add/de/translation", Json(body));
+        var response = await host.GetTestClient().PostAsync("/locales/add/de/translation", Json(body), TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
         await _handler.DidNotReceiveWithAnyArgs().HandleMissingKeyAsync(null, null);
@@ -112,10 +112,10 @@ public class MissingKeysEndpointFixture
         using var host = await StartAsync(e => e.MapI18NextMissingKeys(configure: o => o.MaxKeys = 2));
         var client = host.GetTestClient();
 
-        (await client.PostAsync("/locales/add/de/translation", Json("""{ "a": "", "b": "", "c": "" }"""))).StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        (await client.PostAsync("/locales/add/de/translation", Json("""{ "a": "", "b": "", "c": "" }"""), TestContext.Current.CancellationToken)).StatusCode.ShouldBe(HttpStatusCode.BadRequest);
         await _handler.DidNotReceiveWithAnyArgs().HandleMissingKeyAsync(null, null);
 
-        (await client.PostAsync("/locales/add/de/translation", Json("""{ "a": "", "b": "" }"""))).StatusCode.ShouldBe(HttpStatusCode.NoContent);
+        (await client.PostAsync("/locales/add/de/translation", Json("""{ "a": "", "b": "" }"""), TestContext.Current.CancellationToken)).StatusCode.ShouldBe(HttpStatusCode.NoContent);
     }
 
     [Fact]
@@ -125,11 +125,11 @@ public class MissingKeysEndpointFixture
         var client = host.GetTestClient();
         var body = """{ "a-rather-long-key": "value" }""";
 
-        (await client.PostAsync("/locales/add/de/translation", Json(body))).StatusCode.ShouldBe(HttpStatusCode.RequestEntityTooLarge);
-        (await client.PostAsync("/locales/add/de/translation", new UnknownLengthContent(body))).StatusCode.ShouldBe(HttpStatusCode.RequestEntityTooLarge);
+        (await client.PostAsync("/locales/add/de/translation", Json(body), TestContext.Current.CancellationToken)).StatusCode.ShouldBe(HttpStatusCode.RequestEntityTooLarge);
+        (await client.PostAsync("/locales/add/de/translation", new UnknownLengthContent(body), TestContext.Current.CancellationToken)).StatusCode.ShouldBe(HttpStatusCode.RequestEntityTooLarge);
         await _handler.DidNotReceiveWithAnyArgs().HandleMissingKeyAsync(null, null);
 
-        (await client.PostAsync("/locales/add/de/translation", new UnknownLengthContent("""{ "a": "" }"""))).StatusCode.ShouldBe(HttpStatusCode.NoContent);
+        (await client.PostAsync("/locales/add/de/translation", new UnknownLengthContent("""{ "a": "" }"""), TestContext.Current.CancellationToken)).StatusCode.ShouldBe(HttpStatusCode.NoContent);
     }
 
     [Fact]
@@ -137,7 +137,7 @@ public class MissingKeysEndpointFixture
     {
         using var host = await StartAsync(e => e.MapI18NextMissingKeys());
 
-        var response = await host.GetTestClient().PostAsync("/locales/add/de/translation", new StringContent("key=value", Encoding.UTF8, "application/x-www-form-urlencoded"));
+        var response = await host.GetTestClient().PostAsync("/locales/add/de/translation", new StringContent("key=value", Encoding.UTF8, "application/x-www-form-urlencoded"), TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.UnsupportedMediaType);
     }
@@ -147,7 +147,7 @@ public class MissingKeysEndpointFixture
     {
         using var host = await StartAsync(e => e.MapI18NextMissingKeys());
 
-        var response = await host.GetTestClient().GetAsync("/locales/add/de/translation");
+        var response = await host.GetTestClient().GetAsync("/locales/add/de/translation", TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.MethodNotAllowed);
     }
@@ -163,7 +163,7 @@ public class MissingKeysEndpointFixture
             },
             app => app.UseRouting().UseAuthentication().UseAuthorization().UseEndpoints(e => e.MapI18NextMissingKeys().RequireAuthorization()));
 
-        var response = await host.GetTestClient().PostAsync("/locales/add/de/translation", Json("""{ "key": "value" }"""));
+        var response = await host.GetTestClient().PostAsync("/locales/add/de/translation", Json("""{ "key": "value" }"""), TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
         response.Headers.Location!.AbsolutePath.ShouldBe("/Account/Login");

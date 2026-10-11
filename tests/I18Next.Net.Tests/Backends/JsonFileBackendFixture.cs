@@ -11,15 +11,15 @@ namespace I18Next.Net.Tests.Backends;
 
 public class JsonFileBackendFixture : IAsyncLifetime
 {
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         _backend = new JsonFileBackend("TestFiles");
         _tree = await _backend.LoadNamespaceAsync("en-US", "test");
     }
 
-    public Task DisposeAsync()
+    public ValueTask DisposeAsync()
     {
-        return Task.CompletedTask;
+        return default;
     }
 
     private JsonFileBackend _backend;

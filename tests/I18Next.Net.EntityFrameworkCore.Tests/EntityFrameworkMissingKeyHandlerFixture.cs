@@ -141,7 +141,7 @@ public class EntityFrameworkMissingKeyHandlerFixture
 
         database.GetEntries().Select(e => (e.Key, e.Value)).ShouldBe([("greeting", "Hello"), ("farewell", null)]);
 
-        await backend.SetValueAsync("en", "translation", "farewell", "Goodbye");
+        await backend.SetValueAsync("en", "translation", "farewell", "Goodbye", TestContext.Current.CancellationToken);
 
         (await i18Next.Ta("farewell")).ShouldBe("Goodbye");
         database.GetEntries().Count.ShouldBe(2);

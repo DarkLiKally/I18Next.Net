@@ -57,11 +57,11 @@ public class ResourcesEndpointFixture
     {
         using var host = await StartAsync(CreateBackend(), e => e.MapI18NextResources());
 
-        var response = await host.GetTestClient().GetAsync("/locales/en/translation.json");
+        var response = await host.GetTestClient().GetAsync("/locales/en/translation.json", TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         response.Content.Headers.ContentType!.ToString().ShouldBe("application/json; charset=utf-8");
-        (await response.Content.ReadAsStringAsync()).ShouldBe(EnglishTranslation);
+        (await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken)).ShouldBe(EnglishTranslation);
     }
 
     [Fact]
@@ -69,7 +69,7 @@ public class ResourcesEndpointFixture
     {
         using var host = await StartAsync(CreateBackend(), e => e.MapI18NextResources());
 
-        var json = await host.GetTestClient().GetStringAsync("/locales/de/translation.json");
+        var json = await host.GetTestClient().GetStringAsync("/locales/de/translation.json", TestContext.Current.CancellationToken);
 
         json.ShouldBe("""{"greeting":"Grüß dich {{name}} \u003C3"}""");
     }
@@ -79,7 +79,7 @@ public class ResourcesEndpointFixture
     {
         using var host = await StartAsync(CreateBackend(), e => e.MapI18NextResources());
 
-        var json = await host.GetTestClient().GetStringAsync("/locales/de-AT/common.json");
+        var json = await host.GetTestClient().GetStringAsync("/locales/de-AT/common.json", TestContext.Current.CancellationToken);
 
         json.ShouldBe("""{"save":"Speichern"}""");
     }
@@ -89,7 +89,7 @@ public class ResourcesEndpointFixture
     {
         using var host = await StartAsync(CreateBackend(), e => e.MapI18NextResources());
 
-        var response = await host.GetTestClient().GetAsync("/locales/en/common.json");
+        var response = await host.GetTestClient().GetAsync("/locales/en/common.json", TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }
@@ -104,10 +104,10 @@ public class ResourcesEndpointFixture
         }));
         var client = host.GetTestClient();
 
-        (await client.GetAsync("/locales/en/translation.json")).StatusCode.ShouldBe(HttpStatusCode.OK);
-        (await client.GetAsync("/locales/EN/translation.json")).StatusCode.ShouldBe(HttpStatusCode.OK);
-        (await client.GetAsync("/locales/de/translation.json")).StatusCode.ShouldBe(HttpStatusCode.NotFound);
-        (await client.GetAsync("/locales/de/common.json")).StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        (await client.GetAsync("/locales/en/translation.json", TestContext.Current.CancellationToken)).StatusCode.ShouldBe(HttpStatusCode.OK);
+        (await client.GetAsync("/locales/EN/translation.json", TestContext.Current.CancellationToken)).StatusCode.ShouldBe(HttpStatusCode.OK);
+        (await client.GetAsync("/locales/de/translation.json", TestContext.Current.CancellationToken)).StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        (await client.GetAsync("/locales/de/common.json", TestContext.Current.CancellationToken)).StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }
 
     [Theory]
@@ -124,7 +124,7 @@ public class ResourcesEndpointFixture
         var backend = Substitute.For<ITranslationBackend>();
         using var host = await StartAsync(backend, e => e.MapI18NextResources());
 
-        var response = await host.GetTestClient().GetAsync(path);
+        var response = await host.GetTestClient().GetAsync(path, TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
         await backend.DidNotReceiveWithAnyArgs().LoadNamespaceAsync(null, null);
@@ -144,9 +144,9 @@ public class ResourcesEndpointFixture
             using var host = await StartAsync(new JsonFileBackend(Path.Combine(directory, "locales")), e => e.MapI18NextResources());
             var client = host.GetTestClient();
 
-            (await client.GetStringAsync("/locales/en/translation.json")).ShouldBe("""{"a":{"b":["x",{"c":"y"}]},"count":"3","flag":"True"}""");
-            (await client.GetAsync("/locales/en/..%2F..%2Fsecret.json")).StatusCode.ShouldBe(HttpStatusCode.NotFound);
-            (await client.GetAsync("/locales/..%2F/secret.json")).StatusCode.ShouldBe(HttpStatusCode.NotFound);
+            (await client.GetStringAsync("/locales/en/translation.json", TestContext.Current.CancellationToken)).ShouldBe("""{"a":{"b":["x",{"c":"y"}]},"count":"3","flag":"True"}""");
+            (await client.GetAsync("/locales/en/..%2F..%2Fsecret.json", TestContext.Current.CancellationToken)).StatusCode.ShouldBe(HttpStatusCode.NotFound);
+            (await client.GetAsync("/locales/..%2F/secret.json", TestContext.Current.CancellationToken)).StatusCode.ShouldBe(HttpStatusCode.NotFound);
         }
         finally
         {
@@ -160,7 +160,7 @@ public class ResourcesEndpointFixture
         using var host = await StartAsync(CreateBackend(), e => e.MapI18NextResources());
         var client = host.GetTestClient();
 
-        var response = await client.GetAsync("/locales/en/translation.json");
+        var response = await client.GetAsync("/locales/en/translation.json", TestContext.Current.CancellationToken);
         var eTag = response.Headers.ETag;
 
         eTag.ShouldNotBeNull();
@@ -170,7 +170,7 @@ public class ResourcesEndpointFixture
 
         notModified.StatusCode.ShouldBe(HttpStatusCode.NotModified);
         notModified.Headers.ETag!.Tag.ShouldBe(eTag.Tag);
-        (await notModified.Content.ReadAsStringAsync()).ShouldBeEmpty();
+        (await notModified.Content.ReadAsStringAsync(TestContext.Current.CancellationToken)).ShouldBeEmpty();
 
         (await SendAsync(client, "/locales/en/translation.json", "W/" + eTag.Tag)).StatusCode.ShouldBe(HttpStatusCode.NotModified);
         (await SendAsync(client, "/locales/en/translation.json", "\"other\", " + eTag.Tag)).StatusCode.ShouldBe(HttpStatusCode.NotModified);
@@ -190,9 +190,9 @@ public class ResourcesEndpointFixture
         });
         var client = host.GetTestClient();
 
-        (await client.GetAsync("/locales/en/translation.json")).Headers.CacheControl!.NoCache.ShouldBeTrue();
-        (await client.GetAsync("/cached/en/translation.json")).Headers.CacheControl!.MaxAge.ShouldBe(TimeSpan.FromHours(1));
-        (await client.GetAsync("/uncached/en/translation.json")).Headers.CacheControl.ShouldBeNull();
+        (await client.GetAsync("/locales/en/translation.json", TestContext.Current.CancellationToken)).Headers.CacheControl!.NoCache.ShouldBeTrue();
+        (await client.GetAsync("/cached/en/translation.json", TestContext.Current.CancellationToken)).Headers.CacheControl!.MaxAge.ShouldBe(TimeSpan.FromHours(1));
+        (await client.GetAsync("/uncached/en/translation.json", TestContext.Current.CancellationToken)).Headers.CacheControl.ShouldBeNull();
     }
 
     [Fact]
@@ -200,11 +200,11 @@ public class ResourcesEndpointFixture
     {
         using var host = await StartAsync(CreateBackend(), e => e.MapI18NextResources());
 
-        var response = await host.GetTestClient().SendAsync(new HttpRequestMessage(HttpMethod.Head, "/locales/en/translation.json"));
+        var response = await host.GetTestClient().SendAsync(new HttpRequestMessage(HttpMethod.Head, "/locales/en/translation.json"), TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
         response.Headers.ETag.ShouldNotBeNull();
-        (await response.Content.ReadAsByteArrayAsync()).ShouldBeEmpty();
+        (await response.Content.ReadAsByteArrayAsync(TestContext.Current.CancellationToken)).ShouldBeEmpty();
     }
 
     [Fact]
@@ -213,12 +213,12 @@ public class ResourcesEndpointFixture
         using var host = await StartAsync(CreateBackend(), e => e.MapI18NextResources("/locales/resources.json"));
         var client = host.GetTestClient();
 
-        var json = await client.GetStringAsync("/locales/resources.json?lng=en+de&ns=translation+common");
+        var json = await client.GetStringAsync("/locales/resources.json?lng=en+de&ns=translation+common", TestContext.Current.CancellationToken);
 
         json.ShouldBe("""{"en":{"translation":""" + EnglishTranslation + """},"de":{"translation":{"greeting":"Grüß dich {{name}} \u003C3"},"common":{"save":"Speichern"}}}""");
-        (await client.GetStringAsync("/locales/resources.json?lng=de%2Ben&ns=common")).ShouldBe("""{"de":{"common":{"save":"Speichern"}}}""");
-        (await client.GetAsync("/locales/resources.json?lng=fr&ns=common")).StatusCode.ShouldBe(HttpStatusCode.NotFound);
-        (await client.GetAsync("/locales/resources.json?ns=common")).StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        (await client.GetStringAsync("/locales/resources.json?lng=de%2Ben&ns=common", TestContext.Current.CancellationToken)).ShouldBe("""{"de":{"common":{"save":"Speichern"}}}""");
+        (await client.GetAsync("/locales/resources.json?lng=fr&ns=common", TestContext.Current.CancellationToken)).StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        (await client.GetAsync("/locales/resources.json?ns=common", TestContext.Current.CancellationToken)).StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }
 
     [Fact]
@@ -229,7 +229,7 @@ public class ResourcesEndpointFixture
         var languages = string.Join("+", Repeat("l", 11));
         var namespaces = string.Join("+", Repeat("n", 10));
 
-        var response = await host.GetTestClient().GetAsync($"/locales/resources.json?lng={languages}&ns={namespaces}");
+        var response = await host.GetTestClient().GetAsync($"/locales/resources.json?lng={languages}&ns={namespaces}", TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
     }
@@ -246,16 +246,16 @@ public class ResourcesEndpointFixture
         using var host = await StartAsync(backend, e => e.MapI18NextResources());
         var client = host.GetTestClient();
 
-        (await client.GetStringAsync("/locales/en/translation.json")).ShouldBe("""{"greeting":"Hello"}""");
-        (await client.GetStringAsync("/locales/en/common.json")).ShouldBe("""{"save":"Save"}""");
-        (await client.GetStringAsync("/locales/en/translation.json")).ShouldBe("""{"greeting":"Hello"}""");
+        (await client.GetStringAsync("/locales/en/translation.json", TestContext.Current.CancellationToken)).ShouldBe("""{"greeting":"Hello"}""");
+        (await client.GetStringAsync("/locales/en/common.json", TestContext.Current.CancellationToken)).ShouldBe("""{"save":"Save"}""");
+        (await client.GetStringAsync("/locales/en/translation.json", TestContext.Current.CancellationToken)).ShouldBe("""{"greeting":"Hello"}""");
 
         backend.TranslationsChanged += Raise.EventWith(backend, new TranslationsChangedEventArgs("de", "translation"));
-        (await client.GetStringAsync("/locales/en/translation.json")).ShouldBe("""{"greeting":"Hello"}""");
+        (await client.GetStringAsync("/locales/en/translation.json", TestContext.Current.CancellationToken)).ShouldBe("""{"greeting":"Hello"}""");
 
         backend.TranslationsChanged += Raise.EventWith(backend, new TranslationsChangedEventArgs("en", "translation"));
-        (await client.GetStringAsync("/locales/en/translation.json")).ShouldBe("""{"greeting":"Hi"}""");
-        (await client.GetStringAsync("/locales/en/common.json")).ShouldBe("""{"save":"Save"}""");
+        (await client.GetStringAsync("/locales/en/translation.json", TestContext.Current.CancellationToken)).ShouldBe("""{"greeting":"Hi"}""");
+        (await client.GetStringAsync("/locales/en/common.json", TestContext.Current.CancellationToken)).ShouldBe("""{"save":"Save"}""");
 
         await backend.Received(2).LoadNamespaceAsync("en", "translation");
         await backend.Received(1).LoadNamespaceAsync("en", "common");
@@ -270,7 +270,7 @@ public class ResourcesEndpointFixture
 
         using var host = await StartAsync(backend, e => e.MapI18NextResources());
 
-        var json = await host.GetTestClient().GetStringAsync("/locales/en/translation.json");
+        var json = await host.GetTestClient().GetStringAsync("/locales/en/translation.json", TestContext.Current.CancellationToken);
 
         json.ShouldBe("""{"a":"A","a.b":"B","list":{"0":"x","2":"z"}}""");
     }

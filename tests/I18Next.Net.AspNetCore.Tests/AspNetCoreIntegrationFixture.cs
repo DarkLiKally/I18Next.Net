@@ -109,7 +109,7 @@ public class AspNetCoreIntegrationFixture
         var request = new HttpRequestMessage(HttpMethod.Get, "/");
         request.Headers.TryAddWithoutValidation("Accept-Language", "de-DE, en;q=0.5");
 
-        (await (await client.SendAsync(request)).Content.ReadAsStringAsync()).ShouldBe("Hallo Jane! Hallo Joe!");
-        (await client.GetStringAsync("/")).ShouldBe("Hello Jane! Hello Joe!");
+        (await (await client.SendAsync(request, TestContext.Current.CancellationToken)).Content.ReadAsStringAsync(TestContext.Current.CancellationToken)).ShouldBe("Hallo Jane! Hallo Joe!");
+        (await client.GetStringAsync("/", TestContext.Current.CancellationToken)).ShouldBe("Hello Jane! Hello Joe!");
     }
 }

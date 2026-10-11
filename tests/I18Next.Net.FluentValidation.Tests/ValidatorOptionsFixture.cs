@@ -89,13 +89,13 @@ public class ValidatorOptionsFixture
             await using var provider = CreateServices();
             var hostedService = provider.GetServices<IHostedService>().ShouldHaveSingleItem();
 
-            await hostedService.StartAsync(default);
+            await hostedService.StartAsync(TestContext.Current.CancellationToken);
 
             ValidatorOptions.Global.LanguageManager.ShouldBeSameAs(provider.GetRequiredService<I18NextLanguageManager>());
             provider.GetRequiredService<ILanguageManager>().ShouldBeSameAs(provider.GetRequiredService<I18NextLanguageManager>());
             Validate(new Person()).ShouldBe(["Bitte 'Vorname' angeben.", "Bitte 'E-Mail' angeben."]);
 
-            await hostedService.StopAsync(default);
+            await hostedService.StopAsync(TestContext.Current.CancellationToken);
 
             ValidatorOptions.Global.LanguageManager.ShouldBeSameAs(languageManager);
             ValidatorOptions.Global.DisplayNameResolver.ShouldBeSameAs(previousResolver);
@@ -118,12 +118,12 @@ public class ValidatorOptionsFixture
             await using var provider = CreateServices(o => o.TranslateDisplayNames = false);
             var hostedService = provider.GetServices<IHostedService>().ShouldHaveSingleItem();
 
-            await hostedService.StartAsync(default);
+            await hostedService.StartAsync(TestContext.Current.CancellationToken);
 
             ValidatorOptions.Global.DisplayNameResolver.ShouldBeSameAs(displayNameResolver);
             Validate(new Person()).ShouldBe(["Bitte 'Name' angeben.", "Bitte 'Email' angeben."]);
 
-            await hostedService.StopAsync(default);
+            await hostedService.StopAsync(TestContext.Current.CancellationToken);
 
             ValidatorOptions.Global.LanguageManager.ShouldBeSameAs(languageManager);
         }
@@ -147,12 +147,12 @@ public class ValidatorOptionsFixture
             var otherLanguageManager = new LanguageManager();
             Func<Type, MemberInfo, LambdaExpression, string> otherResolver = (_, _, _) => null;
 
-            await hostedService.StartAsync(default);
+            await hostedService.StartAsync(TestContext.Current.CancellationToken);
 
             ValidatorOptions.Global.LanguageManager = otherLanguageManager;
             ValidatorOptions.Global.DisplayNameResolver = otherResolver;
 
-            await hostedService.StopAsync(default);
+            await hostedService.StopAsync(TestContext.Current.CancellationToken);
 
             ValidatorOptions.Global.LanguageManager.ShouldBeSameAs(otherLanguageManager);
             ValidatorOptions.Global.DisplayNameResolver.ShouldBeSameAs(otherResolver);

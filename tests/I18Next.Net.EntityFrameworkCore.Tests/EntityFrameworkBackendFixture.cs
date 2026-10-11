@@ -123,7 +123,7 @@ public class EntityFrameworkBackendFixture : IDisposable
     [Fact]
     public async Task SetValueAsync_NewKey_ShouldAddTranslationAndNotify()
     {
-        await _backend.SetValueAsync("de", "translation", "greeting", "Hallo");
+        await _backend.SetValueAsync("de", "translation", "greeting", "Hallo", TestContext.Current.CancellationToken);
 
         var entry = _database.GetEntries().ShouldHaveSingleItem();
         entry.Language.ShouldBe("de");
@@ -142,8 +142,8 @@ public class EntityFrameworkBackendFixture : IDisposable
         await _database.AddAsync("de", "translation", "greeting", "Hallo");
         await _database.AddAsync("de", "translation", "untranslated", null);
 
-        await _backend.SetValueAsync("de", "translation", "greeting", "Servus");
-        await _backend.SetValueAsync("de", "translation", "untranslated", "Übersetzt");
+        await _backend.SetValueAsync("de", "translation", "greeting", "Servus", TestContext.Current.CancellationToken);
+        await _backend.SetValueAsync("de", "translation", "untranslated", "Übersetzt", TestContext.Current.CancellationToken);
 
         _database.GetEntries().Select(e => (e.Key, e.Value)).ShouldBe([("greeting", "Servus"), ("untranslated", "Übersetzt")]);
         _changes.Count.ShouldBe(2);
@@ -155,7 +155,7 @@ public class EntityFrameworkBackendFixture : IDisposable
         await _database.AddAsync("de", "translation", "greeting", "Hallo");
         await _database.AddAsync("de", "translation", "farewell", "Tschüss");
 
-        (await _backend.RemoveValueAsync("de", "translation", "greeting")).ShouldBeTrue();
+        (await _backend.RemoveValueAsync("de", "translation", "greeting", TestContext.Current.CancellationToken)).ShouldBeTrue();
 
         _database.GetEntries().ShouldHaveSingleItem().Key.ShouldBe("farewell");
         _changes.ShouldHaveSingleItem().Language.ShouldBe("de");
@@ -166,8 +166,8 @@ public class EntityFrameworkBackendFixture : IDisposable
     {
         await _database.AddAsync("de", "translation", "greeting", "Hallo");
 
-        (await _backend.RemoveValueAsync("de", "translation", "farewell")).ShouldBeFalse();
-        (await _backend.RemoveValueAsync("en", "translation", "greeting")).ShouldBeFalse();
+        (await _backend.RemoveValueAsync("de", "translation", "farewell", TestContext.Current.CancellationToken)).ShouldBeFalse();
+        (await _backend.RemoveValueAsync("en", "translation", "greeting", TestContext.Current.CancellationToken)).ShouldBeFalse();
 
         _database.GetEntries().Count.ShouldBe(1);
         _changes.ShouldBeEmpty();
@@ -252,11 +252,11 @@ public class EntityFrameworkBackendFixture : IDisposable
 
         i18Next.T("greeting").ShouldBe("Hallo");
 
-        await _backend.SetValueAsync("de", "translation", "greeting", "Servus");
+        await _backend.SetValueAsync("de", "translation", "greeting", "Servus", TestContext.Current.CancellationToken);
 
         i18Next.T("greeting").ShouldBe("Servus");
 
-        await _backend.RemoveValueAsync("de", "translation", "greeting");
+        await _backend.RemoveValueAsync("de", "translation", "greeting", TestContext.Current.CancellationToken);
 
         i18Next.T("greeting").ShouldBe("greeting");
     }

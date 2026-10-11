@@ -20,7 +20,7 @@ public class DeepLTranslatorFixture
     {
         var translator = new DeepLTranslator(new HttpClient(_handler), "secret:fx");
 
-        var result = await translator.TranslateAsync(["Hello", "World"], "en-US", "de-DE");
+        var result = await translator.TranslateAsync(["Hello", "World"], "en-US", "de-DE", TestContext.Current.CancellationToken);
 
         result.ShouldBe(["HELLO", "WORLD"]);
 
@@ -44,7 +44,7 @@ public class DeepLTranslatorFixture
     {
         var translator = new DeepLTranslator(new HttpClient(_handler), "secret");
 
-        await translator.TranslateAsync("Hello", "en", "fr");
+        await translator.TranslateAsync("Hello", "en", "fr", TestContext.Current.CancellationToken);
 
         _handler.Requests[0].Uri.ShouldBe(new Uri("https://api.deepl.com/v2/translate"));
     }
@@ -59,9 +59,9 @@ public class DeepLTranslatorFixture
             LanguageMappings = { ["no"] = "NB" }
         };
 
-        await translator.TranslateAsync("Hello", null, "no");
-        await translator.TranslateAsync("Hello", "en", "pt-br");
-        await translator.TranslateAsync("Hello", "en", "zh-Hans");
+        await translator.TranslateAsync("Hello", null, "no", TestContext.Current.CancellationToken);
+        await translator.TranslateAsync("Hello", "en", "pt-br", TestContext.Current.CancellationToken);
+        await translator.TranslateAsync("Hello", "en", "zh-Hans", TestContext.Current.CancellationToken);
 
         _handler.Requests[0].Uri.ShouldBe(new Uri("https://proxy.example.com/deepl/v2/translate"));
         _handler.Requests[0].Json.TryGetProperty("source_lang", out _).ShouldBeFalse();
@@ -76,7 +76,7 @@ public class DeepLTranslatorFixture
     {
         var translator = new DeepLTranslator(new HttpClient(_handler), "secret");
 
-        var result = await translator.TranslateAsync("Hello <b>{{name}}</b> & $t(common:more) {{count, number}}", "en", "de");
+        var result = await translator.TranslateAsync("Hello <b>{{name}}</b> & $t(common:more) {{count, number}}", "en", "de", TestContext.Current.CancellationToken);
 
         result.ShouldBe("HELLO <b>{{name}}</b> & $t(common:more) {{count, number}}");
         _handler.Requests[0].Json.GetProperty("text")[0].GetString().ShouldBe(
@@ -90,7 +90,7 @@ public class DeepLTranslatorFixture
         var translator = new DeepLTranslator(new HttpClient(_handler), "secret");
         var texts = Enumerable.Range(0, 120).Select(i => $"text {i}").ToList();
 
-        var result = await translator.TranslateAsync(texts, "en", "de");
+        var result = await translator.TranslateAsync(texts, "en", "de", TestContext.Current.CancellationToken);
 
         result.ShouldBe(texts.Select(t => t.ToUpperInvariant()));
         _handler.Requests.Select(r => r.Json.GetProperty("text").GetArrayLength()).ShouldBe([50, 50, 20]);
@@ -101,7 +101,7 @@ public class DeepLTranslatorFixture
     {
         var translator = new DeepLTranslator(new HttpClient(_handler), "secret");
 
-        (await translator.TranslateAsync([], "en", "de")).ShouldBeEmpty();
+        (await translator.TranslateAsync([], "en", "de", TestContext.Current.CancellationToken)).ShouldBeEmpty();
         _handler.Requests.ShouldBeEmpty();
     }
 

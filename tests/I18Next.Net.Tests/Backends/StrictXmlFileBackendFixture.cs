@@ -11,15 +11,15 @@ namespace I18Next.Net.Tests.Backends;
 
 public class StrictXmlFileBackendFixture : IAsyncLifetime
 {
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         _backend = new StrictXmlFileBackend("TestFiles");
         _tree = await _backend.LoadNamespaceAsync("en-US", "test-strict");
     }
 
-    public Task DisposeAsync()
+    public ValueTask DisposeAsync()
     {
-        return Task.CompletedTask;
+        return default;
     }
     private StrictXmlFileBackend _backend;
     private ITranslationTree _tree;

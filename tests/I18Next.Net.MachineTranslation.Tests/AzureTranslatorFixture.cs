@@ -20,7 +20,7 @@ public class AzureTranslatorFixture
     {
         var translator = new AzureTranslator(new HttpClient(_handler), "secret", "westeurope");
 
-        var result = await translator.TranslateAsync(["abc", "Hi {{name}}"], "en-US", "de-DE");
+        var result = await translator.TranslateAsync(["abc", "Hi {{name}}"], "en-US", "de-DE", TestContext.Current.CancellationToken);
 
         result.ShouldBe(["cba", "{{name}} iH"]);
 
@@ -41,7 +41,7 @@ public class AzureTranslatorFixture
     {
         var translator = new AzureTranslator(new HttpClient(_handler), "secret");
 
-        await translator.TranslateAsync("abc", null, "zh-Hans");
+        await translator.TranslateAsync("abc", null, "zh-Hans", TestContext.Current.CancellationToken);
 
         var request = _handler.Requests.ShouldHaveSingleItem();
         request.Uri.Query.ShouldBe("?api-version=3.0&textType=html&to=zh-Hans");
@@ -57,7 +57,7 @@ public class AzureTranslatorFixture
             LanguageMappings = { ["zh-CN"] = "zh-Hans" }
         };
 
-        await translator.TranslateAsync("abc", "fr-CA", "zh-CN");
+        await translator.TranslateAsync("abc", "fr-CA", "zh-CN", TestContext.Current.CancellationToken);
 
         _handler.Requests[0].Uri.ShouldBe(
             new Uri("https://my.cognitiveservices.azure.com/translator/text/v3.0/translate?api-version=3.0&textType=html&to=zh-Hans&from=fr-CA"));
@@ -70,7 +70,7 @@ public class AzureTranslatorFixture
         var texts = Enumerable.Range(0, 150).Select(i => $"text {i}").ToList();
         texts.Add(new string('a', 39990));
 
-        var result = await translator.TranslateAsync(texts, "en", "de");
+        var result = await translator.TranslateAsync(texts, "en", "de", TestContext.Current.CancellationToken);
 
         result.Count.ShouldBe(151);
         result[0].ShouldBe("0 txet");

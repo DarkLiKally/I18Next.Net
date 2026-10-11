@@ -295,8 +295,8 @@ public class GeneratorFixture
         var driver = CSharpGeneratorDriver.Create(new[] { new I18NextResourcesGenerator().AsSourceGenerator() }, GeneratorTestHost.CreateAdditionalTexts(files),
             new CSharpParseOptions(LanguageVersion.Latest), driverOptions: new GeneratorDriverOptions(IncrementalGeneratorOutputKind.None, true));
 
-        driver = (CSharpGeneratorDriver)driver.RunGenerators(compilation);
-        driver = (CSharpGeneratorDriver)driver.RunGenerators(compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText("class Unrelated { }")));
+        driver = (CSharpGeneratorDriver)driver.RunGenerators(compilation, TestContext.Current.CancellationToken);
+        driver = (CSharpGeneratorDriver)driver.RunGenerators(compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText("class Unrelated { }", cancellationToken: TestContext.Current.CancellationToken)), TestContext.Current.CancellationToken);
 
         var outputs = driver.GetRunResult().Results.Single().TrackedOutputSteps.SelectMany(s => s.Value).SelectMany(s => s.Outputs);
 

@@ -145,7 +145,7 @@ public class MvcFixture
     {
         await using var app = await StartAsync();
 
-        var response = await app.GetTestClient().SendAsync(TestApplication.CreateRequest(HttpMethod.Get, "/people/count?count=5", "de"));
+        var response = await app.GetTestClient().SendAsync(TestApplication.CreateRequest(HttpMethod.Get, "/people/count?count=5", "de"), TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
     }

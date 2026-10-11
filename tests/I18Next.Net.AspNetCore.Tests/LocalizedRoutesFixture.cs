@@ -81,7 +81,7 @@ public class LocalizedRoutesFixture
     {
         using var host = await StartAsync(ConfigureLanguages);
 
-        var body = await host.GetTestClient().GetStringAsync(path);
+        var body = await host.GetTestClient().GetStringAsync(path, TestContext.Current.CancellationToken);
 
         body.ShouldBe(expected);
     }
@@ -96,7 +96,7 @@ public class LocalizedRoutesFixture
     {
         using var host = await StartAsync(ConfigureLanguages);
 
-        var body = await host.GetTestClient().GetStringAsync(path);
+        var body = await host.GetTestClient().GetStringAsync(path, TestContext.Current.CancellationToken);
 
         body.ShouldBe(expected);
     }
@@ -110,7 +110,7 @@ public class LocalizedRoutesFixture
     {
         using var host = await StartAsync(ConfigureLanguages);
 
-        var response = await host.GetTestClient().GetAsync(path);
+        var response = await host.GetTestClient().GetAsync(path, TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }
@@ -120,10 +120,10 @@ public class LocalizedRoutesFixture
     {
         using var host = await StartAsync(ConfigureLanguages);
 
-        var response = await host.GetTestClient().GetAsync("/products/42");
+        var response = await host.GetTestClient().GetAsync("/products/42", TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        (await response.Content.ReadAsStringAsync()).ShouldEndWith(" |/products/42");
+        (await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken)).ShouldEndWith(" |/products/42");
     }
 
     [Theory]
@@ -146,7 +146,7 @@ public class LocalizedRoutesFixture
         if (acceptLanguage != null)
             request.Headers.TryAddWithoutValidation("Accept-Language", acceptLanguage);
 
-        var response = await host.GetTestClient().SendAsync(request);
+        var response = await host.GetTestClient().SendAsync(request, TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(HttpStatusCode.Redirect);
         response.Headers.Location!.OriginalString.ShouldBe(expected);
@@ -167,10 +167,10 @@ public class LocalizedRoutesFixture
                 .SetDefaultCulture("de")));
         var client = host.GetTestClient();
 
-        var response = await client.GetAsync("/products/42?culture=en");
+        var response = await client.GetAsync("/products/42?culture=en", TestContext.Current.CancellationToken);
 
         response.Headers.Location!.OriginalString.ShouldBe("/en/products/42?culture=en");
-        (await client.GetAsync("/products/42")).Headers.Location!.OriginalString.ShouldBe("/de/produkte/42");
+        (await client.GetAsync("/products/42", TestContext.Current.CancellationToken)).Headers.Location!.OriginalString.ShouldBe("/de/produkte/42");
     }
 
     [Fact]
@@ -184,10 +184,10 @@ public class LocalizedRoutesFixture
         });
         var client = host.GetTestClient();
 
-        (await client.GetStringAsync("/api/status")).ShouldBe("ok");
-        (await client.GetAsync("/API/status")).StatusCode.ShouldBe(HttpStatusCode.OK);
-        (await client.PostAsync("/products", null)).StatusCode.ShouldBe(HttpStatusCode.OK);
-        (await client.GetAsync("/apis")).StatusCode.ShouldBe(HttpStatusCode.Redirect);
+        (await client.GetStringAsync("/api/status", TestContext.Current.CancellationToken)).ShouldBe("ok");
+        (await client.GetAsync("/API/status", TestContext.Current.CancellationToken)).StatusCode.ShouldBe(HttpStatusCode.OK);
+        (await client.PostAsync("/products", null, TestContext.Current.CancellationToken)).StatusCode.ShouldBe(HttpStatusCode.OK);
+        (await client.GetAsync("/apis", TestContext.Current.CancellationToken)).StatusCode.ShouldBe(HttpStatusCode.Redirect);
     }
 
     [Fact]
@@ -196,9 +196,9 @@ public class LocalizedRoutesFixture
         using var host = await StartAsync(ConfigureLanguages);
         var client = host.GetTestClient();
 
-        (await client.GetStringAsync("/de/produkte/42/links?tab=1"))
+        (await client.GetStringAsync("/de/produkte/42/links?tab=1", TestContext.Current.CancellationToken))
             .ShouldBe("/de/produkte/7?page=2#top /de/%C3%BCber-uns /en/products/42/links?tab=1 /de/produkte/42/links?tab=1");
-        (await client.GetStringAsync("/en/products/42/links"))
+        (await client.GetStringAsync("/en/products/42/links", TestContext.Current.CancellationToken))
             .ShouldBe("/en/products/7?page=2#top /de/%C3%BCber-uns /en/products/42/links /de/produkte/42/links");
     }
 
@@ -208,8 +208,8 @@ public class LocalizedRoutesFixture
         using var host = await StartAsync(ConfigureLanguages, configureBefore: app => app.UsePathBase("/shop"));
         var client = host.GetTestClient();
 
-        (await client.GetStringAsync("/shop/de/produkte/42")).ShouldBe("Produkt 42 de de /shop/de|/products/42");
-        (await client.GetStringAsync("/shop/de/produkte/42/links"))
+        (await client.GetStringAsync("/shop/de/produkte/42", TestContext.Current.CancellationToken)).ShouldBe("Produkt 42 de de /shop/de|/products/42");
+        (await client.GetStringAsync("/shop/de/produkte/42/links", TestContext.Current.CancellationToken))
             .ShouldBe("/shop/de/produkte/7?page=2#top /shop/de/%C3%BCber-uns /shop/en/products/42/links /shop/de/produkte/42/links");
     }
 
@@ -223,7 +223,7 @@ public class LocalizedRoutesFixture
             },
             configureBefore: app => app.UsePathBase("/shop"));
 
-        var response = await host.GetTestClient().GetAsync("/shop/products/42");
+        var response = await host.GetTestClient().GetAsync("/shop/products/42", TestContext.Current.CancellationToken);
 
         response.Headers.Location!.OriginalString.ShouldBe("/shop/en/products/42");
     }
@@ -268,15 +268,15 @@ public class LocalizedRoutesFixture
         using var host = await StartAsync(ConfigureLanguages, backend);
         var client = host.GetTestClient();
 
-        (await client.GetAsync("/de/produkte/42")).StatusCode.ShouldBe(HttpStatusCode.OK);
-        (await client.GetAsync("/de/artikel/42")).StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        (await client.GetAsync("/de/produkte/42", TestContext.Current.CancellationToken)).StatusCode.ShouldBe(HttpStatusCode.OK);
+        (await client.GetAsync("/de/artikel/42", TestContext.Current.CancellationToken)).StatusCode.ShouldBe(HttpStatusCode.NotFound);
 
         backend.TranslationsChanged += Raise.EventWith(backend, new TranslationsChangedEventArgs("en", "routes"));
-        (await client.GetAsync("/de/produkte/42")).StatusCode.ShouldBe(HttpStatusCode.OK);
+        (await client.GetAsync("/de/produkte/42", TestContext.Current.CancellationToken)).StatusCode.ShouldBe(HttpStatusCode.OK);
 
         backend.TranslationsChanged += Raise.EventWith(backend, new TranslationsChangedEventArgs("de", "routes"));
-        (await client.GetAsync("/de/artikel/42")).StatusCode.ShouldBe(HttpStatusCode.OK);
-        (await client.GetAsync("/de/produkte/42")).StatusCode.ShouldBe(HttpStatusCode.NotFound);
+        (await client.GetAsync("/de/artikel/42", TestContext.Current.CancellationToken)).StatusCode.ShouldBe(HttpStatusCode.OK);
+        (await client.GetAsync("/de/produkte/42", TestContext.Current.CancellationToken)).StatusCode.ShouldBe(HttpStatusCode.NotFound);
 
         await backend.Received(2).LoadNamespaceAsync("de", "routes");
     }
@@ -294,7 +294,7 @@ public class LocalizedRoutesFixture
         var client = host.GetTestClient();
 
         await Should.ThrowAsync<InvalidOperationException>(() => client.GetAsync("/de/produkte/42"));
-        (await client.GetAsync("/de/produkte/42")).StatusCode.ShouldBe(HttpStatusCode.OK);
+        (await client.GetAsync("/de/produkte/42", TestContext.Current.CancellationToken)).StatusCode.ShouldBe(HttpStatusCode.OK);
     }
 
     [Fact]

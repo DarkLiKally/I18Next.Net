@@ -71,7 +71,7 @@ public class MachineTranslationMissingKeyHandlerFixture
 
         i18Next.T("greeting", new { name = "Ana" }).ShouldBe("Hello Ana");
 
-        var key = await translated.Task.WaitAsync(TimeSpan.FromSeconds(10));
+        var key = await translated.Task.WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
         key.Language.ShouldBe("de");
         key.Namespace.ShouldBe("translation");
         key.Key.ShouldBe("greeting");

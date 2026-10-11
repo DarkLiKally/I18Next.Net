@@ -4,6 +4,7 @@
     <File Path=".github/workflows/build.yml" />
     <File Path="Directory.Build.props" />
     <File Path="Directory.Build.targets" />
+    <File Path="global.json" />
     <File Path="README.md" />
   </Folder>
   <Project Path="samples/Example.Avalonia/Example.Avalonia.csproj" />

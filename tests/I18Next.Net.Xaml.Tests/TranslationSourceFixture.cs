@@ -261,7 +261,7 @@ public class TranslationSourceFixture
 
             File.WriteAllText(Path.Combine(directory, "en", "translation.json"), """{ "title": "Hi" }""");
 
-            (await Task.WhenAny(changed.Task, Task.Delay(TimeSpan.FromSeconds(10)))).ShouldBe(changed.Task);
+            (await Task.WhenAny(changed.Task, Task.Delay(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken))).ShouldBe(changed.Task);
             source.Translate("title").ShouldBe("Hi");
         }
         finally

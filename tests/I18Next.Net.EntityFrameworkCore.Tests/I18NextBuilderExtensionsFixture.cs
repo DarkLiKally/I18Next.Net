@@ -32,7 +32,7 @@ public class I18NextBuilderExtensionsFixture
         var i18Next = database.Services.GetRequiredService<II18Next>();
         i18Next.T("greeting").ShouldBe("Hallo");
 
-        await backend.SetValueAsync("de", "translation", "greeting", "Servus");
+        await backend.SetValueAsync("de", "translation", "greeting", "Servus", TestContext.Current.CancellationToken);
 
         i18Next.T("greeting").ShouldBe("Servus");
     }

@@ -11,15 +11,15 @@ namespace I18Next.Net.Tests.Backends;
 
 public class IniFileBackendFixture : IAsyncLifetime
 {
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         _backend = new IniFileBackend("TestFiles");
         _tree = await _backend.LoadNamespaceAsync("en-US", "test");
     }
 
-    public Task DisposeAsync()
+    public ValueTask DisposeAsync()
     {
-        return Task.CompletedTask;
+        return default;
     }
 
     private IniFileBackend _backend;

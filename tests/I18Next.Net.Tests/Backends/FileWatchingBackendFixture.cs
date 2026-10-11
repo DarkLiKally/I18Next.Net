@@ -89,7 +89,7 @@ public class FileWatchingBackendFixture : IDisposable
 
         File.Move(Path.Combine(_directory, "en", "translation.json"), Path.Combine(_directory, "en", "common.json"));
 
-        (await Task.WhenAny(completion.Task, Task.Delay(Timeout))).ShouldBe(completion.Task);
+        (await Task.WhenAny(completion.Task, Task.Delay(Timeout, TestContext.Current.CancellationToken))).ShouldBe(completion.Task);
     }
 
     [Fact]

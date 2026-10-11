@@ -35,7 +35,7 @@ public class FuncMachineTranslatorFixture
     {
         var translator = new FuncMachineTranslator((_, _, _, _) => throw new InvalidOperationException());
 
-        (await translator.TranslateAsync([], "en", "de")).ShouldBeEmpty();
+        (await translator.TranslateAsync([], "en", "de", TestContext.Current.CancellationToken)).ShouldBeEmpty();
     }
 
     [Fact]
@@ -65,6 +65,6 @@ public class FuncMachineTranslatorFixture
         translator.TranslateAsync(Arg.Is<IReadOnlyList<string>>(t => t.Count == 1 && t[0] == "Hello"), "en", "de", Arg.Any<CancellationToken>())
             .Returns(["Hallo"]);
 
-        (await translator.TranslateAsync("Hello", "en", "de")).ShouldBe("Hallo");
+        (await translator.TranslateAsync("Hello", "en", "de", TestContext.Current.CancellationToken)).ShouldBe("Hallo");
     }
 }

@@ -12,7 +12,7 @@ namespace I18Next.Net.Avalonia.Tests;
 /// </summary>
 public sealed class AvaloniaSession : IDisposable
 {
-    private readonly HeadlessUnitTestSession _session = HeadlessUnitTestSession.StartNew(typeof(TestApplication));
+    private readonly HeadlessUnitTestSession _session = HeadlessUnitTestSession.StartNew(typeof(TestApplication), AvaloniaTestIsolationLevel.PerAssembly);
 
     public void Dispose()
     {

@@ -20,7 +20,6 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: |
-            6.0.x
             8.0.x
             10.0.x
       - name: Build
@@ -48,8 +47,10 @@ jobs:
         run: >-
           for project in tests/*.Tests; do
           [ "$project" = tests/I18Next.Net.Wpf.Tests ] && continue;
-          dotnet test "$project" -c Release --no-build --logger trx --results-directory artifacts/test-results || exit 1;
+          dotnet test --project "$project" -c Release --no-build --report-xunit-trx --results-directory artifacts/test-results || exit 1;
           done
+      - name: Test the .NET 6 build
+        run: dotnet test --project tests/I18Next.Net.Tests -c Release -f net8.0 -p:LibraryTargetFramework=net6.0
       - name: Native AOT
         run: |
           dotnet publish samples/Example.NativeAot -c Release -r linux-x64 -o artifacts/nativeaot
@@ -79,6 +80,6 @@ jobs:
             8.0.x
             10.0.x
       - name: Test on .NET Framework 4.8
-        run: dotnet test tests/I18Next.Net.Tests -c Release -f net48
+        run: dotnet test --project tests/I18Next.Net.Tests -c Release -f net48
       - name: Test WPF
-        run: dotnet test tests/I18Next.Net.Wpf.Tests -c Release
+        run: dotnet test --project tests/I18Next.Net.Wpf.Tests -c Release

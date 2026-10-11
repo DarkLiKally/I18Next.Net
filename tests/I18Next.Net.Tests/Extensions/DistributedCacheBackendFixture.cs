@@ -61,8 +61,8 @@ public class DistributedCacheBackendFixture
 
         await backend.SaveNamespaceAsync("en", "common", CreateTree("common", ("menu.home", "Home")));
 
-        Encoding.UTF8.GetString(await _cache.GetAsync("app:en:common")).ShouldBe("""{"menu.home":"Home"}""");
-        (await _cache.GetAsync(DistributedCacheBackend.DefaultKeyPrefix + "en:common")).ShouldBeNull();
+        Encoding.UTF8.GetString(await _cache.GetAsync("app:en:common", token: TestContext.Current.CancellationToken)).ShouldBe("""{"menu.home":"Home"}""");
+        (await _cache.GetAsync(DistributedCacheBackend.DefaultKeyPrefix + "en:common", token: TestContext.Current.CancellationToken)).ShouldBeNull();
     }
 
     [Fact]
@@ -81,7 +81,7 @@ public class DistributedCacheBackendFixture
     public async Task LoadNamespaceAsync_FlatTreeBuilder_ShouldKeepKeys()
     {
         var backend = new DistributedCacheBackend(_cache, new GenericTranslationTreeBuilderFactory<FlatTranslationTreeBuilder>());
-        await _cache.SetAsync("i18next:en:translation", Encoding.UTF8.GetBytes("""{"Hello. How are you?":"Hi","Hello":"Hello","count":1}"""));
+        await _cache.SetAsync("i18next:en:translation", Encoding.UTF8.GetBytes("""{"Hello. How are you?":"Hi","Hello":"Hello","count":1}"""), token: TestContext.Current.CancellationToken);
 
         var tree = await backend.LoadNamespaceAsync("en", "translation");
 
@@ -143,8 +143,8 @@ public class DistributedCacheBackendFixture
     public async Task LoadNamespaceAsync_InvalidEntry_ShouldReturnNullWithoutLogger()
     {
         var backend = new DistributedCacheBackend(_cache);
-        await _cache.SetAsync("i18next:en:translation", Encoding.UTF8.GetBytes("not json"));
-        await _cache.SetAsync("i18next:en:common", Encoding.UTF8.GetBytes("[]"));
+        await _cache.SetAsync("i18next:en:translation", Encoding.UTF8.GetBytes("not json"), token: TestContext.Current.CancellationToken);
+        await _cache.SetAsync("i18next:en:common", Encoding.UTF8.GetBytes("[]"), token: TestContext.Current.CancellationToken);
 
         (await backend.LoadNamespaceAsync("en", "translation")).ShouldBeNull();
         (await backend.LoadNamespaceAsync("en", "common")).ShouldBeNull();
@@ -155,7 +155,7 @@ public class DistributedCacheBackendFixture
     {
         var cache = Substitute.For<IDistributedCache>();
         var exception = new InvalidOperationException("offline");
-        cache.SetAsync(null, null, null).ReturnsForAnyArgs(Task.FromException(exception));
+        cache.SetAsync(null, null, null, TestContext.Current.CancellationToken).ReturnsForAnyArgs(Task.FromException(exception));
         var logger = CreateLogger();
         var backend = new DistributedCacheBackend(cache) { Logger = logger };
 
@@ -169,14 +169,14 @@ public class DistributedCacheBackendFixture
     {
         var cache = Substitute.For<IDistributedCache>();
         cache.GetAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).ThrowsAsync(new InvalidOperationException("offline"));
-        cache.SetAsync(null, null, null).ReturnsForAnyArgs(Task.FromException(new InvalidOperationException("offline")));
+        cache.SetAsync(null, null, null, TestContext.Current.CancellationToken).ReturnsForAnyArgs(Task.FromException(new InvalidOperationException("offline")));
         var backend = new DistributedCacheBackend(cache) { IgnoreCacheFailures = false };
 
         await Should.ThrowAsync<InvalidOperationException>(() => backend.LoadNamespaceAsync("en", "translation"));
         await Should.ThrowAsync<InvalidOperationException>(() => backend.SaveNamespaceAsync("en", "translation", CreateTree("translation")));
 
         var invalidBackend = new DistributedCacheBackend(_cache) { IgnoreCacheFailures = false };
-        await _cache.SetAsync("i18next:en:translation", Encoding.UTF8.GetBytes("not json"));
+        await _cache.SetAsync("i18next:en:translation", Encoding.UTF8.GetBytes("not json"), token: TestContext.Current.CancellationToken);
 
         await Should.ThrowAsync<Exception>(() => invalidBackend.LoadNamespaceAsync("en", "translation"));
     }
@@ -208,9 +208,9 @@ public class DistributedCacheBackendFixture
         (await serverB.LoadNamespaceAsync("de-AT", "translation")).GetValue("greeting", null).ShouldBe("Hallo");
 
         loads.ShouldBe(1);
-        (await _cache.GetAsync("i18next:de-AT:translation")).ShouldNotBeNull();
+        (await _cache.GetAsync("i18next:de-AT:translation", token: TestContext.Current.CancellationToken)).ShouldNotBeNull();
         (await serverB.LoadNamespaceAsync("fr", "translation")).ShouldBeNull();
-        (await _cache.GetAsync("i18next:fr:translation")).ShouldBeNull();
+        (await _cache.GetAsync("i18next:fr:translation", token: TestContext.Current.CancellationToken)).ShouldBeNull();
     }
 
     [Fact]
