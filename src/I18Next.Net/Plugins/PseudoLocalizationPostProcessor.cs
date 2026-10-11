@@ -4,17 +4,29 @@ using System.Text;
 
 namespace I18Next.Net.Plugins;
 
+/// <summary>
+///     Pseudo-localizes the translations of the configured languages by replacing letters with accented look-alikes and
+///     repeating vowels, to find hard-coded texts and layouts not prepared for longer translations. Enabled per
+///     translation with the <c>postProcess: "pseudo"</c> argument.
+/// </summary>
+/// <param name="options">The options selecting the languages and the replacements.</param>
 public class PseudoLocalizationPostProcessor(PseudoLocalizationOptions options) : IPostProcessor
 {
+    /// <inheritdoc />
     public string Keyword => "pseudo";
 
+    /// <summary>
+    ///     The options selecting the languages and the replacements.
+    /// </summary>
     public PseudoLocalizationOptions Options { get; } = options;
 
+    /// <inheritdoc />
     public string ProcessTranslation(string key, string value, IDictionary<string, object> args, string language, ITranslator translator)
     {
         return value;
     }
 
+    /// <inheritdoc />
     public string ProcessResult(string key, string value, IDictionary<string, object> args, string language, ITranslator translator)
     {
         if (!Options.LanguagesToPseudo.Contains(language))

@@ -32,11 +32,17 @@ public class DateFnsFormatter : IFormatter
     /// </summary>
     public int? FirstWeekContainsDate { get; set; }
 
+    /// <inheritdoc />
+    /// <remarks>
+    ///     Formats <see cref="DateTime" /> and <see cref="DateTimeOffset" /> values with formats other than the built-in
+    ///     formats of the <see cref="IntlFormatter" />.
+    /// </remarks>
     public bool CanFormat(object value, string format, string language)
     {
         return (value is DateTime || value is DateTimeOffset) && format != null && !IntlFormatter.IsFormatName(format);
     }
 
+    /// <inheritdoc />
     public string Format(object value, string format, string language)
     {
         var date = value is DateTimeOffset dateTimeOffset ? dateTimeOffset : ToDateTimeOffset((DateTime)value);

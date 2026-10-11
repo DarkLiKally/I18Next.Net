@@ -2,12 +2,20 @@
 
 namespace I18Next.Net.TranslationTrees;
 
+/// <summary>
+///     Builds a <see cref="TranslationTree" /> which splits the keys at dots into nested groups, like the default
+///     <c>keySeparator</c> of i18next. The default builder of the backends.
+/// </summary>
 public class HierarchicalTranslationTreeBuilder : ITranslationTreeBuilder
 {
     private readonly Dictionary<string, Dictionary<string, object>> _groups = [];
 
     private readonly Dictionary<string, object> _root = [];
 
+    /// <inheritdoc />
+    /// <exception cref="System.ArgumentException">
+    ///     The key was already added, or it conflicts with an added key, e.g. <c>a.b</c> and <c>a</c>.
+    /// </exception>
     public void AddTranslation(string key, string text)
     {
         var parts = key.Split('.');
@@ -43,6 +51,7 @@ public class HierarchicalTranslationTreeBuilder : ITranslationTreeBuilder
         parentGroup.Add(parts[parts.Length - 1], text);
     }
 
+    /// <inheritdoc />
     public ITranslationTree Build()
     {
         var root = BuildNode("", _root);
@@ -50,6 +59,7 @@ public class HierarchicalTranslationTreeBuilder : ITranslationTreeBuilder
         return new TranslationTree(root) { Namespace = Namespace };
     }
 
+    /// <inheritdoc />
     public string Namespace { get; set; }
 
     private TranslationGroup BuildNode(string name, Dictionary<string, object> parentNode)

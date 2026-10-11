@@ -13,15 +13,21 @@ namespace I18Next.Net.Plugins;
 /// </summary>
 public class TraceLogger : ILogger
 {
+    /// <summary>
+    ///     The minimum level of the messages written to the trace. Defaults to
+    ///     <see cref="I18Next.Net.Logging.LogLevel.Warning" />.
+    /// </summary>
     public LogLevel LogLevel { get; set; } = LogLevel.Warning;
 
     private static readonly char[] FormatDelimiters = [',', ':'];
 
+    /// <inheritdoc />
     public bool IsEnabled(LogLevel logLevel)
     {
         return (int)LogLevel <= (int)logLevel;
     }
 
+    /// <inheritdoc />
     public void Log(LogLevel logLevel, Exception exception, string message, params object[] args)
     {
         if (!IsEnabled(logLevel))
@@ -31,6 +37,7 @@ public class TraceLogger : ILogger
         Log(logLevel, newMessage, args);
     }
 
+    /// <inheritdoc />
     public void Log(LogLevel logLevel, string message, params object[] args)
     {
         if (!IsEnabled(logLevel))

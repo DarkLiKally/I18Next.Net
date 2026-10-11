@@ -14,8 +14,16 @@ namespace I18Next.Net.Backends;
 /// </summary>
 public class HttpBackend : ITranslationBackend
 {
+    /// <summary>
+    ///     The default <see cref="LoadPath" />, <c>locales/{{lng}}/{{ns}}.json</c>, like the i18next-http-backend.
+    /// </summary>
     public const string DefaultLoadPath = "locales/{{lng}}/{{ns}}.json";
 
+    /// <summary>
+    ///     The name of the <see cref="HttpClient" /> the builder of the I18Next.Net.Extensions package registers with the
+    ///     <c>IHttpClientFactory</c> for the backend and the <see cref="Plugins.HttpMissingKeyHandler" />. Use it to
+    ///     configure the client, e.g. its base address.
+    /// </summary>
     public const string HttpClientName = "I18Next.Net.HttpBackend";
 
     private static readonly Lazy<HttpClient> SharedHttpClient = new(() => new HttpClient());
@@ -23,21 +31,55 @@ public class HttpBackend : ITranslationBackend
     private readonly Func<HttpClient> _httpClientProvider;
     private readonly ITranslationTreeBuilderFactory _treeBuilderFactory;
 
+    /// <summary>
+    ///     Creates a backend loading the namespaces with a shared <see cref="HttpClient" />. The client has no base address,
+    ///     so <paramref name="loadPath" /> has to be an absolute url.
+    /// </summary>
+    /// <param name="loadPath">The absolute url the namespaces are loaded from, see <see cref="LoadPath" />.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="loadPath" /> is null.</exception>
     public HttpBackend(string loadPath = DefaultLoadPath)
         : this(() => SharedHttpClient.Value, loadPath)
     {
     }
 
+    /// <summary>
+    ///     Creates a backend loading the namespaces with the given http client.
+    /// </summary>
+    /// <param name="httpClient">The http client used to load the namespaces.</param>
+    /// <param name="loadPath">The path or url the namespaces are loaded from, see <see cref="LoadPath" />.</param>
+    /// <exception cref="ArgumentNullException">
+    ///     <paramref name="httpClient" /> or <paramref name="loadPath" /> is null.
+    /// </exception>
     public HttpBackend(HttpClient httpClient, string loadPath = DefaultLoadPath)
         : this(httpClient == null ? throw new ArgumentNullException(nameof(httpClient)) : () => httpClient, loadPath)
     {
     }
 
+    /// <summary>
+    ///     Creates a backend loading the namespaces with the http client returned by the provider, e.g. a client of an
+    ///     <c>IHttpClientFactory</c>.
+    /// </summary>
+    /// <param name="httpClientProvider">Provides the http client for each request.</param>
+    /// <param name="loadPath">The path or url the namespaces are loaded from, see <see cref="LoadPath" />.</param>
+    /// <exception cref="ArgumentNullException">
+    ///     <paramref name="httpClientProvider" /> or <paramref name="loadPath" /> is null.
+    /// </exception>
     public HttpBackend(Func<HttpClient> httpClientProvider, string loadPath = DefaultLoadPath)
         : this(httpClientProvider, loadPath, new GenericTranslationTreeBuilderFactory<HierarchicalTranslationTreeBuilder>())
     {
     }
 
+    /// <summary>
+    ///     Creates a backend loading the namespaces with the http client returned by the provider into trees of the given
+    ///     builders.
+    /// </summary>
+    /// <param name="httpClientProvider">Provides the http client for each request.</param>
+    /// <param name="loadPath">The path or url the namespaces are loaded from, see <see cref="LoadPath" />.</param>
+    /// <param name="treeBuilderFactory">Creates the builders of the loaded translation trees.</param>
+    /// <exception cref="ArgumentNullException">
+    ///     <paramref name="httpClientProvider" />, <paramref name="loadPath" /> or <paramref name="treeBuilderFactory" /> is
+    ///     null.
+    /// </exception>
     public HttpBackend(Func<HttpClient> httpClientProvider, string loadPath, ITranslationTreeBuilderFactory treeBuilderFactory)
     {
         _httpClientProvider = httpClientProvider ?? throw new ArgumentNullException(nameof(httpClientProvider));
@@ -56,8 +98,15 @@ public class HttpBackend : ITranslationBackend
     /// </summary>
     public Func<string, string, string> LoadPathResolver { get; set; }
 
+    /// <summary>
+    ///     Query string parameters appended to each url, like the i18next-http-backend <c>queryStringParams</c> option, e.g.
+    ///     a version to bypass caches. Keys and values are url-encoded.
+    /// </summary>
     public IDictionary<string, string> QueryStringParams { get; } = new Dictionary<string, string>();
 
+    /// <summary>
+    ///     Headers added to each request, like the i18next-http-backend <c>customHeaders</c> option, e.g. for authorization.
+    /// </summary>
     public IDictionary<string, string> CustomHeaders { get; } = new Dictionary<string, string>();
 
     /// <summary>
@@ -70,6 +119,12 @@ public class HttpBackend : ITranslationBackend
     /// </summary>
     public Func<string, ITranslationTreeBuilder, ITranslationTree> Parse { get; set; }
 
+    /// <inheritdoc />
+    /// <remarks>
+    ///     Returns null when the server responds with 404 Not Found, after trying the language part if
+    ///     <see cref="FallbackToLanguagePart" /> is enabled.
+    /// </remarks>
+    /// <exception cref="HttpRequestException">The server responds with another error status code.</exception>
     public async Task<ITranslationTree> LoadNamespaceAsync(string language, string @namespace)
     {
         var tree = await LoadAsync(language, @namespace).ConfigureAwait(false);
@@ -82,6 +137,13 @@ public class HttpBackend : ITranslationBackend
         return languagePart == language ? null : await LoadAsync(languagePart, @namespace).ConfigureAwait(false);
     }
 
+    /// <summary>
+    ///     Gets the url of a namespace from the <see cref="LoadPathResolver" /> or the <see cref="LoadPath" />, with the
+    ///     url-encoded language and namespace inserted and the <see cref="QueryStringParams" /> appended.
+    /// </summary>
+    /// <param name="language">The language.</param>
+    /// <param name="namespace">The namespace.</param>
+    /// <returns>The url of the namespace.</returns>
     protected virtual string GetUrl(string language, string @namespace)
     {
         var path = LoadPathResolver?.Invoke(language, @namespace) ?? LoadPath;

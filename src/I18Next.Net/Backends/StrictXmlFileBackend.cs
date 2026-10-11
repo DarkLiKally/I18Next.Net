@@ -7,29 +7,60 @@ using I18Next.Net.TranslationTrees;
 
 namespace I18Next.Net.Backends;
 
+/// <summary>
+///     Loads translations from XML files, <c>{basePath}/{language}/{namespace}.xml</c>, using <c>Section</c> elements
+///     with a <c>name</c> attribute for groups and <c>Translation</c> elements with a <c>key</c> attribute for the
+///     translations, e.g.
+///     <c>&lt;Section name="menu"&gt;&lt;Translation key="open"&gt;Open&lt;/Translation&gt;&lt;/Section&gt;</c> for the key
+///     <c>menu.open</c>. Allows keys which are no valid XML element names, unlike the
+///     <see cref="XmlFileBackend" />. Other elements are ignored.
+///     When the file of a regional language like <c>de-CH</c> does not exist, the file of its language part
+///     (<c>de</c>) is loaded.
+/// </summary>
+/// <param name="basePath">The directory containing a subdirectory per language.</param>
+/// <param name="treeBuilderFactory">Creates the builders of the loaded translation trees.</param>
 public class StrictXmlFileBackend(string basePath, ITranslationTreeBuilderFactory treeBuilderFactory) : ITranslationBackend
 {
     private readonly ITranslationTreeBuilderFactory _treeBuilderFactory = treeBuilderFactory;
 
+    /// <summary>
+    ///     Creates a backend loading XML files from the given directory into hierarchical translation trees.
+    /// </summary>
+    /// <param name="basePath">The directory containing a subdirectory per language.</param>
     public StrictXmlFileBackend(string basePath)
         : this(basePath, new GenericTranslationTreeBuilderFactory<HierarchicalTranslationTreeBuilder>())
     {
     }
 
+    /// <summary>
+    ///     Creates a backend loading XML files from the <c>locales</c> directory with the given tree builders.
+    /// </summary>
+    /// <param name="treeBuilderFactory">Creates the builders of the loaded translation trees.</param>
     public StrictXmlFileBackend(ITranslationTreeBuilderFactory treeBuilderFactory)
         : this("locales", treeBuilderFactory)
     {
     }
 
+    /// <summary>
+    ///     Creates a backend loading XML files from the <c>locales</c> directory into hierarchical translation trees.
+    /// </summary>
     public StrictXmlFileBackend()
         : this("locales")
     {
     }
 
+    /// <summary>
+    ///     The directory containing a subdirectory per language. Relative paths are resolved against the current directory.
+    /// </summary>
     protected string BasePath { get; } = basePath;
 
+    /// <summary>
+    ///     The encoding of the files. Defaults to UTF-8.
+    /// </summary>
     public Encoding Encoding { get; set; } = Encoding.UTF8;
 
+    /// <inheritdoc />
+    /// <remarks>Returns null if the file of the namespace does not exist.</remarks>
     public Task<ITranslationTree> LoadNamespaceAsync(string language, string @namespace)
     {
         var path = FindFile(language, @namespace);
@@ -53,6 +84,14 @@ public class StrictXmlFileBackend(string basePath, ITranslationTreeBuilderFactor
         return Task.FromResult(builder.Build());
     }
 
+    /// <summary>
+    ///     Finds the file of a namespace. Override it to use another file layout.
+    /// </summary>
+    /// <param name="language">The language.</param>
+    /// <param name="namespace">The namespace.</param>
+    /// <returns>
+    ///     <c>{basePath}/{language}/{namespace}.xml</c>, else the file of the language part, or null if neither exists.
+    /// </returns>
     protected virtual string FindFile(string language, string @namespace)
     {
         var path = Path.Combine(BasePath, language, @namespace + ".xml");

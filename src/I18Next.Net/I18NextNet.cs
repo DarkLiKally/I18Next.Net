@@ -17,6 +17,24 @@ using I18Next.Net.Plugins;
 
 namespace I18Next.Net;
 
+/// <summary>
+///     The default <see cref="II18Next" /> implementation. Resolves translations through an <see cref="ITranslator" />
+///     (usually the <see cref="DefaultTranslator" />) which loads the namespaces from an <see cref="ITranslationBackend" />.
+/// </summary>
+/// <remarks>
+///     The instance starts with the language <c>en-US</c>, the default namespace <c>translation</c> and no fallback
+///     languages. Applications using dependency injection usually configure it with the builder of the
+///     I18Next.Net.Extensions package instead of creating it directly.
+/// </remarks>
+/// <example>
+///     <code>
+///     var backend = new JsonFileBackend("locales");
+///     var i18Next = new I18NextNet(backend, new DefaultTranslator(backend)) { Language = "de" };
+///     i18Next.SetFallbackLanguages("en");
+///
+///     var greeting = i18Next.T("greeting", new { name = "Ada" });
+///     </code>
+/// </example>
 public class I18NextNet : II18Next
 {
     private static readonly HashSet<string> RightToLeftLanguages = new(StringComparer.OrdinalIgnoreCase)
@@ -31,6 +49,22 @@ public class I18NextNet : II18Next
     private readonly TranslationOptions _options;
     private JsonSerializerOptions _modelSerializerOptions;
 
+    /// <summary>
+    ///     Creates an instance translating with the given translator and backend.
+    /// </summary>
+    /// <param name="backend">The backend the translations are loaded from, exposed as <see cref="Backend" />.</param>
+    /// <param name="translator">
+    ///     The translator resolving the translations. It should load its translations from the same
+    ///     <paramref name="backend" />.
+    /// </param>
+    /// <param name="languageDetector">
+    ///     The language detector used by <see cref="UseDetectedLanguage" /> and
+    ///     <see cref="DetectLanguageOnEachTranslation" />. Defaults to a <see cref="DefaultLanguageDetector" /> always
+    ///     detecting <c>en-US</c>.
+    /// </param>
+    /// <exception cref="ArgumentNullException">
+    ///     <paramref name="backend" /> or <paramref name="translator" /> is null.
+    /// </exception>
     public I18NextNet(ITranslationBackend backend, ITranslator translator, ILanguageDetector languageDetector = null)
     {
         _options = CreateTranslationOptions();
@@ -43,24 +77,44 @@ public class I18NextNet : II18Next
         LanguageDetector = languageDetector ?? new DefaultLanguageDetector("en-US");
     }
 
+    /// <summary>
+    ///     The languages searched in order when a key is missing in the requested language, like the i18next
+    ///     <c>fallbackLng</c> option. Empty by default. Overridden per language by <see cref="LanguageFallbacks" />.
+    /// </summary>
+    /// <exception cref="ArgumentNullException">The value is set to null.</exception>
     public string[] FallbackLanguages
     {
         get => _options.FallbackLanguages;
         set => _options.FallbackLanguages = value ?? throw new ArgumentNullException(nameof(value));
     }
 
+    /// <summary>
+    ///     The namespaces searched in order when a key is missing in the requested namespace, like the i18next
+    ///     <c>fallbackNS</c> option. They are searched in the requested language before the fallback languages are tried.
+    ///     <c>null</c> by default.
+    /// </summary>
     public string[] FallbackNamespaces
     {
         get => _options.FallbackNamespaces;
         set => _options.FallbackNamespaces = value;
     }
 
+    /// <summary>
+    ///     Fallback languages per language, like the object form of the i18next <c>fallbackLng</c> option. An entry for the
+    ///     requested language, or else for its language part (<c>de</c> for <c>de-CH</c>), replaces
+    ///     <see cref="FallbackLanguages" /> for that language. <c>null</c> by default.
+    /// </summary>
+    /// <seealso cref="SetLanguageFallbacks" />
     public IDictionary<string, string[]> LanguageFallbacks
     {
         get => _options.LanguageFallbacks;
         set => _options.LanguageFallbacks = value;
     }
 
+    /// <summary>
+    ///     The logger associated with this instance. Defaults to a <see cref="TraceLogger" />. The translator and the other
+    ///     plugins receive their own logger when they are created.
+    /// </summary>
     public ILogger Logger { get; set; }
 
     /// <summary>
@@ -76,8 +130,14 @@ public class I18NextNet : II18Next
             : new JsonSerializerOptions(value) { NumberHandling = value.NumberHandling | JsonNumberHandling.AllowReadingFromString };
     }
 
+    /// <inheritdoc />
     public ITranslationBackend Backend { get; }
 
+    /// <summary>
+    ///     The namespace used for keys without a namespace prefix, like the i18next <c>defaultNS</c> option. Defaults to
+    ///     <c>translation</c>.
+    /// </summary>
+    /// <exception cref="ArgumentNullException">The value is set to null, empty or whitespace.</exception>
     public string DefaultNamespace
     {
         get => _options.DefaultNamespace;
@@ -90,8 +150,17 @@ public class I18NextNet : II18Next
         }
     }
 
+    /// <inheritdoc />
+    /// <remarks>
+    ///     When the detector returns null, empty or whitespace, <see cref="Language" /> is used. Disabled by default.
+    /// </remarks>
     public bool DetectLanguageOnEachTranslation { get; set; }
 
+    /// <summary>
+    ///     The language used for translations without an explicit language. Defaults to <c>en-US</c>. Setting a different
+    ///     language raises <see cref="LanguageChanged" />.
+    /// </summary>
+    /// <exception cref="ArgumentNullException">The value is set to null, empty or whitespace.</exception>
     public string Language
     {
         get;
@@ -110,35 +179,45 @@ public class I18NextNet : II18Next
         }
     }
 
+    /// <inheritdoc />
     public event EventHandler<LanguageChangedEventArgs> LanguageChanged;
 
+    /// <summary>
+    ///     The language detector used by <see cref="UseDetectedLanguage" /> and <see cref="DetectLanguageOnEachTranslation" />.
+    /// </summary>
     public ILanguageDetector LanguageDetector { get; set; }
 
+    /// <inheritdoc />
     public string T(string key, object args = null)
     {
         return Translate(GetCurrentLanguage(), key, args, _options);
     }
 
+    /// <inheritdoc />
     public string T(string language, string key, object args = null)
     {
         return Translate(language, key, args, _options);
     }
 
+    /// <inheritdoc />
     public string T(string language, string defaultNamespace, string key, object args = null)
     {
         return Translate(language, key, args, CreateTranslationOptions(defaultNamespace));
     }
 
+    /// <inheritdoc />
     public Task<string> Ta(string key, object args = null)
     {
         return Ta(GetCurrentLanguage(), key, args);
     }
 
+    /// <inheritdoc />
     public Task<string> Ta(string language, string key, object args = null)
     {
         return Ta(language, key, args, _options);
     }
 
+    /// <inheritdoc />
     public Task<string> Ta(string language, string defaultNamespace, string key, object args = null)
     {
         var options = CreateTranslationOptions(defaultNamespace);
@@ -146,11 +225,15 @@ public class I18NextNet : II18Next
         return Ta(language, key, args, options);
     }
 
+    /// <inheritdoc />
+    /// <exception cref="ArgumentNullException"><paramref name="keys" /> is null or empty.</exception>
     public string T(string[] keys, object args = null)
     {
         return Ta(keys, args).ConfigureAwait(false).GetAwaiter().GetResult();
     }
 
+    /// <inheritdoc />
+    /// <exception cref="ArgumentNullException"><paramref name="keys" /> is null or empty.</exception>
     public async Task<string> Ta(string[] keys, object args = null)
     {
         if (keys == null || keys.Length == 0)
@@ -168,41 +251,59 @@ public class I18NextNet : II18Next
         return await Translator.TranslateAsync(language, keys[keys.Length - 1], argsDict, _options).ConfigureAwait(false);
     }
 
+    /// <inheritdoc />
     public IDictionary<string, object> TObject(string key, object args = null)
     {
         return TaObject(key, args).ConfigureAwait(false).GetAwaiter().GetResult();
     }
 
+    /// <inheritdoc />
     public IDictionary<string, object> TObject(string language, string key, object args = null)
     {
         return TaObject(language, key, args).ConfigureAwait(false).GetAwaiter().GetResult();
     }
 
+    /// <inheritdoc />
     public Task<IDictionary<string, object>> TaObject(string key, object args = null)
     {
         return TaObject(GetCurrentLanguage(), key, args);
     }
 
+    /// <inheritdoc />
     public Task<IDictionary<string, object>> TaObject(string language, string key, object args = null)
     {
         return Translator.TranslateObjectAsync(language, key, args.ToDictionary(), _options);
     }
 
+    /// <inheritdoc />
+    /// <remarks>The values are mapped like <see cref="Ta{TModel}(string, string, object)" /> describes.</remarks>
     public TModel T<TModel>(string key, object args = null)
     {
         return Ta<TModel>(key, args).ConfigureAwait(false).GetAwaiter().GetResult();
     }
 
+    /// <inheritdoc />
+    /// <remarks>The values are mapped like <see cref="Ta{TModel}(string, string, object)" /> describes.</remarks>
     public TModel T<TModel>(string language, string key, object args = null)
     {
         return Ta<TModel>(language, key, args).ConfigureAwait(false).GetAwaiter().GetResult();
     }
 
+    /// <inheritdoc />
+    /// <remarks>The values are mapped like <see cref="Ta{TModel}(string, string, object)" /> describes.</remarks>
     public Task<TModel> Ta<TModel>(string key, object args = null)
     {
         return Ta<TModel>(GetCurrentLanguage(), key, args);
     }
 
+    /// <inheritdoc />
+    /// <remarks>
+    ///     A group whose keys are <c>0</c>, <c>1</c>, ... is treated as an array. Arrays of strings are mapped to
+    ///     <c>string[]</c> or <see cref="List{T}" /> of string, groups of strings to dictionaries of strings, and
+    ///     <see cref="object" /> or <see cref="IDictionary{TKey,TValue}" /> of object receive the translated values as they
+    ///     are. All other types are deserialized from the translated values with <see cref="ModelSerializerOptions" /> or,
+    ///     if not set, case-insensitive reflection based options which also read numbers from strings.
+    /// </remarks>
     public async Task<TModel> Ta<TModel>(string language, string key, object args = null)
     {
         var values = await TaObject(language, key, args).ConfigureAwait(false);
@@ -291,16 +392,23 @@ public class I18NextNet : II18Next
         }
     }
 
+    /// <inheritdoc />
     public bool Exists(string key, object args = null)
     {
         return ExistsAsync(GetCurrentLanguage(), key, args).ConfigureAwait(false).GetAwaiter().GetResult();
     }
 
+    /// <inheritdoc />
     public Task<bool> ExistsAsync(string language, string key, object args = null)
     {
         return Translator.ExistsAsync(language, key, args.ToDictionary(), _options);
     }
 
+    /// <inheritdoc />
+    /// <remarks>
+    ///     Only the language part of the language is checked against the known right-to-left languages, e.g. <c>ar</c> for
+    ///     <c>ar-EG</c>. Languages with the <c>Arab</c> script subtag, e.g. <c>ks-Arab</c>, are right-to-left as well.
+    /// </remarks>
     public string Dir(string language = null)
     {
         language ??= GetCurrentLanguage();
@@ -314,23 +422,48 @@ public class I18NextNet : II18Next
         return RightToLeftLanguages.Contains(languagePart) || language.IndexOf("-Arab", StringComparison.OrdinalIgnoreCase) > -1 ? "rtl" : "ltr";
     }
 
+    /// <inheritdoc />
     public ITranslator Translator { get; }
 
+    /// <inheritdoc />
     public void UseDetectedLanguage()
     {
         Language = LanguageDetector.GetLanguage();
     }
 
+    /// <summary>
+    ///     Sets the <see cref="FallbackLanguages" /> searched when a key is missing in the requested language.
+    /// </summary>
+    /// <param name="languages">The fallback languages in order of preference.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="languages" /> is null.</exception>
     public void SetFallbackLanguages(params string[] languages)
     {
         FallbackLanguages = languages;
     }
 
+    /// <summary>
+    ///     Sets the <see cref="FallbackNamespaces" /> searched when a key is missing in the requested namespace.
+    /// </summary>
+    /// <param name="namespaces">The fallback namespaces in order of preference.</param>
     public void SetFallbackNamespaces(params string[] namespaces)
     {
         FallbackNamespaces = namespaces;
     }
 
+    /// <summary>
+    ///     Sets the fallback languages of a single language in <see cref="LanguageFallbacks" />, creating the dictionary with
+    ///     a case-insensitive comparer if it does not exist yet.
+    /// </summary>
+    /// <param name="language">
+    ///     The language, e.g. <c>de-CH</c>, or a language part like <c>de</c> to match all its regions.
+    /// </param>
+    /// <param name="fallbackLanguages">
+    ///     The fallback languages in order of preference, used instead of <see cref="FallbackLanguages" /> for
+    ///     <paramref name="language" />.
+    /// </param>
+    /// <exception cref="ArgumentNullException">
+    ///     <paramref name="language" /> is null, empty or whitespace or <paramref name="fallbackLanguages" /> is null.
+    /// </exception>
     public void SetLanguageFallbacks(string language, params string[] fallbackLanguages)
     {
         if (string.IsNullOrWhiteSpace(language))

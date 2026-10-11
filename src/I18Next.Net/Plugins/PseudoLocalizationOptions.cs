@@ -3,10 +3,22 @@ using System.Collections.Generic;
 
 namespace I18Next.Net.Plugins;
 
+/// <summary>
+///     The options of the <see cref="PseudoLocalizationPostProcessor" />.
+/// </summary>
 public class PseudoLocalizationOptions
 {
+    /// <summary>
+    ///     The languages whose translations are pseudo-localized, compared case-sensitively. Empty by default, so nothing is
+    ///     pseudo-localized until a language is added.
+    /// </summary>
     public ICollection<string> LanguagesToPseudo { get; } = new HashSet<string>();
 
+    /// <summary>
+    ///     The letters repeated <see cref="LetterMultiplier" /> times to simulate longer translations. Defaults to the vowels
+    ///     including <c>y</c>.
+    /// </summary>
+    /// <exception cref="ArgumentNullException">The value is set to null.</exception>
     public char[] RepeatedLetters
     {
         get;
@@ -15,6 +27,10 @@ public class PseudoLocalizationOptions
         'a', 'e', 'i', 'o', 'u', 'y', 'A', 'E', 'I', 'O', 'U', 'Y'
     ];
 
+    /// <summary>
+    ///     How often the <see cref="RepeatedLetters" /> are repeated. Defaults to 2.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">The value is set to less than 1 or more than 100.</exception>
     public int LetterMultiplier
     {
         get;
@@ -27,6 +43,11 @@ public class PseudoLocalizationOptions
         }
     } = 2;
 
+    /// <summary>
+    ///     The replacements of the letters, by default accented look-alikes of the ASCII letters, e.g. <c>ḛ</c> for <c>e</c>.
+    ///     Letters without a replacement are kept.
+    /// </summary>
+    /// <exception cref="ArgumentNullException">The value is set to null.</exception>
     public IDictionary<char, char> Letters
     {
         get;
@@ -87,5 +108,9 @@ public class PseudoLocalizationOptions
         { 'Z', 'Ż' },
     };
 
+    /// <summary>
+    ///     Whether the translations are wrapped in brackets, e.g. <c>[Ḥḛḛḽḽṓṓ]</c>, to reveal truncated or concatenated texts.
+    ///     Disabled by default.
+    /// </summary>
     public bool WrapStrings { get; set; }
 }

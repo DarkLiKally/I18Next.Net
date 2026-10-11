@@ -17,6 +17,9 @@ namespace I18Next.Net.Plugins;
 /// </summary>
 public class HttpMissingKeyHandler : IMissingKeyHandler
 {
+    /// <summary>
+    ///     The default <see cref="AddPath" />, <c>locales/add/{{lng}}/{{ns}}</c>, like the i18next-http-backend.
+    /// </summary>
     public const string DefaultAddPath = "locales/add/{{lng}}/{{ns}}";
 
     private static readonly Lazy<HttpClient> SharedHttpClient = new(() => new HttpClient());
@@ -24,16 +27,39 @@ public class HttpMissingKeyHandler : IMissingKeyHandler
     private readonly ConcurrentDictionary<(string Language, string Namespace, string Key), bool> _handledKeys = new();
     private readonly Func<HttpClient> _httpClientProvider;
 
+    /// <summary>
+    ///     Creates a handler posting the missing keys with a shared <see cref="HttpClient" />. The client has no base address,
+    ///     so <paramref name="addPath" /> has to be an absolute url.
+    /// </summary>
+    /// <param name="addPath">The absolute url the missing keys are posted to, see <see cref="AddPath" />.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="addPath" /> is null.</exception>
     public HttpMissingKeyHandler(string addPath = DefaultAddPath)
         : this(() => SharedHttpClient.Value, addPath)
     {
     }
 
+    /// <summary>
+    ///     Creates a handler posting the missing keys with the given http client.
+    /// </summary>
+    /// <param name="httpClient">The http client used to post the missing keys.</param>
+    /// <param name="addPath">The path or url the missing keys are posted to, see <see cref="AddPath" />.</param>
+    /// <exception cref="ArgumentNullException">
+    ///     <paramref name="httpClient" /> or <paramref name="addPath" /> is null.
+    /// </exception>
     public HttpMissingKeyHandler(HttpClient httpClient, string addPath = DefaultAddPath)
         : this(httpClient == null ? throw new ArgumentNullException(nameof(httpClient)) : () => httpClient, addPath)
     {
     }
 
+    /// <summary>
+    ///     Creates a handler posting the missing keys with the http client returned by the provider, e.g. a client of an
+    ///     <c>IHttpClientFactory</c>.
+    /// </summary>
+    /// <param name="httpClientProvider">Provides the http client for each request.</param>
+    /// <param name="addPath">The path or url the missing keys are posted to, see <see cref="AddPath" />.</param>
+    /// <exception cref="ArgumentNullException">
+    ///     <paramref name="httpClientProvider" /> or <paramref name="addPath" /> is null.
+    /// </exception>
     public HttpMissingKeyHandler(Func<HttpClient> httpClientProvider, string addPath = DefaultAddPath)
     {
         _httpClientProvider = httpClientProvider ?? throw new ArgumentNullException(nameof(httpClientProvider));
@@ -46,10 +72,22 @@ public class HttpMissingKeyHandler : IMissingKeyHandler
     /// </summary>
     public string AddPath { get; set; }
 
+    /// <summary>
+    ///     Headers added to each request, e.g. for authorization.
+    /// </summary>
     public IDictionary<string, string> CustomHeaders { get; } = new Dictionary<string, string>();
 
+    /// <summary>
+    ///     The logger used to report failed requests. Defaults to a <see cref="TraceLogger" />.
+    /// </summary>
     public ILogger Logger { get; set; } = new TraceLogger();
 
+    /// <inheritdoc />
+    /// <remarks>
+    ///     Each key is posted once per handler instance with its default value or, if there is none, the key itself as value.
+    ///     Failed requests and timeouts are logged as warnings instead of thrown, and the key is posted again when it is
+    ///     missing the next time.
+    /// </remarks>
     public async Task HandleMissingKeyAsync(object sender, MissingKeyEventArgs args)
     {
         var handledKey = (args.Language, args.Namespace, args.Key);

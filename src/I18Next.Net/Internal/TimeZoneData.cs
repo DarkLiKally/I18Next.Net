@@ -5,8 +5,15 @@ namespace I18Next.Net.Internal;
 
 // TODO Integrate https://github.com/mj1856/TimeZoneNames/
 // Like mentioned here https://stackoverflow.com/questions/15302083/timezone-abbreviations
+/// <summary>
+///     A time zone abbreviation with its name and UTC offset, used by the <see cref="Formatters.MomentJsFormatter" /> to
+///     format the <c>z</c> and <c>zz</c> tokens.
+/// </summary>
 public class TimeZoneData
 {
+    /// <summary>
+    ///     The known time zones ordered by their abbreviation.
+    /// </summary>
     public static TimeZoneData[] DefaultTimeZones =
     [
         new("A", "Alpha Time Zone", "Military", +1, 0),
@@ -255,6 +262,16 @@ public class TimeZoneData
     ];
 
 
+    /// <summary>
+    ///     Creates a time zone.
+    /// </summary>
+    /// <param name="abbr">The abbreviation, e.g. <c>CET</c>.</param>
+    /// <param name="name">The name, e.g. <c>Central European Time</c>.</param>
+    /// <param name="continent">The continent or region, e.g. <c>Europe</c>.</param>
+    /// <param name="hourOffset">The hours of the UTC offset.</param>
+    /// <param name="minuteOffset">
+    ///     The minutes of the UTC offset, applied in the direction of <paramref name="hourOffset" />.
+    /// </param>
     public TimeZoneData(string abbr, string name, string continent, int hourOffset, int minuteOffset)
     {
         var offset = TimeSpan.FromHours(hourOffset);
@@ -267,19 +284,42 @@ public class TimeZoneData
         Offset = offset;
     }
 
+    /// <summary>
+    ///     The abbreviation, e.g. <c>CET</c>.
+    /// </summary>
     public string Abbreviation { get; }
 
+    /// <summary>
+    ///     The continent or region, e.g. <c>Europe</c>.
+    /// </summary>
     public string Continent { get; }
 
+    /// <summary>
+    ///     The name, e.g. <c>Central European Time</c>.
+    /// </summary>
     public string Name { get; }
 
+    /// <summary>
+    ///     The offset from UTC.
+    /// </summary>
     public TimeSpan Offset { get; }
 
+    /// <summary>
+    ///     Gets the first of the <see cref="DefaultTimeZones" /> with the given offset.
+    /// </summary>
+    /// <param name="offset">The offset from UTC.</param>
+    /// <returns>The first matching time zone or null if none matches.</returns>
     public static TimeZoneData GetFirstForOffset(TimeSpan offset)
     {
         return DefaultTimeZones.FirstOrDefault(tz => tz.Offset == offset);
     }
 
+    /// <summary>
+    ///     Gets the first of the <see cref="DefaultTimeZones" /> on the given continent with the given offset.
+    /// </summary>
+    /// <param name="continent">The continent or region, e.g. <c>Europe</c>.</param>
+    /// <param name="offset">The offset from UTC.</param>
+    /// <returns>The first matching time zone or null if none matches.</returns>
     public static TimeZoneData GetFirstForOffset(string continent, TimeSpan offset)
     {
         return DefaultTimeZones.FirstOrDefault(tz => tz.Continent == continent && tz.Offset == offset);

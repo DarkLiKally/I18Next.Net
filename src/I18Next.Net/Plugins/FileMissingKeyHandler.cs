@@ -13,8 +13,13 @@ namespace I18Next.Net.Plugins;
 ///     Writes missing keys into JSON files like the <c>saveMissing</c> option of the i18next-fs-backend, so they can be
 ///     translated later. Meant for development.
 /// </summary>
+/// <param name="addPath">The file the missing keys are written to, see <see cref="AddPath" />.</param>
+/// <exception cref="ArgumentNullException"><paramref name="addPath" /> is null.</exception>
 public class FileMissingKeyHandler(string addPath = FileMissingKeyHandler.DefaultAddPath) : IMissingKeyHandler
 {
+    /// <summary>
+    ///     The default <see cref="AddPath" />, <c>locales/{{lng}}/{{ns}}.missing.json</c>.
+    /// </summary>
     public const string DefaultAddPath = "locales/{{lng}}/{{ns}}.missing.json";
 
     private static readonly JsonWriterOptions WriterOptions = new() { Indented = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
@@ -33,6 +38,12 @@ public class FileMissingKeyHandler(string addPath = FileMissingKeyHandler.Defaul
     /// </summary>
     public string KeySeparator { get; set; } = ".";
 
+    /// <inheritdoc />
+    /// <remarks>
+    ///     Each key is written once per handler instance with its default value or, if there is none, the key itself as value.
+    ///     Keys already in the file are kept, and missing keys of languages or namespaces which are not valid file names are
+    ///     ignored. Writes are serialized, so the handler can be used concurrently.
+    /// </remarks>
     public async Task HandleMissingKeyAsync(object sender, MissingKeyEventArgs args)
     {
         if (!IsValidPathSegment(args.Language) || !IsValidPathSegment(args.Namespace) || !_handledKeys.TryAdd((args.Language, args.Namespace, args.Key), true))

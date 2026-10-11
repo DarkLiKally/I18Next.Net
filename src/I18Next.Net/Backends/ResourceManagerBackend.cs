@@ -18,12 +18,25 @@ public class ResourceManagerBackend : ITranslationBackend
     private readonly Dictionary<string, ResourceManager> _resourceManagers = new(StringComparer.Ordinal);
     private readonly ITranslationTreeBuilderFactory _treeBuilderFactory;
 
+    /// <summary>
+    ///     Creates a backend providing a single namespace from the given resource manager, e.g.
+    ///     <c>new ResourceManagerBackend(Strings.ResourceManager)</c>. More namespaces can be added with <see cref="Add" />.
+    /// </summary>
+    /// <param name="resourceManager">The resource manager providing the translations of the namespace.</param>
+    /// <param name="namespace">The namespace. Defaults to <c>translation</c>, the default namespace of i18next.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="resourceManager" /> is null.</exception>
+    /// <exception cref="ArgumentException"><paramref name="namespace" /> is null or empty.</exception>
     public ResourceManagerBackend(ResourceManager resourceManager, string @namespace = "translation")
         : this(new GenericTranslationTreeBuilderFactory<HierarchicalTranslationTreeBuilder>())
     {
         Add(@namespace, resourceManager);
     }
 
+    /// <summary>
+    ///     Creates a backend without namespaces using the given tree builders. Add the namespaces with <see cref="Add" />.
+    /// </summary>
+    /// <param name="treeBuilderFactory">Creates the builders of the loaded translation trees.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="treeBuilderFactory" /> is null.</exception>
     public ResourceManagerBackend(ITranslationTreeBuilderFactory treeBuilderFactory)
     {
         _treeBuilderFactory = treeBuilderFactory ?? throw new ArgumentNullException(nameof(treeBuilderFactory));
@@ -40,6 +53,8 @@ public class ResourceManagerBackend : ITranslationBackend
     /// <param name="namespace">The namespace.</param>
     /// <param name="resourceManager">The resource manager providing the translations of the namespace.</param>
     /// <returns>The current backend instance.</returns>
+    /// <exception cref="ArgumentException"><paramref name="namespace" /> is null or empty.</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="resourceManager" /> is null.</exception>
     public ResourceManagerBackend Add(string @namespace, ResourceManager resourceManager)
     {
         if (string.IsNullOrEmpty(@namespace))
@@ -50,6 +65,12 @@ public class ResourceManagerBackend : ITranslationBackend
         return this;
     }
 
+    /// <inheritdoc />
+    /// <remarks>
+    ///     Loads the string resources of the culture of the language, else of its language part, without falling back to
+    ///     parent cultures. The <see cref="NeutralLanguage" /> loads the neutral resources. Returns null for unknown
+    ///     namespaces, unknown cultures and cultures without resources.
+    /// </remarks>
     public Task<ITranslationTree> LoadNamespaceAsync(string language, string @namespace)
     {
         if (!_resourceManagers.TryGetValue(@namespace, out var resourceManager))

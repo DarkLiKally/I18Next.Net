@@ -2,15 +2,26 @@
 
 namespace I18Next.Net.TranslationTrees;
 
+/// <summary>
+///     A translation tree of nested <see cref="TranslationGroup" />s and <see cref="Translation" />s, e.g. built by the
+///     <see cref="HierarchicalTranslationTreeBuilder" />. Keys are paths separated by dots, like <c>menu.file.open</c>.
+/// </summary>
 public class TranslationTree : IHierarchicalTranslationTree
 {
     private Dictionary<string, Translation> _translations;
 
+    /// <summary>
+    ///     Creates a tree with the given root group.
+    /// </summary>
+    /// <param name="rootNode">The root group containing the translations and groups of the first level.</param>
     public TranslationTree(TranslationGroup rootNode)
     {
         Root = rootNode;
     }
 
+    /// <summary>
+    ///     The root group. Setting it rebuilds the index of the translations by their full keys.
+    /// </summary>
     public TranslationTreeNode Root
     {
         get;
@@ -21,6 +32,7 @@ public class TranslationTree : IHierarchicalTranslationTree
         }
     }
 
+    /// <inheritdoc />
     public IDictionary<string, string> GetAllValues()
     {
         var result = new Dictionary<string, string>(_translations.Count);
@@ -31,6 +43,10 @@ public class TranslationTree : IHierarchicalTranslationTree
         return result;
     }
 
+    /// <inheritdoc />
+    /// <exception cref="TranslationKeyInvalidException">
+    ///     The key leads to a group instead of a translation or continues below a translation.
+    /// </exception>
     public string GetValue(string key, IDictionary<string, object> args)
     {
         if (_translations.TryGetValue(key, out var indexedTranslation))
@@ -67,6 +83,8 @@ public class TranslationTree : IHierarchicalTranslationTree
         return translation.Value;
     }
 
+    /// <inheritdoc />
+    /// <remarks>A null or empty key returns all translations.</remarks>
     public IDictionary<string, string> GetGroupValues(string key)
     {
         var node = Root;
@@ -90,6 +108,7 @@ public class TranslationTree : IHierarchicalTranslationTree
         return result;
     }
 
+    /// <inheritdoc />
     public string Namespace { get; set; }
 
     private static Dictionary<string, Translation> BuildTranslationIndex(TranslationTreeNode root)

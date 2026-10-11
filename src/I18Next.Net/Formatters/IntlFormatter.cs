@@ -23,6 +23,11 @@ public class IntlFormatter : IFormatter
     private static readonly ConcurrentDictionary<string, ParsedFormat> ParsedFormats = new();
     private static readonly ConcurrentDictionary<(int Minimum, int Maximum, bool Grouping), string> NumberPatterns = new();
 
+    /// <inheritdoc />
+    /// <remarks>
+    ///     Formats numbers with <c>number</c>, <c>currency</c> and <c>relativetime</c>, <see cref="DateTime" /> and
+    ///     <see cref="DateTimeOffset" /> values with <c>datetime</c> and enumerables other than strings with <c>list</c>.
+    /// </remarks>
     public bool CanFormat(object value, string format, string language)
     {
         return value == null || format == null
@@ -36,6 +41,7 @@ public class IntlFormatter : IFormatter
             };
     }
 
+    /// <inheritdoc />
     public string Format(object value, string format, string language)
     {
         if (value == null)

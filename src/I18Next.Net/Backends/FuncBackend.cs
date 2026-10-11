@@ -18,11 +18,25 @@ public class FuncBackend : ITranslationBackend
 {
     private readonly Func<string, string, Task<ITranslationTree>> _loader;
 
+    /// <summary>
+    ///     Creates a backend loading the namespaces with the given asynchronous delegate.
+    /// </summary>
+    /// <param name="loader">
+    ///     Loads the translation tree of a language and namespace, or returns null if the namespace does not exist.
+    /// </param>
+    /// <exception cref="ArgumentNullException"><paramref name="loader" /> is null.</exception>
     public FuncBackend(Func<string, string, Task<ITranslationTree>> loader)
     {
         _loader = loader ?? throw new ArgumentNullException(nameof(loader));
     }
 
+    /// <summary>
+    ///     Creates a backend loading the namespaces with the given delegate.
+    /// </summary>
+    /// <param name="loader">
+    ///     Loads the translation tree of a language and namespace, or returns null if the namespace does not exist.
+    /// </param>
+    /// <exception cref="ArgumentNullException"><paramref name="loader" /> is null.</exception>
     public FuncBackend(Func<string, string, ITranslationTree> loader)
         : this(loader == null ? throw new ArgumentNullException(nameof(loader)) : (language, ns) => Task.FromResult(loader(language, ns)))
     {
@@ -34,6 +48,7 @@ public class FuncBackend : ITranslationBackend
     /// </summary>
     public bool FallbackToLanguagePart { get; set; } = true;
 
+    /// <inheritdoc />
     public async Task<ITranslationTree> LoadNamespaceAsync(string language, string @namespace)
     {
         var tree = await _loader(language, @namespace).ConfigureAwait(false);
@@ -49,6 +64,14 @@ public class FuncBackend : ITranslationBackend
     /// <summary>
     ///     Creates a backend from a delegate returning the JSON content of a namespace.
     /// </summary>
+    /// <param name="loader">
+    ///     Returns the JSON content of a language and namespace, or null if the namespace does not exist.
+    /// </param>
+    /// <param name="treeBuilderFactory">
+    ///     Creates the builders of the loaded translation trees. Defaults to hierarchical translation trees.
+    /// </param>
+    /// <returns>The created backend.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="loader" /> is null.</exception>
     public static FuncBackend FromJson(Func<string, string, Task<string>> loader, ITranslationTreeBuilderFactory treeBuilderFactory = null)
     {
         if (loader == null)
@@ -65,6 +88,14 @@ public class FuncBackend : ITranslationBackend
     /// <summary>
     ///     Creates a backend from a delegate returning the JSON content of a namespace.
     /// </summary>
+    /// <param name="loader">
+    ///     Returns the JSON content of a language and namespace, or null if the namespace does not exist.
+    /// </param>
+    /// <param name="treeBuilderFactory">
+    ///     Creates the builders of the loaded translation trees. Defaults to hierarchical translation trees.
+    /// </param>
+    /// <returns>The created backend.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="loader" /> is null.</exception>
     public static FuncBackend FromJson(Func<string, string, string> loader, ITranslationTreeBuilderFactory treeBuilderFactory = null)
     {
         if (loader == null)
@@ -76,6 +107,15 @@ public class FuncBackend : ITranslationBackend
     /// <summary>
     ///     Creates a backend from a delegate returning a stream with the JSON content of a namespace, e.g. an embedded resource.
     /// </summary>
+    /// <param name="loader">
+    ///     Returns a stream with the JSON content of a language and namespace, or null if the namespace does not exist. The
+    ///     stream is disposed after reading.
+    /// </param>
+    /// <param name="treeBuilderFactory">
+    ///     Creates the builders of the loaded translation trees. Defaults to hierarchical translation trees.
+    /// </param>
+    /// <returns>The created backend.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="loader" /> is null.</exception>
     public static FuncBackend FromStream(Func<string, string, Task<Stream>> loader, ITranslationTreeBuilderFactory treeBuilderFactory = null)
     {
         if (loader == null)
@@ -96,6 +136,15 @@ public class FuncBackend : ITranslationBackend
     /// <summary>
     ///     Creates a backend from a delegate returning a stream with the JSON content of a namespace, e.g. an embedded resource.
     /// </summary>
+    /// <param name="loader">
+    ///     Returns a stream with the JSON content of a language and namespace, or null if the namespace does not exist. The
+    ///     stream is disposed after reading.
+    /// </param>
+    /// <param name="treeBuilderFactory">
+    ///     Creates the builders of the loaded translation trees. Defaults to hierarchical translation trees.
+    /// </param>
+    /// <returns>The created backend.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="loader" /> is null.</exception>
     public static FuncBackend FromStream(Func<string, string, Stream> loader, ITranslationTreeBuilderFactory treeBuilderFactory = null)
     {
         if (loader == null)
@@ -107,6 +156,16 @@ public class FuncBackend : ITranslationBackend
     /// <summary>
     ///     Creates a backend from a delegate returning the resources of a namespace as nested dictionaries, lists or objects.
     /// </summary>
+    /// <param name="loader">
+    ///     Returns the resources of a language and namespace, or null if the namespace does not exist. Dictionaries and
+    ///     objects become groups, enumerables are stored with their indexes as keys and other values are converted to
+    ///     strings with the invariant culture.
+    /// </param>
+    /// <param name="treeBuilderFactory">
+    ///     Creates the builders of the loaded translation trees. Defaults to hierarchical translation trees.
+    /// </param>
+    /// <returns>The created backend.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="loader" /> is null.</exception>
     public static FuncBackend FromObject(Func<string, string, Task<object>> loader, ITranslationTreeBuilderFactory treeBuilderFactory = null)
     {
         if (loader == null)
@@ -131,6 +190,16 @@ public class FuncBackend : ITranslationBackend
     /// <summary>
     ///     Creates a backend from a delegate returning the resources of a namespace as nested dictionaries, lists or objects.
     /// </summary>
+    /// <param name="loader">
+    ///     Returns the resources of a language and namespace, or null if the namespace does not exist. Dictionaries and
+    ///     objects become groups, enumerables are stored with their indexes as keys and other values are converted to
+    ///     strings with the invariant culture.
+    /// </param>
+    /// <param name="treeBuilderFactory">
+    ///     Creates the builders of the loaded translation trees. Defaults to hierarchical translation trees.
+    /// </param>
+    /// <returns>The created backend.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="loader" /> is null.</exception>
     public static FuncBackend FromObject(Func<string, string, object> loader, ITranslationTreeBuilderFactory treeBuilderFactory = null)
     {
         if (loader == null)

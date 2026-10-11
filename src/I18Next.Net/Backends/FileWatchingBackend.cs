@@ -20,6 +20,17 @@ public class FileWatchingBackend : INotifyingTranslationBackend, IDisposable
     private readonly Timer _timer;
     private readonly FileSystemWatcher _watcher;
 
+    /// <summary>
+    ///     Creates a backend loading the namespaces from the given backend and watching the given directory, including its
+    ///     subdirectories, for changes. The directory is created if it does not exist.
+    /// </summary>
+    /// <param name="backend">
+    ///     The backend loading the namespaces, e.g. a <see cref="JsonFileBackend" />. Its own change notifications are
+    ///     forwarded if it implements <see cref="INotifyingTranslationBackend" />.
+    /// </param>
+    /// <param name="basePath">The directory containing the translation files.</param>
+    /// <param name="filter">The pattern of the watched files, e.g. <c>*.json</c>. Defaults to all files.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="backend" /> or <paramref name="basePath" /> is null.</exception>
     public FileWatchingBackend(ITranslationBackend backend, string basePath, string filter = "*.*")
     {
         _backend = backend ?? throw new ArgumentNullException(nameof(backend));
@@ -48,15 +59,27 @@ public class FileWatchingBackend : INotifyingTranslationBackend, IDisposable
     /// </summary>
     public TimeSpan Delay { get; set; } = TimeSpan.FromMilliseconds(200);
 
+    /// <summary>
+    ///     The backend loading the namespaces.
+    /// </summary>
     public ITranslationBackend Backend => _backend;
 
+    /// <inheritdoc />
+    /// <remarks>
+    ///     Raised on a thread pool thread once the files did not change for <see cref="Delay" />, once per changed language
+    ///     and namespace, or once for all namespaces.
+    /// </remarks>
     public event EventHandler<TranslationsChangedEventArgs> TranslationsChanged;
 
+    /// <inheritdoc />
     public Task<ITranslationTree> LoadNamespaceAsync(string language, string @namespace)
     {
         return _backend.LoadNamespaceAsync(language, @namespace);
     }
 
+    /// <summary>
+    ///     Stops watching the directory.
+    /// </summary>
     public void Dispose()
     {
         _watcher.Dispose();

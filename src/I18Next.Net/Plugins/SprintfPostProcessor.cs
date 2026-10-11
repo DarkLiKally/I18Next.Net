@@ -5,15 +5,28 @@ using System.Text.RegularExpressions;
 
 namespace I18Next.Net.Plugins;
 
+/// <summary>
+///     Replaces sprintf-style placeholders like <c>%s</c> or <c>%d</c> with the values of the <c>sprintf</c> array
+///     argument in order, similar to the i18next-sprintf-postprocessor. Enabled per translation with the
+///     <c>postProcess: "sprintf"</c> argument, e.g. <c>new { postProcess = "sprintf", sprintf = new object[] { "a", 2 } }</c>.
+/// </summary>
+/// <remarks>
+///     Every <c>%</c> together with the following character is a placeholder; the values are formatted with the current
+///     culture. Named placeholders like <c>%(name)s</c> are not supported.
+/// </remarks>
 public class SprintfPostProcessor : IPostProcessor
 {
+    /// <inheritdoc />
     public string Keyword => "sprintf";
 
+    /// <inheritdoc />
     public string ProcessTranslation(string key, string value, IDictionary<string, object> args, string language, ITranslator translator)
     {
         return value;
     }
 
+    /// <inheritdoc />
+    /// <exception cref="System.FormatException">The translation contains more placeholders than values are given.</exception>
     public string ProcessResult(string key, string value, IDictionary<string, object> args, string language, ITranslator translator)
     {
         if (args == null)

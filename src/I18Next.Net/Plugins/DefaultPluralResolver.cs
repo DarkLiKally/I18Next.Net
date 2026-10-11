@@ -6,14 +6,41 @@ using I18Next.Net.Internal;
 
 namespace I18Next.Net.Plugins;
 
+/// <summary>
+///     The i18next JSON format versions, which differ in the suffixes of plural keys, like the i18next
+///     <c>compatibilityJSON</c> option.
+/// </summary>
 public enum JsonFormat
 {
+    /// <summary>
+    ///     The i18next v1 format: <c>key</c> and <c>key_plural</c>, or <c>key_plural_2</c>, <c>key_plural_5</c>, ... for
+    ///     languages with more plural forms.
+    /// </summary>
     Version1 = 1,
+    /// <summary>
+    ///     The i18next v2 format: <c>key</c> and <c>key_plural</c>, or suffixes using the numbers of the plural rule for
+    ///     languages with more plural forms, e.g. <c>key_1</c>, <c>key_2</c> and <c>key_5</c> for Russian.
+    /// </summary>
     Version2 = 2,
+    /// <summary>
+    ///     The i18next v3 format: <c>key</c> and <c>key_plural</c>, or <c>key_0</c>, <c>key_1</c>, <c>key_2</c>, ... using
+    ///     the index of the plural form for languages with more plural forms.
+    /// </summary>
     Version3 = 3,
+    /// <summary>
+    ///     The i18next v4 format using the CLDR plural categories like <c>key_one</c> and <c>key_other</c>, and
+    ///     <c>key_ordinal_one</c>, ... for ordinals. Also supports fractional counts and <c>key_zero</c> for a count of 0.
+    /// </summary>
     Version4 = 4
 }
 
+/// <summary>
+///     Resolves the plural suffixes of i18next for all languages supported by i18next, in the JSON format selected by
+///     <see cref="JsonFormatVersion" />.
+/// </summary>
+/// <remarks>
+///     The rules are looked up for the full language first, then for its language part (<c>de</c> for <c>de-CH</c>).
+/// </remarks>
 public class DefaultPluralResolver : IPluralResolver
 {
     private const string Zero = "zero";
@@ -282,14 +309,33 @@ public class DefaultPluralResolver : IPluralResolver
         }
     }
 
+    /// <summary>
+    ///     The separator between a key and its plural suffix, like the i18next <c>pluralSeparator</c> option. Defaults to
+    ///     <c>_</c>. Not used by <see cref="JsonFormat.Version1" />.
+    /// </summary>
     public string PluralSeparator { get; set; } = "_";
 
     private CategorySuffixes _categorySuffixes;
 
+    /// <summary>
+    ///     The JSON format determining the plural suffixes. Defaults to <see cref="JsonFormat.Version3" />; set
+    ///     <see cref="JsonFormat.Version4" /> for translations using the CLDR plural categories of current i18next versions.
+    /// </summary>
     public JsonFormat JsonFormatVersion { get; set; } = JsonFormat.Version3;
 
+    /// <summary>
+    ///     Whether languages with a singular and one plural form use <c>key</c> and <c>key_plural</c> instead of numbered
+    ///     suffixes, like the i18next <c>simplifyPluralSuffix</c> option. Enabled by default. Not used by
+    ///     <see cref="JsonFormat.Version4" />.
+    /// </summary>
     public bool UseSimplePluralSuffixIfPossible { get; set; } = true;
 
+    /// <inheritdoc />
+    /// <remarks>
+    ///     Returns an empty string for languages without plural rules in the formats before
+    ///     <see cref="JsonFormat.Version4" />, and the suffix of the category <c>other</c> in
+    ///     <see cref="JsonFormat.Version4" />.
+    /// </remarks>
     public string GetPluralSuffix(string language, int count)
     {
         if (JsonFormatVersion == JsonFormat.Version4)
@@ -339,6 +385,11 @@ public class DefaultPluralResolver : IPluralResolver
         }
     }
 
+    /// <inheritdoc />
+    /// <remarks>
+    ///     Always true for <see cref="JsonFormat.Version3" /> and later; earlier formats only need plural handling for
+    ///     languages with more than one form.
+    /// </remarks>
     public bool NeedsPlural(string language)
     {
         if (JsonFormatVersion >= JsonFormat.Version3)

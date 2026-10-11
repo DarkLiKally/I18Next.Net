@@ -9,7 +9,9 @@ using I18Next.Net.Plugins;
 namespace I18Next.Net.Formatters;
 
 /// <summary>
-///     Translates MomentJS tokens to .Net format tokens and uses this to format DateTime and DateTimeOffset values.
+///     Formats DateTime and DateTimeOffset values with Moment.js format strings, e.g. <c>{{date, MMMM Do YYYY}}</c> or
+///     <c>{{date, LLL}}</c>, by translating the Moment.js tokens to .NET format tokens and formatting with the culture of
+///     the language.
 /// </summary>
 public class MomentJsFormatter : IFormatter
 {
@@ -97,11 +99,17 @@ public class MomentJsFormatter : IFormatter
         new(
             @"(\[[^\[]*\])|(\\)?([Hh]mm(ss)?|Mo|MM?M?M?|Do|DDDo|DD?D?D?|ddd?d?|do?|w[o|w]?|W[o|W]?|Qo?|YYYYYY|YYYYY|YYYY|YY|gg(ggg?)?|GG(GGG?)?|e|E|a|A|hh?|HH?|kk?|mm?|ss?|S{1,9}|x|X|zz?|ZZ?|.)");
 
+    /// <inheritdoc />
+    /// <remarks>
+    ///     Formats <see cref="DateTime" /> and <see cref="DateTimeOffset" /> values with formats other than the built-in
+    ///     formats of the <see cref="IntlFormatter" />.
+    /// </remarks>
     public bool CanFormat(object value, string format, string language)
     {
         return (value is DateTime || value is DateTimeOffset) && !IntlFormatter.IsFormatName(format);
     }
 
+    /// <inheritdoc />
     public string Format(object value, string format, string language)
     {
         if (value == null)

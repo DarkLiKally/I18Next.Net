@@ -13,6 +13,19 @@ using I18Next.Net.TranslationTrees;
 
 namespace I18Next.Net.Plugins;
 
+/// <summary>
+///     The default <see cref="ITranslator" /> implementing the i18next translation logic: namespace prefixes
+///     (<c>ns:key</c>), the <c>keyPrefix</c>, <c>context</c>, <c>count</c> (plurals and ordinals), <c>defaultValue</c>,
+///     <c>replace</c>, <c>joinArrays</c> and <c>postProcess</c> arguments, fallback namespaces and languages,
+///     interpolation, nesting, post processors and missing key notifications.
+/// </summary>
+/// <remarks>
+///     Loaded namespaces are cached per language and namespace. The cache is kept forever unless the backend implements
+///     <see cref="IExpiringTranslationBackend" />, entries changed by an <see cref="INotifyingTranslationBackend" /> are
+///     removed, and <see cref="ClearCache()" /> removes entries manually. The language <c>cimode</c> returns
+///     <c>namespace:key</c> instead of a translation, like in i18next. When no translation and no default value exists,
+///     the key is returned.
+/// </remarks>
 public class DefaultTranslator : ITranslator
 {
     private readonly ITranslationBackend _backend;
@@ -23,6 +36,13 @@ public class DefaultTranslator : ITranslator
 
     private readonly ConcurrentDictionary<(string Language, string Namespace), CachedTree> _treeCache = new();
 
+    /// <summary>
+    ///     Creates a translator using the given plugins.
+    /// </summary>
+    /// <param name="backend">The backend the namespaces are loaded from.</param>
+    /// <param name="logger">The logger used for diagnostics and missing keys.</param>
+    /// <param name="pluralResolver">The plural resolver providing the plural suffixes for the <c>count</c> argument.</param>
+    /// <param name="interpolator">The interpolator used for interpolation and nesting.</param>
     public DefaultTranslator(ITranslationBackend backend, ILogger logger, IPluralResolver pluralResolver, IInterpolator interpolator)
     {
         _backend = backend;
@@ -35,6 +55,11 @@ public class DefaultTranslator : ITranslator
             notifyingBackend.TranslationsChanged += OnTranslationsChanged;
     }
 
+    /// <summary>
+    ///     Creates a translator with a <see cref="TraceLogger" />, a <see cref="DefaultPluralResolver" /> and a
+    ///     <see cref="DefaultInterpolator" />.
+    /// </summary>
+    /// <param name="backend">The backend the namespaces are loaded from.</param>
     public DefaultTranslator(ITranslationBackend backend)
         : this(backend, new TraceLogger(), new DefaultPluralResolver(), null)
     {
@@ -42,19 +67,46 @@ public class DefaultTranslator : ITranslator
         _syncInterpolator = (DefaultInterpolator)_interpolator;
     }
 
+    /// <summary>
+    ///     Creates a translator with a <see cref="TraceLogger" />, a <see cref="DefaultPluralResolver" /> and the given
+    ///     interpolator.
+    /// </summary>
+    /// <param name="backend">The backend the namespaces are loaded from.</param>
+    /// <param name="interpolator">The interpolator used for interpolation and nesting.</param>
     public DefaultTranslator(ITranslationBackend backend, IInterpolator interpolator)
         : this(backend, new TraceLogger(), new DefaultPluralResolver(), interpolator)
     {
     }
 
+    /// <summary>
+    ///     Whether variables like <c>{{name}}</c> are interpolated. Enabled by default; the <c>interpolate: false</c>
+    ///     argument disables it for a single translation.
+    /// </summary>
     public bool AllowInterpolation { get; set; } = true;
 
+    /// <summary>
+    ///     Whether nested translations like <c>$t(key)</c> are resolved. Enabled by default; the <c>nest: false</c> argument
+    ///     disables it for a single translation.
+    /// </summary>
     public bool AllowNesting { get; set; } = true;
 
+    /// <summary>
+    ///     Whether the <see cref="PostProcessors" /> requested with the <c>postProcess</c> argument are applied. Enabled by
+    ///     default.
+    /// </summary>
     public bool AllowPostprocessing { get; set; } = true;
 
+    /// <summary>
+    ///     The separator between a key and its context, like the i18next <c>contextSeparator</c> option. Defaults to
+    ///     <c>_</c>, so the <c>context: "male"</c> argument resolves <c>friend_male</c> for the key <c>friend</c>.
+    /// </summary>
     public string ContextSeparator { get; set; } = "_";
 
+    /// <summary>
+    ///     The separator between a namespace and a key, like the i18next <c>nsSeparator</c> option. Defaults to <c>:</c>, so
+    ///     <c>common:save</c> resolves the key <c>save</c> in the namespace <c>common</c>. Null or empty disables namespace
+    ///     prefixes.
+    /// </summary>
     public string NamespaceSeparator { get; set; } = ":";
 
     /// <summary>
@@ -63,12 +115,21 @@ public class DefaultTranslator : ITranslator
     /// </summary>
     public bool ReturnEmptyString { get; set; } = true;
 
+    /// <summary>
+    ///     The handlers invoked after the <see cref="MissingKey" /> event when a key is missing in a language and namespace.
+    /// </summary>
     public List<IMissingKeyHandler> MissingKeyHandlers { get; } = [];
 
+    /// <summary>
+    ///     Raised when a key is missing in a language and namespace, like the i18next <c>missingKey</c> event. It is raised
+    ///     for each searched fallback language and namespace that lacks the key.
+    /// </summary>
     public event EventHandler<MissingKeyEventArgs> MissingKey;
 
+    /// <inheritdoc />
     public List<IPostProcessor> PostProcessors { get; } = [];
 
+    /// <inheritdoc />
     public virtual Task<string> TranslateAsync(string language, string key, IDictionary<string, object> args, TranslationOptions options)
     {
         return TranslateValueAsync(language, key, args, options).AsTask();
@@ -110,6 +171,7 @@ public class DefaultTranslator : ITranslator
         return $"key '{actualNamespace}{NamespaceSeparator}{key} ({language})' returned an object instead of string.";
     }
 
+    /// <inheritdoc />
     public virtual async Task<IDictionary<string, object>> TranslateObjectAsync(string language, string key, IDictionary<string, object> args,
         TranslationOptions options)
     {
@@ -143,6 +205,7 @@ public class DefaultTranslator : ITranslator
         return result;
     }
 
+    /// <inheritdoc />
     public virtual async Task<bool> ExistsAsync(string language, string key, IDictionary<string, object> args, TranslationOptions options)
     {
         ValidateArguments(language, key, options);
@@ -153,11 +216,19 @@ public class DefaultTranslator : ITranslator
         return await ResolveTranslationAsync(language, actualNamespace, key, args, options, false).ConfigureAwait(false) != null;
     }
 
+    /// <summary>
+    ///     Removes all loaded namespaces from the cache, so they are loaded from the backend again when they are used next.
+    /// </summary>
     public void ClearCache()
     {
         _treeCache.Clear();
     }
 
+    /// <summary>
+    ///     Removes a loaded namespace from the cache, so it is loaded from the backend again when it is used next.
+    /// </summary>
+    /// <param name="language">The language of the namespace.</param>
+    /// <param name="namespace">The namespace.</param>
     public void ClearCache(string language, string @namespace)
     {
         _treeCache.TryRemove((language, @namespace), out _);
@@ -674,6 +745,9 @@ public class DefaultTranslator : ITranslator
         return options?.FallbackLanguages;
     }
 
+    /// <summary>
+    ///     The current time used to expire cached namespaces. Can be overridden to control the time in tests.
+    /// </summary>
     protected virtual DateTimeOffset UtcNow => DateTimeOffset.UtcNow;
 
     private ValueTask<ITranslationTree> ResolveTranslationTreeAsync(string language, string ns)

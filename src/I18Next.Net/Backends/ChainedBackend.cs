@@ -15,6 +15,13 @@ public class ChainedBackend : IExpiringTranslationBackend, INotifyingTranslation
     private readonly ITranslationBackend[] _backends;
     private readonly ConcurrentDictionary<(string Language, string Namespace), CacheEntry> _cache = new();
 
+    /// <summary>
+    ///     Creates a backend asking the given backends in order, e.g. an <see cref="InMemoryBackend" /> cache in front of an
+    ///     <see cref="HttpBackend" />. Changes notified by backends implementing <see cref="INotifyingTranslationBackend" />
+    ///     remove the affected namespaces from the cache and are forwarded through <see cref="TranslationsChanged" />.
+    /// </summary>
+    /// <param name="backends">The backends in order of precedence.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="backends" /> is null.</exception>
     public ChainedBackend(params ITranslationBackend[] backends)
     {
         _backends = backends ?? throw new ArgumentNullException(nameof(backends));
@@ -26,8 +33,12 @@ public class ChainedBackend : IExpiringTranslationBackend, INotifyingTranslation
         }
     }
 
+    /// <inheritdoc />
     public event EventHandler<TranslationsChangedEventArgs> TranslationsChanged;
 
+    /// <summary>
+    ///     The chained backends in order of precedence.
+    /// </summary>
     public IReadOnlyList<ITranslationBackend> Backends => _backends;
 
     /// <summary>
@@ -53,8 +64,16 @@ public class ChainedBackend : IExpiringTranslationBackend, INotifyingTranslation
     /// </summary>
     public bool SaveToEarlierBackends { get; set; }
 
+    /// <summary>
+    ///     The current time used to expire cached namespaces. Can be overridden to control the time in tests.
+    /// </summary>
     protected virtual DateTimeOffset UtcNow => DateTimeOffset.UtcNow;
 
+    /// <inheritdoc />
+    /// <remarks>
+    ///     Returns the namespace of the first backend providing it, or null if no backend provides it. Uses and fills the
+    ///     cache when <see cref="CacheEnabled" /> is set.
+    /// </remarks>
     public async Task<ITranslationTree> LoadNamespaceAsync(string language, string @namespace)
     {
         if (!CacheEnabled)
@@ -84,11 +103,19 @@ public class ChainedBackend : IExpiringTranslationBackend, INotifyingTranslation
         return tree;
     }
 
+    /// <summary>
+    ///     Removes all namespaces from the cache, so they are loaded from the backends again when they are used next.
+    /// </summary>
     public void ClearCache()
     {
         _cache.Clear();
     }
 
+    /// <summary>
+    ///     Removes a namespace from the cache, so it is loaded from the backends again when it is used next.
+    /// </summary>
+    /// <param name="language">The language of the namespace.</param>
+    /// <param name="namespace">The namespace.</param>
     public void ClearCache(string language, string @namespace)
     {
         _cache.TryRemove((language, @namespace), out _);

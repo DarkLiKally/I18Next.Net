@@ -9,10 +9,23 @@ using System.Reflection;
 
 namespace I18Next.Net.Internal;
 
+/// <summary>
+///     Converts translation arguments, e.g. anonymous objects like <c>new { count = 2 }</c>, to dictionaries.
+/// </summary>
 public static class ObjectExtensions
 {
     private static readonly ConcurrentDictionary<Type, PropertyAccessor[]> AccessorCache = new();
 
+    /// <summary>
+    ///     Converts an object to a dictionary of its public instance properties. The property getters are cached per type and
+    ///     compiled to delegates where dynamic code is supported. Use dictionaries or the source generator of the
+    ///     I18Next.Net.Generators package in trimmed applications, because the properties are read with reflection.
+    /// </summary>
+    /// <param name="value">The object to convert.</param>
+    /// <returns>
+    ///     The values keyed by their property names, the value itself if it already is a
+    ///     <see cref="IDictionary{TKey,TValue}" /> of string and object, or an empty dictionary if it is null.
+    /// </returns>
     public static IDictionary<string, object> ObjectToDictionary(object value)
     {
         if (value == null)
@@ -37,6 +50,7 @@ public static class ObjectExtensions
             : value?.ToString();
     }
 
+    /// <inheritdoc cref="ObjectToDictionary" />
     public static IDictionary<string, object> ToDictionary(this object value)
     {
         return ObjectToDictionary(value);

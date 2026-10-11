@@ -7,17 +7,31 @@ using I18Next.Net.Plugins;
 
 namespace I18Next.Net.Formatters;
 
+/// <summary>
+///     The fallback formatter of the <see cref="Plugins.DefaultInterpolator" />, used when no registered formatter can
+///     format a value. Supports the built-in i18next formats of the <see cref="IntlFormatter" />, <c>uppercase</c>,
+///     <c>lowercase</c> and .NET format strings like <c>{{value, N2}}</c> or <c>{{date, yyyy-MM-dd}}</c>.
+/// </summary>
+/// <remarks>
+///     Values are formatted with the culture of the language, or the invariant culture if the language is no known
+///     culture. Values without a format are converted with the invariant culture. If a .NET format string is invalid, a
+///     warning is logged and the value is converted with <see cref="object.ToString" />.
+/// </remarks>
+/// <param name="logger">The logger used to report unknown cultures and invalid format strings.</param>
 public class DefaultFormatter(ILogger logger) : IFormatter
 {
     private static readonly IntlFormatter IntlFormatter = new();
 
     private readonly ILogger _logger = logger;
 
+    /// <inheritdoc />
+    /// <remarks>Always returns true.</remarks>
     public bool CanFormat(object value, string format, string language)
     {
         return true;
     }
 
+    /// <inheritdoc />
     public string Format(object value, string format, string language)
     {
         if (value == null)
