@@ -54,7 +54,7 @@ public class GettextBackend(string basePath) : ITranslationBackend
         var path = FindFile(language, @namespace);
 
         if (path == null)
-            return null;
+            return Task.FromResult<ITranslationTree>(null);
 
         using (Stream moFileStream = File.OpenRead(path))
         {

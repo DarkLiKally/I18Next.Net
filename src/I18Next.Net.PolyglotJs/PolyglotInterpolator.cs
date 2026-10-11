@@ -112,8 +112,8 @@ public class PolyglotInterpolator : IInterpolator
     ///         the first form.
     ///     </para>
     ///     <para>
-    ///         Placeholders are looked up in the arguments by the whole placeholder including the delimiters, e.g. the
-    ///         argument <c>%{name}</c> for the placeholder <c>%{name}</c>. Placeholders without argument are kept.
+    ///         Placeholders are replaced by the argument with the name between the delimiters, e.g. the argument
+    ///         <c>name</c> for the placeholder <c>%{name}</c>. Placeholders without argument are kept.
     ///     </para>
     /// </remarks>
     /// <param name="source">The translation in Polyglot.js format.</param>
@@ -155,13 +155,10 @@ public class PolyglotInterpolator : IInterpolator
 
         foreach (Match match in matches)
         {
-            var expression = match.Groups[0].Value;
+            var expression = match.Groups[1].Value;
 
             if (args == null || !args.ContainsKey(expression))
-            {
-                result = result.ReplaceFirst(match.Value, expression);
                 continue;
-            }
 
             var value = args[expression];
             string resultValue = null;
