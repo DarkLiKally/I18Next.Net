@@ -6,9 +6,16 @@ using Microsoft.CodeAnalysis;
 
 namespace I18Next.Net.Generators;
 
+/// <summary>
+///     Generates key constants and typed translation accessors into the classes annotated with
+///     <c>[I18NextResources]</c> from the JSON translation files of the source language added as <c>AdditionalFiles</c>.
+///     Reports invalid translation files (I18N001), keys and namespaces missing in other languages (I18N002, I18N004),
+///     placeholders unknown to the source language (I18N003) and missing translation files of the source language (I18N005).
+/// </summary>
 [Generator(LanguageNames.CSharp)]
 public sealed class I18NextResourcesGenerator : IIncrementalGenerator
 {
+    /// <inheritdoc />
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var targets = context.SyntaxProvider.ForAttributeWithMetadataName(ResourceTarget.AttributeName, static (_, _) => true, ResourceTarget.Create);

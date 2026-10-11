@@ -18,6 +18,10 @@ public static class I18NextXaml
     ///     The instance translating the XAML. Set it before the first view is loaded, setting another instance later
     ///     translates all views again.
     /// </summary>
+    /// <remarks>
+    ///     Changes of the language and the translations raised on other threads update the views on the UI thread the first
+    ///     view was translated on.
+    /// </remarks>
     public static II18Next Instance
     {
         get => _instance;

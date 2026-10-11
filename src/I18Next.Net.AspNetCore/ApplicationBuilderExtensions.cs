@@ -8,6 +8,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace I18Next.Net.AspNetCore;
 
+/// <summary>
+///     Extension methods for <see cref="IApplicationBuilder" /> to add the I18Next middleware to the request pipeline.
+/// </summary>
 public static class ApplicationBuilderExtensions
 {
     /// <summary>
@@ -28,6 +31,14 @@ public static class ApplicationBuilderExtensions
     /// <param name="app">The application builder.</param>
     /// <param name="configure">Configures the languages and the handling of requests without a language prefix.</param>
     /// <returns>The application builder.</returns>
+    /// <exception cref="ArgumentNullException">
+    ///     If <paramref name="app" /> or <paramref name="configure" /> is <c>null</c>.
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    ///     If no language is configured, a language contains characters other than letters, digits, dashes and
+    ///     underscores, the namespace is empty or the default language is not one of the languages.
+    /// </exception>
+    /// <exception cref="InvalidOperationException">If no <see cref="ITranslationBackend" /> is registered.</exception>
     public static IApplicationBuilder UseI18NextLocalizedRoutes(this IApplicationBuilder app, Action<I18NextLocalizedRoutesOptions> configure)
     {
         if (app == null)

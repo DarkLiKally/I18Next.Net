@@ -11,20 +11,25 @@ using Microsoft.CodeAnalysis.CodeFixes;
 namespace I18Next.Net.Generators.CodeFixes;
 
 /// <summary>
-///     Adds the keys missing in a language with the text of the source language, which is the text shown until they are translated.
+///     Fixes a key missing in a language (I18N002) by adding it to the translation file of the language with the text of
+///     the source language, which is the text shown until it is translated. Several missing keys of a file can be added
+///     at once.
 /// </summary>
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(MissingKeyCodeFixProvider), DocumentKinds = [nameof(TextDocumentKind.AdditionalDocument)],
     DocumentExtensions = [".json"])]
 [Shared]
 public sealed class MissingKeyCodeFixProvider : CodeFixProvider
 {
+    /// <inheritdoc />
     public override ImmutableArray<string> FixableDiagnosticIds { get; } = ImmutableArray.Create("I18N002");
 
+    /// <inheritdoc />
     public override FixAllProvider GetFixAllProvider()
     {
         return null;
     }
 
+    /// <inheritdoc />
     public override async Task RegisterCodeFixesAsync(CodeFixContext context)
     {
         var document = context.TextDocument;

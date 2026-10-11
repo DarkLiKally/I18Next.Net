@@ -14,8 +14,10 @@ namespace I18Next.Net.Unity.Editor
     /// </summary>
     internal sealed class LinkXmlProcessor : IUnityLinkerProcessor
     {
+        /// <inheritdoc />
         public int callbackOrder => 0;
 
+        /// <inheritdoc />
         public string GenerateAdditionalLinkXmlFile(BuildReport report, UnityLinkerBuildPipelineData data)
         {
             var package = PackageInfo.FindForAssembly(typeof(LinkXmlProcessor).Assembly);

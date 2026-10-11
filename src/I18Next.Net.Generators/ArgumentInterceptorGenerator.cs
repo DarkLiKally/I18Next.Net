@@ -18,9 +18,17 @@ namespace I18Next.Net.Generators;
 ///     Converts anonymous objects passed as translation arguments into dictionaries at compile time, so trimmed and Native
 ///     AOT applications don't depend on reflection to read their properties.
 /// </summary>
+/// <remarks>
+///     The calls are intercepted when <c>PublishAot</c>, <c>PublishTrimmed</c> or <c>IsAotCompatible</c> is enabled. The
+///     MSBuild property <c>I18NextInterceptArguments</c> enables or disables the interception explicitly.
+/// </remarks>
 [Generator(LanguageNames.CSharp)]
 public sealed class ArgumentInterceptorGenerator : IIncrementalGenerator
 {
+    /// <summary>
+    ///     The namespace of the generated interceptors. The build targets of the package add it to the
+    ///     <c>InterceptorsNamespaces</c> MSBuild property.
+    /// </summary>
     public const string GeneratedNamespace = "I18Next.Net.Generated";
 
     private const string Dictionary = "global::System.Collections.Generic.Dictionary<string, object>";
@@ -30,6 +38,7 @@ public sealed class ArgumentInterceptorGenerator : IIncrementalGenerator
     private static readonly Lazy<MethodInfo> GetInterceptableLocationMethod = new(() => typeof(Microsoft.CodeAnalysis.CSharp.CSharpExtensions).GetMethod("GetInterceptableLocation",
         [typeof(SemanticModel), typeof(InvocationExpressionSyntax), typeof(CancellationToken)]));
 
+    /// <inheritdoc />
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var enabled = context.AnalyzerConfigOptionsProvider.Select(static (options, _) => IsEnabled(options.GlobalOptions));

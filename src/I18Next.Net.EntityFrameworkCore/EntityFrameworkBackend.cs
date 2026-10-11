@@ -25,22 +25,38 @@ public class EntityFrameworkBackend<TContext> : IWritableTranslationBackend, INo
     private readonly IDbContextFactory<TContext> _contextFactory;
     private readonly ITranslationTreeBuilderFactory _treeBuilderFactory;
 
+    /// <summary>
+    ///     Creates a backend which builds hierarchical translation trees, so dotted keys like <c>menu.home</c> are nested.
+    /// </summary>
+    /// <param name="contextFactory">The factory creating a context for every operation.</param>
+    /// <exception cref="ArgumentNullException">If <paramref name="contextFactory" /> is <c>null</c>.</exception>
     public EntityFrameworkBackend(IDbContextFactory<TContext> contextFactory)
         : this(contextFactory, new GenericTranslationTreeBuilderFactory<HierarchicalTranslationTreeBuilder>())
     {
     }
 
+    /// <summary>
+    ///     Creates a backend which builds the translation trees with the given factory.
+    /// </summary>
+    /// <param name="contextFactory">The factory creating a context for every operation.</param>
+    /// <param name="treeBuilderFactory">The factory creating the builders of the loaded translation trees.</param>
+    /// <exception cref="ArgumentNullException">If an argument is <c>null</c>.</exception>
     public EntityFrameworkBackend(IDbContextFactory<TContext> contextFactory, ITranslationTreeBuilderFactory treeBuilderFactory)
     {
         _contextFactory = contextFactory ?? throw new ArgumentNullException(nameof(contextFactory));
         _treeBuilderFactory = treeBuilderFactory ?? throw new ArgumentNullException(nameof(treeBuilderFactory));
     }
 
+    /// <summary>
+    ///     Raised after translations were changed through <see cref="SaveNamespaceAsync" />, <see cref="SetValueAsync" /> or
+    ///     <see cref="RemoveValueAsync" />. Changes made directly in the database are not detected, use
+    ///     <see cref="CacheExpiration" /> to pick them up.
+    /// </summary>
     public event EventHandler<TranslationsChangedEventArgs> TranslationsChanged;
 
     /// <summary>
-    ///     Loads the language part of a regional language like "de" for "de-DE" when there are no translations for the
-    ///     regional language.
+    ///     Whether the language part of a regional language like <c>de</c> for <c>de-DE</c> is loaded when there are no
+    ///     translations for the regional language. Defaults to <c>true</c>.
     /// </summary>
     public bool FallbackToLanguagePart { get; set; } = true;
 
@@ -50,6 +66,15 @@ public class EntityFrameworkBackend<TContext> : IWritableTranslationBackend, INo
     /// </summary>
     public TimeSpan? CacheExpiration { get; set; }
 
+    /// <summary>
+    ///     Loads the translations of a namespace. Missing keys without a translation are skipped.
+    /// </summary>
+    /// <param name="language">The language of the namespace.</param>
+    /// <param name="namespace">The namespace.</param>
+    /// <returns>
+    ///     The translations or <c>null</c> if there are none for the language (and its language part when
+    ///     <see cref="FallbackToLanguagePart" /> is enabled).
+    /// </returns>
     public async Task<ITranslationTree> LoadNamespaceAsync(string language, string @namespace)
     {
         List<KeyValuePair<string, string>> values;
@@ -80,9 +105,19 @@ public class EntityFrameworkBackend<TContext> : IWritableTranslationBackend, INo
     }
 
     /// <summary>
-    ///     Replaces the translations of a namespace with the translations of the given tree. Missing keys without a
-    ///     translation are kept.
+    ///     Replaces the translations of a namespace with the translations of the given tree, written with a single
+    ///     <c>SaveChanges</c>. Missing keys without a translation are kept. Raises <see cref="TranslationsChanged" />.
     /// </summary>
+    /// <param name="language">The language of the namespace.</param>
+    /// <param name="namespace">The namespace.</param>
+    /// <param name="tree">
+    ///     The translations, <see cref="ITranslationTree.GetAllValues" /> provides them with dotted keys.
+    /// </param>
+    /// <returns>A task which completes when the translations are stored.</returns>
+    /// <exception cref="ArgumentException">
+    ///     If <paramref name="language" /> or <paramref name="namespace" /> is <c>null</c>, empty or whitespace.
+    /// </exception>
+    /// <exception cref="ArgumentNullException">If <paramref name="tree" /> is <c>null</c>.</exception>
     public async Task SaveNamespaceAsync(string language, string @namespace, ITranslationTree tree)
     {
         ValidateArguments(language, @namespace);
@@ -123,8 +158,19 @@ public class EntityFrameworkBackend<TContext> : IWritableTranslationBackend, INo
     }
 
     /// <summary>
-    ///     Adds or updates the translation of a key.
+    ///     Adds or updates the translation of a key. Raises <see cref="TranslationsChanged" />.
     /// </summary>
+    /// <param name="language">The language of the translation.</param>
+    /// <param name="namespace">The namespace of the key.</param>
+    /// <param name="key">The key with dots separating nested groups, e.g. <c>menu.home</c>.</param>
+    /// <param name="value">The translation.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A task which completes when the translation is stored.</returns>
+    /// <exception cref="ArgumentException">
+    ///     If <paramref name="language" />, <paramref name="namespace" /> or <paramref name="key" /> is <c>null</c>,
+    ///     empty or whitespace.
+    /// </exception>
+    /// <exception cref="ArgumentNullException">If <paramref name="value" /> is <c>null</c>.</exception>
     public async Task SetValueAsync(string language, string @namespace, string key, string value, CancellationToken cancellationToken = default)
     {
         ValidateArguments(language, @namespace);
@@ -150,9 +196,17 @@ public class EntityFrameworkBackend<TContext> : IWritableTranslationBackend, INo
     }
 
     /// <summary>
-    ///     Removes the translation of a key.
+    ///     Removes the translation of a key. Raises <see cref="TranslationsChanged" /> if the key existed.
     /// </summary>
+    /// <param name="language">The language of the translation.</param>
+    /// <param name="namespace">The namespace of the key.</param>
+    /// <param name="key">The key with dots separating nested groups, e.g. <c>menu.home</c>.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns><c>true</c> if the key existed.</returns>
+    /// <exception cref="ArgumentException">
+    ///     If <paramref name="language" />, <paramref name="namespace" /> or <paramref name="key" /> is <c>null</c>,
+    ///     empty or whitespace.
+    /// </exception>
     public async Task<bool> RemoveValueAsync(string language, string @namespace, string key, CancellationToken cancellationToken = default)
     {
         ValidateArguments(language, @namespace);

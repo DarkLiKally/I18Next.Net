@@ -26,6 +26,19 @@ public class I18NextRouteLocalizer
     private readonly ConcurrentDictionary<string, Task<RouteMap>> _maps = new(StringComparer.OrdinalIgnoreCase);
     private readonly List<(string Language, PathString Prefix)> _prefixes = [];
 
+    /// <summary>
+    ///     Creates a route localizer which loads the translated path segments from the given backend. Subscribes to
+    ///     <see cref="INotifyingTranslationBackend.TranslationsChanged" /> if the backend supports it.
+    /// </summary>
+    /// <param name="backend">The backend providing the namespace with the translated path segments.</param>
+    /// <param name="options">The languages, the default language and the namespace of the localized routes.</param>
+    /// <exception cref="ArgumentNullException">
+    ///     If <paramref name="backend" /> or <paramref name="options" /> is <c>null</c>.
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    ///     If no language is configured, a language contains characters other than letters, digits, dashes and
+    ///     underscores, the namespace is empty or the default language is not one of the languages.
+    /// </exception>
     public I18NextRouteLocalizer(ITranslationBackend backend, I18NextLocalizedRoutesOptions options)
     {
         if (options == null)

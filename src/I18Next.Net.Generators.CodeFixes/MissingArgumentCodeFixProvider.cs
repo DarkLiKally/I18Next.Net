@@ -12,19 +12,26 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace I18Next.Net.Generators.CodeFixes;
 
+/// <summary>
+///     Fixes a missing translation argument (I18N011) by renaming the unused member of the anonymous object which most
+///     likely was meant for the placeholder.
+/// </summary>
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(MissingArgumentCodeFixProvider))]
 [Shared]
 public sealed class MissingArgumentCodeFixProvider : CodeFixProvider
 {
     private const string EquivalenceKey = "I18N011.Rename";
 
+    /// <inheritdoc />
     public override ImmutableArray<string> FixableDiagnosticIds { get; } = ImmutableArray.Create("I18N011");
 
+    /// <inheritdoc />
     public override FixAllProvider GetFixAllProvider()
     {
         return WellKnownFixAllProviders.BatchFixer;
     }
 
+    /// <inheritdoc />
     public override async Task RegisterCodeFixesAsync(CodeFixContext context)
     {
         var document = context.Document;

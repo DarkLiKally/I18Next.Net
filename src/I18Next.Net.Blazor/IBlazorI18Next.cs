@@ -35,13 +35,17 @@ public interface IBlazorI18Next
     ///     Uses the language stored in the browser and loads the configured namespaces. Call it before the WebAssembly
     ///     application runs, as translations cannot be loaded over HTTP while rendering.
     /// </summary>
+    /// <returns>A task which completes when the language is set and its namespaces are loaded.</returns>
     Task InitializeAsync();
 
     /// <summary>
     ///     Loads the configured namespaces of the new language, changes the language of the current user and stores it in
-    ///     the browser.
+    ///     the browser (local storage, cookie and the <c>lang</c> and <c>dir</c> attributes of the document). When the
+    ///     language is changed again before the namespaces are loaded, only the latest language is applied.
     /// </summary>
     /// <param name="language">The new language. It is matched against the supported languages.</param>
+    /// <returns>A task which completes when the language is changed.</returns>
+    /// <exception cref="ArgumentNullException">If <paramref name="language" /> is <c>null</c> or whitespace.</exception>
     Task ChangeLanguageAsync(string language);
 
     /// <summary>
@@ -49,6 +53,7 @@ public interface IBlazorI18Next
     ///     synchronously.
     /// </summary>
     /// <param name="namespaces">The namespaces to load. Uses the configured namespaces if none are provided.</param>
+    /// <returns>A task which completes when the namespaces are loaded.</returns>
     Task LoadNamespacesAsync(params string[] namespaces);
 
     /// <summary>
@@ -80,11 +85,14 @@ public interface IBlazorI18Next
     ///     Returns a translator with the current language of the user and a fixed namespace and key prefix. It keeps the
     ///     language when the language of the user changes.
     /// </summary>
+    /// <param name="namespace">The namespace of the keys or <c>null</c> to use the default namespace.</param>
+    /// <param name="keyPrefix">The prefix prepended to every key, e.g. <c>account.settings</c>, or <c>null</c>.</param>
+    /// <returns>The translator with the fixed language, namespace and key prefix.</returns>
     FixedT GetFixedT(string @namespace = null, string keyPrefix = null);
 
     /// <summary>
     ///     Gets the text direction of the language of the current user.
     /// </summary>
-    /// <returns>"rtl" for right-to-left languages, otherwise "ltr".</returns>
+    /// <returns><c>rtl</c> for right-to-left languages, otherwise <c>ltr</c>.</returns>
     string Dir();
 }

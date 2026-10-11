@@ -11,6 +11,9 @@ using Microsoft.Extensions.Options;
 
 namespace I18Next.Net.DataAnnotations;
 
+/// <summary>
+///     Extension methods for <see cref="IMvcBuilder" /> to translate the DataAnnotations of ASP.NET Core MVC.
+/// </summary>
 public static class MvcBuilderExtensions
 {
     /// <summary>
@@ -28,6 +31,14 @@ public static class MvcBuilderExtensions
     ///     Translates the validation messages of the DataAnnotations, the model binding messages and the display names of
     ///     ASP.NET Core MVC using I18Next. The error messages don't have to be set on the attributes.
     /// </summary>
+    /// <remarks>
+    ///     Registers the services of
+    ///     <see cref="I18NextBuilderExtensions.AddDataAnnotationsLocalization(Extensions.Builder.I18NextBuilder)" />,
+    ///     adds the <see cref="I18NextDisplayMetadataProvider" /> and the <see cref="I18NextModelValidatorProvider" /> to
+    ///     the <see cref="MvcOptions" /> and decorates the registered <see cref="IValidationAttributeAdapterProvider" />
+    ///     with the <see cref="I18NextValidationAttributeAdapterProvider" /> to translate the client side validation
+    ///     messages.
+    /// </remarks>
     /// <param name="builder">The MVC builder.</param>
     /// <param name="configure">Configures the DataAnnotations integration.</param>
     /// <returns>The current MVC builder instance.</returns>

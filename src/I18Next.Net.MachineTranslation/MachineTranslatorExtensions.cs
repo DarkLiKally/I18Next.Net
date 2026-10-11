@@ -4,6 +4,9 @@ using System.Threading.Tasks;
 
 namespace I18Next.Net.MachineTranslation;
 
+/// <summary>
+///     Extension methods for <see cref="IMachineTranslator" />.
+/// </summary>
 public static class MachineTranslatorExtensions
 {
     /// <summary>
@@ -15,6 +18,9 @@ public static class MachineTranslatorExtensions
     /// <param name="targetLanguage">The language to translate the text into.</param>
     /// <param name="cancellationToken">Cancels the translation.</param>
     /// <returns>The translated text.</returns>
+    /// <exception cref="ArgumentNullException">
+    ///     If <paramref name="translator" /> or <paramref name="text" /> is <c>null</c>.
+    /// </exception>
     public static async Task<string> TranslateAsync(this IMachineTranslator translator, string text, string sourceLanguage, string targetLanguage,
         CancellationToken cancellationToken = default)
     {

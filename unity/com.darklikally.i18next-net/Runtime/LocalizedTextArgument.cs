@@ -17,10 +17,18 @@ namespace I18Next.Net.Unity
         [SerializeField]
         private string _value;
 
+        /// <summary>
+        ///     Creates an argument without name and value, e.g. for the inspector.
+        /// </summary>
         public LocalizedTextArgument()
         {
         }
 
+        /// <summary>
+        ///     Creates an argument with the given name and value.
+        /// </summary>
+        /// <param name="name">The name of the argument, e.g. <c>name</c> for <c>{{name}}</c>.</param>
+        /// <param name="value">The value of the argument.</param>
         public LocalizedTextArgument(string name, string value)
         {
             _name = name;

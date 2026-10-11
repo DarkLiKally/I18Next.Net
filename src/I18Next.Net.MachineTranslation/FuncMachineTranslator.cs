@@ -13,12 +13,27 @@ public class FuncMachineTranslator : IMachineTranslator
 {
     private readonly Func<IReadOnlyList<string>, string, string, CancellationToken, Task<IReadOnlyList<string>>> _translate;
 
-    /// <param name="translate">Translates the texts (first argument) from the source language (second) into the target language (third).</param>
+    /// <summary>
+    ///     Creates a translator calling the given delegate.
+    /// </summary>
+    /// <param name="translate">
+    ///     Translates the texts (first argument) from the source language (second, <c>null</c> to detect it) into the target
+    ///     language (third) and returns the translated texts in the same order.
+    /// </param>
+    /// <exception cref="ArgumentNullException">If <paramref name="translate" /> is <c>null</c>.</exception>
     public FuncMachineTranslator(Func<IReadOnlyList<string>, string, string, CancellationToken, Task<IReadOnlyList<string>>> translate)
     {
         _translate = translate ?? throw new ArgumentNullException(nameof(translate));
     }
 
+    /// <inheritdoc />
+    /// <remarks>
+    ///     The delegate is not called for an empty list of texts.
+    /// </remarks>
+    /// <exception cref="ArgumentNullException">If <paramref name="texts" /> is <c>null</c>.</exception>
+    /// <exception cref="MachineTranslationException">
+    ///     If the delegate returns <c>null</c> or a different number of texts than it received.
+    /// </exception>
     public async Task<IReadOnlyList<string>> TranslateAsync(IReadOnlyList<string> texts, string sourceLanguage, string targetLanguage,
         CancellationToken cancellationToken = default)
     {

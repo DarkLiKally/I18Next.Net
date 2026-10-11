@@ -14,7 +14,7 @@ public class I18NextDisplayNameResolver
     private readonly II18Next _i18Next;
 
     /// <summary>
-    ///     Constructor using the default options.
+    ///     Creates a display name resolver with the default options.
     /// </summary>
     /// <param name="i18Next">The I18Next instance used to translate the property names.</param>
     public I18NextDisplayNameResolver(II18Next i18Next)
@@ -23,10 +23,13 @@ public class I18NextDisplayNameResolver
     }
 
     /// <summary>
-    ///     Constructor.
+    ///     Creates a display name resolver with the given options.
     /// </summary>
     /// <param name="i18Next">The I18Next instance used to translate the property names.</param>
     /// <param name="options">The options of the FluentValidation integration.</param>
+    /// <exception cref="ArgumentNullException">
+    ///     If <paramref name="i18Next" /> or <paramref name="options" /> is <c>null</c>.
+    /// </exception>
     public I18NextDisplayNameResolver(II18Next i18Next, I18NextFluentValidationOptions options)
     {
         _i18Next = i18Next ?? throw new ArgumentNullException(nameof(i18Next));

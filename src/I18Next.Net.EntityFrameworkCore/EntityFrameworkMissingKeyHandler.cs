@@ -21,6 +21,11 @@ public class EntityFrameworkMissingKeyHandler<TContext> : IMissingKeyHandler
     private readonly IDbContextFactory<TContext> _contextFactory;
     private readonly ConcurrentDictionary<(string Language, string Namespace, string Key), bool> _handledKeys = new();
 
+    /// <summary>
+    ///     Creates a handler adding the missing keys to the database.
+    /// </summary>
+    /// <param name="contextFactory">The factory creating a context for every added key.</param>
+    /// <exception cref="ArgumentNullException">If <paramref name="contextFactory" /> is <c>null</c>.</exception>
     public EntityFrameworkMissingKeyHandler(IDbContextFactory<TContext> contextFactory)
     {
         _contextFactory = contextFactory ?? throw new ArgumentNullException(nameof(contextFactory));
@@ -32,6 +37,15 @@ public class EntityFrameworkMissingKeyHandler<TContext> : IMissingKeyHandler
     /// </summary>
     public string Language { get; set; }
 
+    /// <summary>
+    ///     Adds the missing key without a translation to the database unless it exists already. Keys added by other
+    ///     processes at the same time are ignored. If adding the key fails, the exception is thrown and the key is added
+    ///     again the next time it is missing.
+    /// </summary>
+    /// <param name="sender">The translator which misses the key.</param>
+    /// <param name="args">The language, namespace and key which are missing.</param>
+    /// <returns>A task which completes when the key is added.</returns>
+    /// <exception cref="ArgumentNullException">If <paramref name="args" /> is <c>null</c>.</exception>
     public async Task HandleMissingKeyAsync(object sender, MissingKeyEventArgs args)
     {
         if (args == null)

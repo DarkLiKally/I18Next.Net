@@ -56,6 +56,7 @@ public class Trans : I18NextComponentBase
     [Parameter]
     public IReadOnlyDictionary<string, RenderFragment<RenderFragment>> Components { get; set; }
 
+    /// <inheritdoc />
     protected override void BuildRenderTree(RenderTreeBuilder builder)
     {
         var translation = Ns == null ? T(Key, Args) : I18n.GetFixedT(Ns).T(Key, Args);

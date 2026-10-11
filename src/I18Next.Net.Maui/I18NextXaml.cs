@@ -18,6 +18,10 @@ public static class I18NextXaml
     ///     The instance translating the XAML. <see cref="MauiAppBuilderExtensions.UseI18Next(Microsoft.Maui.Hosting.MauiAppBuilder)" />
     ///     sets it from the service provider. Setting another instance later translates all views again.
     /// </summary>
+    /// <remarks>
+    ///     Changes of the language and the translations raised on other threads update the views on the UI thread the first
+    ///     view was translated on.
+    /// </remarks>
     public static II18Next Instance
     {
         get => _instance;

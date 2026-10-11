@@ -9,18 +9,23 @@ namespace I18Next.Net.Blazor;
 
 /// <summary>
 ///     A component which translates into the language of the current user and renders again when the language or the
-///     translations change.
+///     translations change. The rendering is dispatched to the renderer with
+///     <see cref="ComponentBase.InvokeAsync(Action)" />, so the events may be raised on any thread.
 /// </summary>
 public abstract class I18NextComponentBase : ComponentBase, IDisposable
 {
     private bool _subscribed;
 
     /// <summary>
-    ///     The language of the current user.
+    ///     The translator holding the language of the current user.
     /// </summary>
     [Inject]
     protected IBlazorI18Next I18n { get; set; }
 
+    /// <inheritdoc />
+    /// <remarks>
+    ///     Subscribes to the changes of the language and the translations when the parameters are set the first time.
+    /// </remarks>
     public override Task SetParametersAsync(ParameterView parameters)
     {
         if (!_subscribed)
@@ -44,12 +49,20 @@ public abstract class I18NextComponentBase : ComponentBase, IDisposable
         return I18n.T(key, args);
     }
 
+    /// <summary>
+    ///     Unsubscribes from the changes of the language and the translations.
+    /// </summary>
     public void Dispose()
     {
         Dispose(true);
         GC.SuppressFinalize(this);
     }
 
+    /// <summary>
+    ///     Unsubscribes from the changes of the language and the translations. Override it to release further resources
+    ///     and call the base implementation.
+    /// </summary>
+    /// <param name="disposing">Whether the method is called from <see cref="Dispose()" />.</param>
     protected virtual void Dispose(bool disposing)
     {
         if (!disposing || !_subscribed)

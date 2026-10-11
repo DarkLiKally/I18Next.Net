@@ -11,6 +11,13 @@ namespace I18Next.Net.Unity
     /// </summary>
     public class SystemLanguageDetector : ILanguageDetector
     {
+        /// <summary>
+        ///     Creates a detector which falls back to the given language.
+        /// </summary>
+        /// <param name="fallbackLanguage">The language used when the language of the operating system is unknown.</param>
+        /// <exception cref="ArgumentNullException">
+        ///     If <paramref name="fallbackLanguage" /> is <c>null</c>, empty or whitespace.
+        /// </exception>
         public SystemLanguageDetector(string fallbackLanguage = "en")
         {
             if (string.IsNullOrWhiteSpace(fallbackLanguage))
@@ -24,6 +31,13 @@ namespace I18Next.Net.Unity
         /// </summary>
         public string FallbackLanguage { get; set; }
 
+        /// <summary>
+        ///     Detects the language of the operating system.
+        /// </summary>
+        /// <returns>
+        ///     The language code of <see cref="Application.systemLanguage" /> or the <see cref="FallbackLanguage" /> if the
+        ///     language is unknown.
+        /// </returns>
         public string GetLanguage()
         {
             return GetLanguageCode(Application.systemLanguage) ?? FallbackLanguage;
@@ -34,7 +48,9 @@ namespace I18Next.Net.Unity
         ///     <c>zh-Hans</c> for <see cref="SystemLanguage.ChineseSimplified" />.
         /// </summary>
         /// <param name="language">The system language.</param>
-        /// <returns>The language code or <c>null</c> for <see cref="SystemLanguage.Unknown" />.</returns>
+        /// <returns>
+        ///     The language code or <c>null</c> for <see cref="SystemLanguage.Unknown" /> and unmapped languages.
+        /// </returns>
         public static string GetLanguageCode(SystemLanguage language)
         {
             switch (language.ToString())

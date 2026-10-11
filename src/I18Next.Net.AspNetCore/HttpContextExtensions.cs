@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Http;
 
 namespace I18Next.Net.AspNetCore;
 
+/// <summary>
+///     Extension methods for <see cref="HttpContext" /> to build localized paths of the localized routes.
+/// </summary>
 public static class HttpContextExtensions
 {
     /// <summary>

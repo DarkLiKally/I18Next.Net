@@ -14,6 +14,9 @@ using Microsoft.Extensions.Validation;
 
 namespace I18Next.Net.DataAnnotations;
 
+/// <summary>
+///     Extension methods for <see cref="I18NextBuilder" /> to translate the DataAnnotations validation messages.
+/// </summary>
 public static class I18NextBuilderExtensions
 {
     /// <summary>

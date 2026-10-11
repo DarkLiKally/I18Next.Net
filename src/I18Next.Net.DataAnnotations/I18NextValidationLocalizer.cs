@@ -19,7 +19,7 @@ public class I18NextValidationLocalizer
     private readonly II18Next _i18Next;
 
     /// <summary>
-    ///     Constructor using the default options.
+    ///     Creates a localizer with the default options.
     /// </summary>
     /// <param name="i18Next">The I18Next instance used to translate the messages.</param>
     public I18NextValidationLocalizer(II18Next i18Next)
@@ -28,10 +28,13 @@ public class I18NextValidationLocalizer
     }
 
     /// <summary>
-    ///     Constructor.
+    ///     Creates a localizer with the given options.
     /// </summary>
     /// <param name="i18Next">The I18Next instance used to translate the messages.</param>
     /// <param name="options">The options of the DataAnnotations integration.</param>
+    /// <exception cref="ArgumentNullException">
+    ///     If <paramref name="i18Next" /> or <paramref name="options" /> is <c>null</c>.
+    /// </exception>
     public I18NextValidationLocalizer(II18Next i18Next, I18NextDataAnnotationsOptions options)
     {
         _i18Next = i18Next ?? throw new ArgumentNullException(nameof(i18Next));

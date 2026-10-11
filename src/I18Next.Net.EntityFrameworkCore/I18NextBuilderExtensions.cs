@@ -7,6 +7,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace I18Next.Net.EntityFrameworkCore;
 
+/// <summary>
+///     Extension methods for <see cref="I18NextBuilder" /> to store translations in a database with Entity Framework Core.
+/// </summary>
 public static class I18NextBuilderExtensions
 {
     /// <summary>

@@ -16,6 +16,10 @@ namespace I18Next.Net.Blazor;
 /// </summary>
 public sealed class BlazorI18Next : IBlazorI18Next, IDisposable, IAsyncDisposable
 {
+    /// <summary>
+    ///     The path of the JavaScript module which reads the stored language from the browser and stores the chosen
+    ///     language, the <c>lang</c> and the <c>dir</c> attribute of the document.
+    /// </summary>
     public const string ModulePath = "./_content/I18Next.Net.Blazor/i18next.js";
 
     private const string PreloadKey = "__i18next_blazor_preload__";
@@ -28,6 +32,15 @@ public sealed class BlazorI18Next : IBlazorI18Next, IDisposable, IAsyncDisposabl
     private int _languageVersion;
     private IJSObjectReference _module;
 
+    /// <summary>
+    ///     Creates the translator of a user. The initial language is detected by the language detector of the
+    ///     <paramref name="i18Next" /> instance and matched against the supported languages. Subscribes to
+    ///     <see cref="INotifyingTranslationBackend.TranslationsChanged" /> if the backend supports it.
+    /// </summary>
+    /// <param name="i18Next">The shared I18Next instance used to translate.</param>
+    /// <param name="options">The supported languages, the preloaded namespaces and how the language is stored.</param>
+    /// <param name="jsRuntime">The JavaScript runtime used to read and store the language in the browser.</param>
+    /// <exception cref="ArgumentNullException">If an argument is <c>null</c>.</exception>
     public BlazorI18Next(II18Next i18Next, IOptions<I18NextBlazorOptions> options, IJSRuntime jsRuntime)
     {
         _i18Next = i18Next ?? throw new ArgumentNullException(nameof(i18Next));
@@ -42,14 +55,23 @@ public sealed class BlazorI18Next : IBlazorI18Next, IDisposable, IAsyncDisposabl
             _notifyingBackend.TranslationsChanged += OnTranslationsChanged;
     }
 
+    /// <inheritdoc />
     public II18Next Instance => _i18Next;
 
+    /// <inheritdoc />
     public string Language { get; private set; }
 
+    /// <inheritdoc />
     public event EventHandler<LanguageChangedEventArgs> LanguageChanged;
 
+    /// <inheritdoc />
     public event EventHandler<TranslationsChangedEventArgs> TranslationsChanged;
 
+    /// <inheritdoc />
+    /// <remarks>
+    ///     The stored language is ignored while JavaScript is not available, e.g. during prerendering. When
+    ///     <see cref="ChangeLanguageAsync" /> is called before the initialization completes, the newer language wins.
+    /// </remarks>
     public async Task InitializeAsync()
     {
         var version = ++_languageVersion;
@@ -62,6 +84,7 @@ public sealed class BlazorI18Next : IBlazorI18Next, IDisposable, IAsyncDisposabl
             SetLanguage(language);
     }
 
+    /// <inheritdoc />
     public async Task ChangeLanguageAsync(string language)
     {
         if (string.IsNullOrWhiteSpace(language))
@@ -80,42 +103,56 @@ public sealed class BlazorI18Next : IBlazorI18Next, IDisposable, IAsyncDisposabl
         await StoreLanguageAsync(language);
     }
 
+    /// <inheritdoc />
     public Task LoadNamespacesAsync(params string[] namespaces)
     {
         return LoadAsync(Language, namespaces);
     }
 
+    /// <inheritdoc />
     public string T(string key, object args = null)
     {
         return _i18Next.T(Language, key, args);
     }
 
+    /// <inheritdoc />
     public TModel T<TModel>(string key, object args = null)
     {
         return _i18Next.T<TModel>(Language, key, args);
     }
 
+    /// <inheritdoc />
     public bool Exists(string key, object args = null)
     {
         return _i18Next.ExistsAsync(Language, key, args).ConfigureAwait(false).GetAwaiter().GetResult();
     }
 
+    /// <inheritdoc />
     public FixedT GetFixedT(string @namespace = null, string keyPrefix = null)
     {
         return new FixedT(_i18Next, Language, @namespace, keyPrefix, GetNamespaceSeparator());
     }
 
+    /// <inheritdoc />
     public string Dir()
     {
         return _i18Next.Dir(Language);
     }
 
+    /// <summary>
+    ///     Unsubscribes from the changed translations of the backend.
+    /// </summary>
     public void Dispose()
     {
         if (_notifyingBackend != null)
             _notifyingBackend.TranslationsChanged -= OnTranslationsChanged;
     }
 
+    /// <summary>
+    ///     Unsubscribes from the changed translations of the backend and releases the imported JavaScript module. A
+    ///     disconnected circuit is ignored.
+    /// </summary>
+    /// <returns>A task which completes when the module is released.</returns>
     public async ValueTask DisposeAsync()
     {
         Dispose();

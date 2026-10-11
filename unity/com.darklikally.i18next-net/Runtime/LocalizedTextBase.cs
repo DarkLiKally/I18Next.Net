@@ -76,7 +76,8 @@ namespace I18Next.Net.Unity
         }
 
         /// <summary>
-        ///     The count used to resolve plurals.
+        ///     The count used to resolve plurals. Replaces a <c>count</c> of <see cref="Arguments" /> and
+        ///     <see cref="Args" />, strings are converted to numbers.
         /// </summary>
         public object Count
         {
@@ -109,12 +110,19 @@ namespace I18Next.Net.Unity
         /// <param name="text">The translated text.</param>
         protected abstract void SetText(string text);
 
+        /// <summary>
+        ///     Shows the translation for the first time. Call the base implementation when overriding it.
+        /// </summary>
         protected virtual void Start()
         {
             _started = true;
             Refresh();
         }
 
+        /// <summary>
+        ///     Subscribes to the changes of the language and the translations and shows the translation again. Call the base
+        ///     implementation when overriding it.
+        /// </summary>
         protected virtual void OnEnable()
         {
             I18NextUnity.LanguageChanged += OnLanguageChanged;
@@ -123,6 +131,10 @@ namespace I18Next.Net.Unity
             Refresh();
         }
 
+        /// <summary>
+        ///     Unsubscribes from the changes of the language and the translations. Call the base implementation when
+        ///     overriding it.
+        /// </summary>
         protected virtual void OnDisable()
         {
             I18NextUnity.LanguageChanged -= OnLanguageChanged;

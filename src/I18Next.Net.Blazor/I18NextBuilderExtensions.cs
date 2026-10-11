@@ -10,11 +10,16 @@ using Microsoft.Extensions.Options;
 
 namespace I18Next.Net.Blazor;
 
+/// <summary>
+///     Extension methods for <see cref="I18NextBuilder" /> to integrate I18Next into Blazor.
+/// </summary>
 public static class I18NextBuilderExtensions
 {
     /// <summary>
-    ///     Registers the scoped <see cref="IBlazorI18Next" /> holding the language of each user and detects the initial
-    ///     language from the current culture.
+    ///     Registers the scoped <see cref="IBlazorI18Next" /> holding the language of each user (a circuit on the server or
+    ///     the WebAssembly application) and a <see cref="ThreadLanguageDetector" /> which detects the initial language from
+    ///     the current culture and falls back to the default language. An <see cref="IBlazorI18Next" /> registered before
+    ///     is kept.
     /// </summary>
     /// <param name="builder">The I18Next builder.</param>
     /// <param name="configure">Configures the supported languages, the preloaded namespaces and how the language is stored.</param>

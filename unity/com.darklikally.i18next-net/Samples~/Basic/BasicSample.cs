@@ -4,6 +4,10 @@ using UnityEngine;
 
 namespace I18Next.Net.Unity.Samples
 {
+    /// <summary>
+    ///     Shows translated texts with interpolation and plurals and buttons to switch the language, using the default
+    ///     instance of <see cref="I18NextUnity" /> which loads the translations from <c>Resources/locales</c>.
+    /// </summary>
     public class BasicSample : MonoBehaviour
     {
         private int _count = 1;

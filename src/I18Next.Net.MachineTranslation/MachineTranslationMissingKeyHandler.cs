@@ -23,10 +23,20 @@ public class MachineTranslationMissingKeyHandler : IMissingKeyHandler
     private readonly ConcurrentDictionary<(string Language, string Namespace, string Key), Lazy<Task>> _requests = new();
     private readonly IMachineTranslator _translator;
 
+    /// <summary>
+    ///     Passes the translated keys to <paramref name="onTranslated" />. The callback is called on a thread pool thread.
+    /// </summary>
     /// <param name="translator">The machine translator.</param>
     /// <param name="backend">The backend the source language texts are loaded from.</param>
     /// <param name="sourceLanguage">The language missing keys are translated from.</param>
     /// <param name="onTranslated">Receives the translated keys, e.g. to save them.</param>
+    /// <exception cref="ArgumentNullException">
+    ///     If <paramref name="translator" />, <paramref name="backend" /> or <paramref name="onTranslated" /> is
+    ///     <c>null</c>.
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    ///     If <paramref name="sourceLanguage" /> is <c>null</c>, empty or whitespace.
+    /// </exception>
     public MachineTranslationMissingKeyHandler(IMachineTranslator translator, ITranslationBackend backend, string sourceLanguage,
         Func<MachineTranslatedKey, Task> onTranslated)
     {
@@ -48,15 +58,33 @@ public class MachineTranslationMissingKeyHandler : IMissingKeyHandler
     /// <param name="backend">The backend the source language texts and existing translations are loaded from.</param>
     /// <param name="sourceLanguage">The language missing keys are translated from.</param>
     /// <param name="target">The backend the translated keys are stored in.</param>
+    /// <exception cref="ArgumentNullException">
+    ///     If <paramref name="translator" />, <paramref name="backend" /> or <paramref name="target" /> is <c>null</c>.
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    ///     If <paramref name="sourceLanguage" /> is <c>null</c>, empty or whitespace.
+    /// </exception>
     public MachineTranslationMissingKeyHandler(IMachineTranslator translator, ITranslationBackend backend, string sourceLanguage, InMemoryBackend target)
         : this(translator, backend, sourceLanguage, CreateStore(target, backend))
     {
     }
 
+    /// <summary>
+    ///     The language missing keys are translated from. Keys missing in this language or its regional variants are not
+    ///     translated.
+    /// </summary>
     public string SourceLanguage { get; }
 
+    /// <summary>
+    ///     The logger receiving failed translations as warnings and keys without a source text as debug messages. Defaults
+    ///     to a <see cref="TraceLogger" />.
+    /// </summary>
     public ILogger Logger { get; set; } = new TraceLogger();
 
+    /// <summary>
+    ///     The separator of plural suffixes like <c>_one</c>. When the source language lacks the plural form of a missing
+    ///     key, the <c>_other</c> form is translated. Defaults to <c>_</c>.
+    /// </summary>
     public string PluralSeparator { get; set; } = "_";
 
     /// <summary>
@@ -65,6 +93,19 @@ public class MachineTranslationMissingKeyHandler : IMissingKeyHandler
     /// </summary>
     public bool WaitForTranslation { get; set; }
 
+    /// <summary>
+    ///     Starts the translation of the missing key on a thread pool thread unless it was started before. The most
+    ///     specific of the possible keys found in the source language is translated, failures are logged to the
+    ///     <see cref="Logger" />. Afterwards the cached namespace of the translator is cleared, so the next lookup uses the
+    ///     translation. Keys missing in the source language and the languages <c>cimode</c> and <c>dev</c> are ignored.
+    /// </summary>
+    /// <param name="sender">The translator which misses the key.</param>
+    /// <param name="args">The language, namespace and possible keys which are missing.</param>
+    /// <returns>
+    ///     A task which completes when the key is translated if <see cref="WaitForTranslation" /> is enabled, otherwise a
+    ///     completed task.
+    /// </returns>
+    /// <exception cref="ArgumentNullException">If <paramref name="args" /> is <c>null</c>.</exception>
     public Task HandleMissingKeyAsync(object sender, MissingKeyEventArgs args)
     {
         if (args == null)

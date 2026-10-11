@@ -9,10 +9,14 @@ using Microsoft.Maui.Hosting;
 
 namespace I18Next.Net.Maui;
 
+/// <summary>
+///     Extension methods for <see cref="MauiAppBuilder" /> to translate MAUI applications with I18Next.
+/// </summary>
 public static class MauiAppBuilderExtensions
 {
     /// <summary>
     ///     Registers I18Next with the default configuration and uses it for the <see cref="TExtension" /> markup extension.
+    ///     <see cref="I18NextXaml.Instance" /> is set from the service provider when the application is built.
     /// </summary>
     /// <param name="builder">The MAUI app builder.</param>
     /// <returns>The MAUI app builder.</returns>
@@ -23,6 +27,7 @@ public static class MauiAppBuilderExtensions
 
     /// <summary>
     ///     Registers I18Next and uses it for the <see cref="TExtension" /> markup extension.
+    ///     <see cref="I18NextXaml.Instance" /> is set from the service provider when the application is built.
     /// </summary>
     /// <param name="builder">The MAUI app builder.</param>
     /// <param name="i18Next">Configures backends, plugins and options.</param>

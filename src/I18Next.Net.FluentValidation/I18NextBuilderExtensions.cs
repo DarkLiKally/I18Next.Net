@@ -11,6 +11,9 @@ using Microsoft.Extensions.Options;
 
 namespace I18Next.Net.FluentValidation;
 
+/// <summary>
+///     Extension methods for <see cref="I18NextBuilder" /> to translate the FluentValidation messages.
+/// </summary>
 public static class I18NextBuilderExtensions
 {
     /// <summary>

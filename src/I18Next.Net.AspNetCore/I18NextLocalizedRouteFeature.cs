@@ -5,6 +5,9 @@ namespace I18Next.Net.AspNetCore;
 /// <summary>
 ///     Describes the localized route of the current request. Set by the localized routes middleware.
 /// </summary>
+/// <param name="localizer">The localizer used to translate the paths.</param>
+/// <param name="language">The language of the path prefix or <c>null</c> if the request has no language prefix.</param>
+/// <param name="pathBase">The path base of the request without the language prefix.</param>
 public class I18NextLocalizedRouteFeature(I18NextRouteLocalizer localizer, string language, PathString pathBase)
 {
     /// <summary>

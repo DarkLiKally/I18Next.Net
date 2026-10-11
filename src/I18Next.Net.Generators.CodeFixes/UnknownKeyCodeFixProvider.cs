@@ -13,6 +13,10 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace I18Next.Net.Generators.CodeFixes;
 
+/// <summary>
+///     Fixes an unknown translation key (I18N010) by changing it to a similar existing key or by adding it to the
+///     translation file of the source language or to all translation files, using the last segment of the key as text.
+/// </summary>
 [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(UnknownKeyCodeFixProvider))]
 [Shared]
 public sealed class UnknownKeyCodeFixProvider : CodeFixProvider
@@ -20,13 +24,16 @@ public sealed class UnknownKeyCodeFixProvider : CodeFixProvider
     private const string AddToSourceFileKey = "I18N010.AddToSourceFile";
     private const string AddToAllFilesKey = "I18N010.AddToAllFiles";
 
+    /// <inheritdoc />
     public override ImmutableArray<string> FixableDiagnosticIds { get; } = ImmutableArray.Create("I18N010");
 
+    /// <inheritdoc />
     public override FixAllProvider GetFixAllProvider()
     {
         return new AddKeysFixAllProvider();
     }
 
+    /// <inheritdoc />
     public override async Task RegisterCodeFixesAsync(CodeFixContext context)
     {
         var document = context.Document;

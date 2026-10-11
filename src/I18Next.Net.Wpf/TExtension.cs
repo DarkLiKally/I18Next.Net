@@ -15,10 +15,17 @@ namespace I18Next.Net.Wpf;
 [XamlSetMarkupExtension(nameof(ReceiveMarkupExtension))]
 public class TExtension : MarkupExtension
 {
+    /// <summary>
+    ///     Creates an extension without a key, which has to be set with <see cref="Key" />.
+    /// </summary>
     public TExtension()
     {
     }
 
+    /// <summary>
+    ///     Creates an extension translating the given key, e.g. <c>{i18n:T menu.title}</c>.
+    /// </summary>
+    /// <param name="key">The key to be translated.</param>
     public TExtension(string key)
     {
         Key = key;
@@ -48,8 +55,10 @@ public class TExtension : MarkupExtension
 
     /// <summary>
     ///     Keeps bindings set on <see cref="Args" /> and <see cref="Count" /> instead of letting XAML evaluate them, as
-    ///     bindings can only be evaluated on dependency properties.
+    ///     bindings can only be evaluated on dependency properties. Called by the XAML parser.
     /// </summary>
+    /// <param name="targetObject">The object the markup extension is set on.</param>
+    /// <param name="eventArgs">The markup extension and the member it is set on.</param>
     public static void ReceiveMarkupExtension(object targetObject, XamlSetMarkupExtensionEventArgs eventArgs)
     {
         if (targetObject is not TExtension extension || eventArgs.MarkupExtension is not BindingBase binding)
@@ -68,6 +77,15 @@ public class TExtension : MarkupExtension
         }
     }
 
+    /// <summary>
+    ///     Creates a one way binding which translates the key with <see cref="I18NextXaml.Instance" /> and updates when the
+    ///     language or the translations change. When <see cref="Args" /> or <see cref="Count" /> is a binding, a multi
+    ///     binding also updates when their values change.
+    /// </summary>
+    /// <param name="serviceProvider">The service provider of the XAML parser.</param>
+    /// <returns>The binding expression, or the binding itself when the target is not a dependency property, e.g.
+    ///     in a template.</returns>
+    /// <exception cref="InvalidOperationException">If <see cref="Key" /> is not set.</exception>
     public override object ProvideValue(IServiceProvider serviceProvider)
     {
         if (string.IsNullOrEmpty(Key))

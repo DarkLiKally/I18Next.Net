@@ -8,13 +8,19 @@ using Microsoft.CodeAnalysis.Operations;
 
 namespace I18Next.Net.Generators;
 
+/// <summary>
+///     Reports constant keys passed to the translation methods of <c>II18Next</c> which do not exist in the translation
+///     files of the source language of an <c>[I18NextResources]</c> class (I18N010) and suggests similar keys.
+/// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class UnknownKeyAnalyzer : DiagnosticAnalyzer
 {
     private static readonly HashSet<string> MethodNames = ["T", "Ta", "TObject", "TaObject", "Exists", "ExistsAsync"];
 
+    /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = ImmutableArray.Create(Diagnostics.UnknownKey);
 
+    /// <inheritdoc />
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);

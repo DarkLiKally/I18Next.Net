@@ -13,10 +13,17 @@ namespace I18Next.Net.Avalonia;
 /// </summary>
 public class TExtension : MarkupExtension
 {
+    /// <summary>
+    ///     Creates an extension without a key, which has to be set with <see cref="Key" />.
+    /// </summary>
     public TExtension()
     {
     }
 
+    /// <summary>
+    ///     Creates an extension translating the given key, e.g. <c>{i18n:T menu.title}</c>.
+    /// </summary>
+    /// <param name="key">The key to be translated.</param>
     public TExtension(string key)
     {
         Key = key;
@@ -43,6 +50,14 @@ public class TExtension : MarkupExtension
     /// </summary>
     public string Namespace { get; set; }
 
+    /// <summary>
+    ///     Creates a one way binding which translates the key with <see cref="I18NextXaml.Instance" /> and updates when the
+    ///     language or the translations change. When <see cref="Args" /> or <see cref="Count" /> is a binding, a multi
+    ///     binding also updates when their values change.
+    /// </summary>
+    /// <param name="serviceProvider">The service provider of the XAML parser.</param>
+    /// <returns>The binding.</returns>
+    /// <exception cref="InvalidOperationException">If <see cref="Key" /> is not set.</exception>
     public override object ProvideValue(IServiceProvider serviceProvider)
     {
         if (string.IsNullOrEmpty(Key))

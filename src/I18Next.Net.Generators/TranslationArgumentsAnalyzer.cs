@@ -10,6 +10,11 @@ using Microsoft.CodeAnalysis.Operations;
 
 namespace I18Next.Net.Generators;
 
+/// <summary>
+///     Compares the anonymous objects passed as arguments of <c>T</c> and <c>Ta</c> calls and <c>IStringLocalizer</c>
+///     lookups with the placeholders of the translation in the files of an <c>[I18NextResources]</c> class. Reports
+///     placeholders without an argument (I18N011) and arguments no translation uses (I18N012).
+/// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class TranslationArgumentsAnalyzer : DiagnosticAnalyzer
 {
@@ -23,9 +28,11 @@ public sealed class TranslationArgumentsAnalyzer : DiagnosticAnalyzer
         "joinArrays", "returnObjects", "returnDetails", "replace", "interpolation", "interpolate", "nest", "skipInterpolation", "postProcess", "sprintf"
     ];
 
+    /// <inheritdoc />
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(Diagnostics.MissingArgument, Diagnostics.UnusedArgument);
 
+    /// <inheritdoc />
     public override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);

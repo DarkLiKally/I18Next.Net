@@ -12,10 +12,21 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace I18Next.Net.AspNetCore;
 
+/// <summary>
+///     Extension methods for <see cref="IEndpointRouteBuilder" /> to map the endpoints used by i18next in the browser.
+/// </summary>
 public static class EndpointRouteBuilderExtensions
 {
+    /// <summary>
+    ///     The default route pattern of <see cref="MapI18NextResources" />, matching the default <c>loadPath</c> of the
+    ///     <c>i18next-http-backend</c>.
+    /// </summary>
     public const string DefaultResourcesPattern = "/locales/{lng}/{ns}.json";
 
+    /// <summary>
+    ///     The default route pattern of <see cref="MapI18NextMissingKeys" />, matching the default <c>addPath</c> of the
+    ///     <c>i18next-http-backend</c>.
+    /// </summary>
     public const string DefaultMissingKeysPattern = "/locales/add/{lng}/{ns}";
 
     /// <summary>
@@ -38,6 +49,9 @@ public static class EndpointRouteBuilderExtensions
     /// <param name="pattern">The route pattern.</param>
     /// <param name="configure">Configures the allowed languages and namespaces and the caching headers.</param>
     /// <returns>A builder to further configure the endpoint, e.g. with CORS or authorization.</returns>
+    /// <exception cref="ArgumentNullException">If <paramref name="endpoints" /> is <c>null</c>.</exception>
+    /// <exception cref="ArgumentException">If <paramref name="pattern" /> is <c>null</c> or empty.</exception>
+    /// <exception cref="InvalidOperationException">If no <see cref="ITranslationBackend" /> is registered.</exception>
     public static IEndpointConventionBuilder MapI18NextResources(this IEndpointRouteBuilder endpoints, string pattern = DefaultResourcesPattern,
         Action<I18NextResourcesOptions> configure = null)
     {
@@ -77,6 +91,11 @@ public static class EndpointRouteBuilderExtensions
     /// <param name="pattern">The route pattern.</param>
     /// <param name="configure">Configures the allowed languages and namespaces and the request limits.</param>
     /// <returns>A builder to further configure the endpoint, e.g. with authorization.</returns>
+    /// <exception cref="ArgumentNullException">If <paramref name="endpoints" /> is <c>null</c>.</exception>
+    /// <exception cref="ArgumentException">
+    ///     If <paramref name="pattern" /> is <c>null</c> or empty or lacks the <c>{lng}</c> or <c>{ns}</c> parameter, or
+    ///     a configured request limit is not greater than zero.
+    /// </exception>
     public static IEndpointConventionBuilder MapI18NextMissingKeys(this IEndpointRouteBuilder endpoints, string pattern = DefaultMissingKeysPattern,
         Action<I18NextMissingKeysOptions> configure = null)
     {

@@ -36,6 +36,14 @@ public class TExtension : IMarkupExtension<BindingBase>
     /// </summary>
     public string Namespace { get; set; }
 
+    /// <summary>
+    ///     Creates a one way binding which translates the key with <see cref="I18NextXaml.Instance" /> and updates when the
+    ///     language or the translations change. When <see cref="Args" /> or <see cref="Count" /> is a binding, a multi
+    ///     binding also updates when their values change.
+    /// </summary>
+    /// <param name="serviceProvider">The service provider of the XAML parser.</param>
+    /// <returns>The binding.</returns>
+    /// <exception cref="InvalidOperationException">If <see cref="Key" /> is not set.</exception>
     public BindingBase ProvideValue(IServiceProvider serviceProvider)
     {
         if (string.IsNullOrEmpty(Key))

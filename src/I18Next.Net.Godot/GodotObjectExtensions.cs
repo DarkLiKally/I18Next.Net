@@ -2,6 +2,10 @@
 
 namespace I18Next.Net.Godot;
 
+/// <summary>
+///     Extension methods for <see cref="GodotObject" /> to translate with the instance registered by
+///     <see cref="I18NextGodot.Register" />.
+/// </summary>
 public static class GodotObjectExtensions
 {
     /// <summary>

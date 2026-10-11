@@ -5,12 +5,24 @@
 /// </summary>
 public class TranslationEntry
 {
+    /// <summary>
+    ///     The maximum length of the <see cref="Key" /> column.
+    /// </summary>
     public const int KeyMaxLength = 500;
 
+    /// <summary>
+    ///     The maximum length of the <see cref="Language" /> column.
+    /// </summary>
     public const int LanguageMaxLength = 35;
 
+    /// <summary>
+    ///     The maximum length of the <see cref="Namespace" /> column.
+    /// </summary>
     public const int NamespaceMaxLength = 100;
 
+    /// <summary>
+    ///     The primary key. Translations of a namespace are loaded in the order of their ids.
+    /// </summary>
     public int Id { get; set; }
 
     /// <summary>
@@ -18,6 +30,9 @@ public class TranslationEntry
     /// </summary>
     public string Language { get; set; }
 
+    /// <summary>
+    ///     The namespace, e.g. <c>translation</c> or <c>common</c>.
+    /// </summary>
     public string Namespace { get; set; }
 
     /// <summary>

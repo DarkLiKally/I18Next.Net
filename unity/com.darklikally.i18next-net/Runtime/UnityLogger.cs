@@ -14,13 +14,25 @@ namespace I18Next.Net.Unity
     /// </summary>
     public class UnityLogger : ILogger
     {
+        /// <summary>
+        ///     The minimum level of the logged messages. Defaults to <see cref="Logging.LogLevel.Warning" />.
+        /// </summary>
         public LogLevel LogLevel { get; set; } = LogLevel.Warning;
 
+        /// <inheritdoc />
         public bool IsEnabled(LogLevel logLevel)
         {
             return logLevel != LogLevel.None && (int)LogLevel <= (int)logLevel;
         }
 
+        /// <summary>
+        ///     Writes the message to the Unity console like <see cref="Log(LogLevel, string, object[])" /> and the exception
+        ///     with <see cref="Debug.LogException(Exception)" />.
+        /// </summary>
+        /// <param name="logLevel">The severity of the message.</param>
+        /// <param name="exception">The exception to log or <c>null</c>.</param>
+        /// <param name="message">The message template, e.g. <c>Missing key {key}</c>.</param>
+        /// <param name="args">The values replacing the placeholders of the template in their order.</param>
         public void Log(LogLevel logLevel, Exception exception, string message, params object[] args)
         {
             if (!IsEnabled(logLevel))
@@ -32,6 +44,14 @@ namespace I18Next.Net.Unity
                 Debug.LogException(exception);
         }
 
+        /// <summary>
+        ///     Writes the message to the Unity console with <see cref="Debug.Log(object)" />,
+        ///     <see cref="Debug.LogWarning(object)" /> or <see cref="Debug.LogError(object)" /> depending on the level. The
+        ///     placeholders of the template are replaced by the arguments in their order.
+        /// </summary>
+        /// <param name="logLevel">The severity of the message.</param>
+        /// <param name="message">The message template, e.g. <c>Missing key {key}</c>.</param>
+        /// <param name="args">The values replacing the placeholders of the template in their order.</param>
         public void Log(LogLevel logLevel, string message, params object[] args)
         {
             if (!IsEnabled(logLevel))

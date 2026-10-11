@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace I18Next.Net.Blazor;
 
+/// <summary>
+///     Options of the Blazor integration, configured with <see cref="I18NextBuilderExtensions.IntegrateToBlazor" />.
+/// </summary>
 public class I18NextBlazorOptions
 {
     /// <summary>

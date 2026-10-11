@@ -15,7 +15,7 @@ public class I18NextValidator
     private readonly I18NextValidationLocalizer _localizer;
 
     /// <summary>
-    ///     Constructor using the default options.
+    ///     Creates a validator translating with a <see cref="I18NextValidationLocalizer" /> with the default options.
     /// </summary>
     /// <param name="i18Next">The I18Next instance used to translate the messages.</param>
     public I18NextValidator(II18Next i18Next)
@@ -24,9 +24,10 @@ public class I18NextValidator
     }
 
     /// <summary>
-    ///     Constructor.
+    ///     Creates a validator translating with the given localizer.
     /// </summary>
     /// <param name="localizer">The localizer used to translate the messages.</param>
+    /// <exception cref="ArgumentNullException">If <paramref name="localizer" /> is <c>null</c>.</exception>
     public I18NextValidator(I18NextValidationLocalizer localizer)
     {
         _localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));

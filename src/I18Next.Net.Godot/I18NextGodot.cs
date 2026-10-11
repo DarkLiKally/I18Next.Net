@@ -33,8 +33,14 @@ public static class I18NextGodot
     ///     <see cref="INotifyingTranslationBackend" /> translate all controls again. Call it on the main thread, registering
     ///     another instance replaces the previous one.
     /// </summary>
+    /// <remarks>
+    ///     Language changes and changed translations reported on other threads are applied on the main thread with a
+    ///     deferred call.
+    /// </remarks>
     /// <param name="i18Next">The I18Next instance.</param>
-    /// <param name="languages">The languages to add to the translation server, e.g. "en" and "de".</param>
+    /// <param name="languages">The languages to add to the translation server, e.g. <c>en</c> and <c>de</c>.</param>
+    /// <exception cref="ArgumentNullException">If <paramref name="i18Next" /> is <c>null</c>.</exception>
+    /// <exception cref="ArgumentException">If no language is given.</exception>
     public static void Register(II18Next i18Next, params string[] languages)
     {
         if (i18Next == null)
@@ -82,20 +88,20 @@ public static class I18NextGodot
     }
 
     /// <summary>
-    ///     Converts an i18next language like "de-DE" to a Godot locale like "de_DE".
+    ///     Converts an i18next language like <c>de-DE</c> to a Godot locale like <c>de_DE</c>.
     /// </summary>
     /// <param name="language">The i18next language.</param>
-    /// <returns>The Godot locale.</returns>
+    /// <returns>The Godot locale or <c>null</c> if <paramref name="language" /> is <c>null</c>.</returns>
     public static string ToLocale(string language)
     {
         return language?.Replace('-', '_');
     }
 
     /// <summary>
-    ///     Converts a Godot locale like "de_DE" to an i18next language like "de-DE".
+    ///     Converts a Godot locale like <c>de_DE</c> to an i18next language like <c>de-DE</c>.
     /// </summary>
     /// <param name="locale">The Godot locale.</param>
-    /// <returns>The i18next language.</returns>
+    /// <returns>The i18next language or <c>null</c> if <paramref name="locale" /> is <c>null</c>.</returns>
     public static string ToLanguage(string locale)
     {
         return locale?.Replace('_', '-');

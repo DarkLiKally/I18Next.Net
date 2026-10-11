@@ -95,6 +95,9 @@ namespace I18Next.Net.Unity
         /// <param name="fallbackLanguage">The language used for missing translations and unknown system languages.</param>
         /// <param name="resourcesPath">The folder below a <c>Resources</c> folder containing the translations.</param>
         /// <returns>The I18Next instance.</returns>
+        /// <exception cref="ArgumentNullException">
+        ///     If <paramref name="fallbackLanguage" /> is <c>null</c>, empty or whitespace.
+        /// </exception>
         public static I18NextNet CreateDefault(string fallbackLanguage = "en", string resourcesPath = DefaultResourcesPath)
         {
             if (string.IsNullOrWhiteSpace(fallbackLanguage))
@@ -118,7 +121,8 @@ namespace I18Next.Net.Unity
         /// <summary>
         ///     Creates a backend loading the JSON content of a namespace from the text asset
         ///     <c>Resources/{path}/{lng}/{ns}.json</c>. Works on all platforms, translations have to be loaded on the main
-        ///     thread.
+        ///     thread. When a regional language like <c>de-AT</c> has no file, the file of the language part <c>de</c> is
+        ///     loaded.
         /// </summary>
         /// <param name="path">The folder below a <c>Resources</c> folder containing the translations.</param>
         /// <returns>The backend.</returns>
@@ -131,7 +135,8 @@ namespace I18Next.Net.Unity
 
         /// <summary>
         ///     Creates a backend reading the JSON files <c>StreamingAssets/{path}/{lng}/{ns}.json</c>, which can be replaced
-        ///     after the build. Requires synchronous file access, so it does not work on Android and WebGL.
+        ///     after the build. Requires synchronous file access, so it does not work on Android and WebGL. When a regional
+        ///     language like <c>de-AT</c> has no file, the file of the language part <c>de</c> is loaded.
         /// </summary>
         /// <param name="path">The folder below the <c>StreamingAssets</c> folder containing the translations.</param>
         /// <returns>The backend.</returns>

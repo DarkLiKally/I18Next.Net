@@ -13,6 +13,7 @@ namespace I18Next.Net.Unity
     {
         private Text _text;
 
+        /// <inheritdoc />
         protected override void SetText(string text)
         {
             if (_text == null)

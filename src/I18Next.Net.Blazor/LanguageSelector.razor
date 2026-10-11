@@ -12,17 +12,22 @@
     private IOptions<I18NextBlazorOptions> Options { get; set; }
 
     /// <summary>
-    ///     The languages to choose from. Uses the supported languages if not provided.
+    ///     The languages to choose from. Uses the supported languages of the <see cref="I18NextBlazorOptions" /> if not
+    ///     provided, or only the current language if none are configured.
     /// </summary>
     [Parameter]
     public IEnumerable<string> Languages { get; set; }
 
     /// <summary>
-    ///     Returns the displayed name of a language. Uses the native name of the culture if not provided.
+    ///     Returns the displayed name of a language. Uses the capitalized native name of the culture if not provided, or the
+    ///     language itself if it is no known culture.
     /// </summary>
     [Parameter]
     public Func<string, string> DisplayName { get; set; }
 
+    /// <summary>
+    ///     Additional attributes like <c>class</c> or <c>aria-label</c> applied to the rendered <c>select</c> element.
+    /// </summary>
     [Parameter(CaptureUnmatchedValues = true)]
     public IReadOnlyDictionary<string, object> AdditionalAttributes { get; set; }
 
