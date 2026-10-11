@@ -52,6 +52,7 @@
   <Project Path="tests/I18Next.Net.Maui.Tests/I18Next.Net.Maui.Tests.csproj" />
   <Project Path="tests/I18Next.Net.Tests/I18Next.Net.Tests.csproj" />
   <Project Path="tests/I18Next.Net.Tool.Tests/I18Next.Net.Tool.Tests.csproj" />
+  <Project Path="tests/I18Next.Net.Unity.Tests/I18Next.Net.Unity.Tests.csproj" />
   <Project Path="tests/I18Next.Net.Wpf.Tests/I18Next.Net.Wpf.Tests.csproj" />
   <Project Path="tests/I18Next.Net.Xaml.Tests/I18Next.Net.Xaml.Tests.csproj" />
 </Solution>
