@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <data name="greeting" xml:space="preserve">
+    <comment>Shown on the start page</comment>
+    <value>Hello {{name}}!</value>
+  </data>
+  <data name="menu.title" xml:space="preserve">
+    <value>Menu</value>
+  </data>
+  <data name="multiline" xml:space="preserve">
+    <value>First line
+Second line</value>
+  </data>
+  <!-- comment -->
+</root>
