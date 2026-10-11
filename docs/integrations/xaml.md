@@ -1,11 +1,12 @@
-# WPF and .NET MAUI
+# WPF, .NET MAUI and Avalonia
 
-`I18Next.Net.Wpf` and `I18Next.Net.Maui` provide the `T` markup extension. Its text updates when the language changes
+`I18Next.Net.Wpf`, `I18Next.Net.Maui` and `I18Next.Net.Avalonia` provide the `T` markup extension. Its text updates when the language changes
 and, with a [watching backend](#hot-reload), when the translation files change.
 
 ```
 dotnet add package I18Next.Net.Wpf
 dotnet add package I18Next.Net.Maui
+dotnet add package I18Next.Net.Avalonia
 ```
 
 ```xml
@@ -91,6 +92,33 @@ Embedded resources work on all platforms, e.g. `Resources/Locales/en.translation
 ```
 
 Inject `II18Next` to switch the language, e.g. from a picker.
+
+## Avalonia
+
+`I18Next.Net.Avalonia` targets Avalonia 12. Set the instance with `UseI18Next` on the `AppBuilder`:
+
+```csharp
+public static void Main(string[] args)
+{
+    var locales = Path.Combine(AppContext.BaseDirectory, "locales");
+    var backend = new JsonFileBackend(locales);
+    var i18n = new I18NextNet(backend, new DefaultTranslator(backend)) { Language = "en" };
+
+    AppBuilder.Configure<App>()
+        .UsePlatformDetect()
+        .UseI18Next(i18n)
+        .StartWithClassicDesktopLifetime(args);
+}
+```
+
+or assign `I18NextXaml.Instance` yourself. The markup extension works with compiled and reflection bindings, so
+`Args={Binding User}` can be used in views with `x:DataType`:
+
+```xml
+<Window xmlns:i18n="https://github.com/DarkLiKally/I18Next.Net" x:DataType="local:MainViewModel" Title="{i18n:T title}">
+    <TextBlock Text="{i18n:T inbox, Count={Binding Count}}" />
+</Window>
+```
 
 ## Hot reload
 

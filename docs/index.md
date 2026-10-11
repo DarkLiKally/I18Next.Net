@@ -23,7 +23,7 @@ features:
   - title: Typed keys
     details: A source generator creates key constants and typed translation methods from your JSON files, checks them with analyzers and fixes them with code fixes.
   - title: Integrations
-    details: ASP.NET Core, Blazor, WPF, .NET MAUI, DataAnnotations and FluentValidation, plus the dotnet i18next tool with machine translation.
+    details: ASP.NET Core, Blazor, WPF, .NET MAUI, Avalonia, DataAnnotations and FluentValidation, plus the dotnet i18next tool with machine translation.
   - title: Fast
     details: Translations are resolved synchronously from cached namespaces with few allocations, many times faster than i18next on Node.
   - title: .NET Standard 2.0 to .NET 10

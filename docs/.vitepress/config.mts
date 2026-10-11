@@ -49,7 +49,7 @@ export default defineConfig({
                     { text: "Dependency injection", link: "/integrations/dependency-injection" },
                     { text: "ASP.NET Core", link: "/integrations/aspnetcore" },
                     { text: "Blazor", link: "/integrations/blazor" },
-                    { text: "WPF and .NET MAUI", link: "/integrations/xaml" },
+                    { text: "WPF, .NET MAUI and Avalonia", link: "/integrations/xaml" },
                     { text: "Validation", link: "/integrations/validation" },
                     { text: "Source generator", link: "/integrations/source-generator" }
                 ]

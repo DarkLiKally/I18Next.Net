@@ -18,7 +18,7 @@ The documentation is available at [darklikally.github.io/I18Next.Net](https://da
 - [Built-in plugins](#built-in-plugins)
 - [Typed keys with the source generator](#typed-keys-with-the-source-generator)
 - [Dependency injection and ASP.NET Core](#dependency-injection-and-aspnet-core)
-- [Blazor, WPF and .NET MAUI](#blazor-wpf-and-net-maui)
+- [Blazor, WPF, .NET MAUI and Avalonia](#blazor-wpf-net-maui-and-avalonia)
 - [Validation messages](#validation-messages)
 - [Command-line tool and machine translation](#command-line-tool-and-machine-translation)
 - [Trimming and Native AOT](#trimming-and-native-aot)
@@ -39,6 +39,7 @@ The documentation is available at [darklikally.github.io/I18Next.Net](https://da
 | `I18Next.Net.Blazor` | Blazor components and a language per user for interactive server, WebAssembly and static rendering |
 | `I18Next.Net.Wpf` | WPF markup extension `{i18n:T key}` updating on language and translation changes |
 | `I18Next.Net.Maui` | .NET MAUI markup extension `{i18n:T key}` and `UseI18Next()` |
+| `I18Next.Net.Avalonia` | Avalonia markup extension `{i18n:T key}` updating on language and translation changes |
 | `I18Next.Net.DataAnnotations` | Translated DataAnnotations messages and display names for MVC, minimal APIs and `Validator` |
 | `I18Next.Net.FluentValidation` | FluentValidation messages and display names from i18next |
 | `I18Next.Net.EntityFrameworkCore` | Backend and missing key handler storing translations in a database |
@@ -52,8 +53,8 @@ The documentation is available at [darklikally.github.io/I18Next.Net](https://da
 | `I18Next.Net.Generators` | Source generator for typed keys and translation methods, analyzers and code fixes for the translation files and Native AOT support |
 
 The packages target .NET Standard 2.0 (including .NET Framework 4.6.2 and later), .NET 6, .NET 8 and .NET 10. A .NET 11
-build is added automatically when building with a .NET 11 SDK. The Blazor, MAUI, Entity Framework Core and tool packages
-target .NET 8 and .NET 10, the WPF package .NET 8 and .NET 10 on Windows.
+build is added automatically when building with a .NET 11 SDK. The Blazor, MAUI, Avalonia, Entity Framework Core and
+tool packages target .NET 8 and .NET 10, the WPF package .NET 8 and .NET 10 on Windows.
 
 ## Installation
 
@@ -881,7 +882,7 @@ i18next-http-backend in the browser uses the same translations as the server. Th
 segments with the `routes` namespace (`{ "products": "produkte" }` in `de/routes.json`) and set the request culture.
 See [ASP.NET Core](https://darklikally.github.io/I18Next.Net/integrations/aspnetcore).
 
-## Blazor, WPF and .NET MAUI
+## Blazor, WPF, .NET MAUI and Avalonia
 
 ```csharp
 builder.Services.AddI18NextLocalization(i18n => i18n
@@ -902,16 +903,18 @@ Every circuit or browser tab has its own language (`IBlazorI18Next`), stored in 
 storage. Components render again when the language or the translation files change. WebAssembly apps load the
 translations with `AddHttpBackend()` and `await IBlazorI18Next.InitializeAsync()` before running.
 
-WPF and .NET MAUI use a markup extension which updates the texts when the language or the translation files change:
+WPF, .NET MAUI and Avalonia use a markup extension which updates the texts when the language or the translation files
+change:
 
 ```xml
 <TextBlock xmlns:i18n="https://github.com/DarkLiKally/I18Next.Net"
            Text="{i18n:T inbox, Count={Binding UnreadCount}}" />
 ```
 
-Set `I18NextXaml.Instance = i18n;` at startup in WPF, MAUI apps call `builder.UseI18Next(i18n => i18n.AddBackend(...))`.
-See [Blazor](https://darklikally.github.io/I18Next.Net/integrations/blazor) and
-[WPF and .NET MAUI](https://darklikally.github.io/I18Next.Net/integrations/xaml).
+Set `I18NextXaml.Instance = i18n;` at startup in WPF, MAUI apps call `builder.UseI18Next(i18n => i18n.AddBackend(...))`
+and Avalonia apps `AppBuilder.Configure<App>().UseI18Next(i18n)`. See
+[Blazor](https://darklikally.github.io/I18Next.Net/integrations/blazor) and
+[WPF, .NET MAUI and Avalonia](https://darklikally.github.io/I18Next.Net/integrations/xaml).
 
 ## Validation messages
 
@@ -1093,6 +1096,7 @@ npm run bench
 | [`Example.WebApp`](samples/Example.WebApp) | ASP.NET Core MVC with view localization |
 | [`Example.Blazor`](samples/Example.Blazor) | Blazor Web App with interactive server and WebAssembly pages, `Trans`, `LanguageSelector` and hot reload |
 | [`Example.Wpf`](samples/Example.Wpf) | WPF window with a language switcher and hot reload |
+| [`Example.Avalonia`](samples/Example.Avalonia) | Avalonia window with a language switcher and hot reload |
 | [`Example.Validation`](samples/Example.Validation) | Translated DataAnnotations and FluentValidation messages in MVC and minimal APIs |
 | [`Example.NativeAot`](samples/Example.NativeAot) | Native AOT application with anonymous arguments and typed models |
 | [`Example.ConsoleApp.NetCore`](samples/Example.ConsoleApp.NetCore) | Console application with and without dependency injection |

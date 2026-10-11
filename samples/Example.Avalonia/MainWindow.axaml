@@ -1,0 +1,19 @@
+<Window x:Class="Example.Avalonia.MainWindow"
+        xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:i18n="https://github.com/DarkLiKally/I18Next.Net"
+        xmlns:local="clr-namespace:Example.Avalonia"
+        x:DataType="local:MainViewModel"
+        Title="{i18n:T title}" Width="440" Height="320">
+    <StackPanel Margin="16">
+        <ComboBox ItemsSource="{Binding Languages}" SelectedItem="{Binding Language}" Width="140" />
+
+        <TextBlock Margin="0,16,0,0" FontSize="18" Text="{i18n:T greeting, Args={Binding Name}}" />
+        <TextBox Margin="0,8,0,0" Text="{Binding Name}" />
+
+        <TextBlock Margin="0,16,0,0" Text="{i18n:T inbox, Count={Binding Count}}" />
+        <Slider Margin="0,8,0,0" Minimum="0" Maximum="10" IsSnapToTickEnabled="True" TickFrequency="1" Value="{Binding Count}" />
+
+        <TextBlock Margin="0,16,0,0" Foreground="Gray" TextWrapping="Wrap" Text="{i18n:T hint}" />
+    </StackPanel>
+</Window>
