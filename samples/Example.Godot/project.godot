@@ -1,0 +1,22 @@
+; Engine configuration file.
+
+config_version=5
+
+[application]
+
+config/name="I18Next.Net Godot sample"
+run/main_scene="res://Main.tscn"
+config/features=PackedStringArray("4.3", "C#")
+
+[autoload]
+
+Localization="*res://Localization.cs"
+
+[display]
+
+window/size/viewport_width=640
+window/size/viewport_height=360
+
+[dotnet]
+
+project/assembly_name="Example.Godot"

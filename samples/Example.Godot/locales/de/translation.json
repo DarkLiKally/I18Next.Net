@@ -1,0 +1,11 @@
+{
+  "title": "I18Next.Net Godot-Beispiel",
+  "inbox_zero": "Du hast keine Nachrichten",
+  "inbox_one": "Du hast {{count}} Nachricht",
+  "inbox_other": "Du hast {{count}} Nachrichten",
+  "buttons": {
+    "addMessage": "Nachricht hinzufügen",
+    "switchLanguage": "English"
+  },
+  "hint": "Bearbeite locales/de/translation.json, während das Spiel aus dem Editor läuft, um die Änderungen sofort zu sehen."
+}

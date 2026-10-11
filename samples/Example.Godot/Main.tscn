@@ -1,0 +1,51 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Main.cs" id="1"]
+
+[node name="Main" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="Layout" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -80.0
+offset_right = 200.0
+offset_bottom = 80.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="Layout"]
+layout_mode = 2
+text = "title"
+horizontal_alignment = 1
+
+[node name="Inbox" type="Label" parent="Layout"]
+auto_translate_mode = 2
+layout_mode = 2
+horizontal_alignment = 1
+
+[node name="AddMessage" type="Button" parent="Layout"]
+layout_mode = 2
+text = "buttons.addMessage"
+
+[node name="SwitchLanguage" type="Button" parent="Layout"]
+layout_mode = 2
+text = "buttons.switchLanguage"
+
+[node name="Hint" type="Label" parent="Layout"]
+layout_mode = 2
+text = "hint"
+horizontal_alignment = 1
+autowrap_mode = 3

@@ -14,6 +14,7 @@
   <Project Path="samples/Example.ConsoleApp.NetCore/Example.ConsoleApp.NetCore.csproj" />
   <Project Path="samples/Example.ConsoleApp.NetFramework/Example.ConsoleApp.NetFramework.csproj" />
   <Project Path="samples/Example.Features/Example.Features.csproj" />
+  <Project Path="samples/Example.Godot/Example.Godot.csproj" />
   <Project Path="samples/Example.MinimalApi/Example.MinimalApi.csproj" />
   <Project Path="samples/Example.NativeAot/Example.NativeAot.csproj" />
   <Project Path="samples/Example.SourceGenerator/Example.SourceGenerator.csproj" />
