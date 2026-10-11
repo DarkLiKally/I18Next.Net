@@ -19,7 +19,9 @@ using Microsoft.Extensions.Options;
 namespace I18Next.Net.Extensions.Builder;
 
 /// <summary>
-///     Allows registering I18Next into an IServiceCollection using simple fluent configuration methods.
+///     Allows registering I18Next into an <see cref="IServiceCollection" /> using simple fluent configuration methods.
+///     Usually used through
+///     <see cref="ServiceCollectionExtensions.AddI18NextLocalization(IServiceCollection, Action{I18NextBuilder})" />.
 /// </summary>
 public class I18NextBuilder
 {
@@ -28,7 +30,8 @@ public class I18NextBuilder
     private string _watchedPath;
 
     /// <summary>
-    ///     Constructor.
+    ///     Creates a builder registering the services in the given collection and registers the
+    ///     <see cref="I18NextOptions" />. Call <see cref="Build" /> after the configuration.
     /// </summary>
     /// <param name="services">Underlying service collection.</param>
     public I18NextBuilder(IServiceCollection services)
@@ -38,7 +41,8 @@ public class I18NextBuilder
     }
 
     /// <summary>
-    ///     Provides direct access to the underlying IServiceCollection used to register the services and plugins.
+    ///     Provides direct access to the underlying <see cref="IServiceCollection" /> used to register the services and
+    ///     plugins.
     /// </summary>
     public IServiceCollection Services { get; }
 
@@ -49,7 +53,7 @@ public class I18NextBuilder
     ///     <para>
     ///         Note: The configuring I18Next instance can only use one backend at a time. By default the last registered
     ///         backend will be used.
-    ///         You can use a ChainedBackend to combine multiple backend implementations into one.
+    ///         You can use a <see cref="ChainedBackend" /> to combine multiple backend implementations into one.
     ///     </para>
     /// </remarks>
     /// <param name="backend">The translation backend instance.</param>
@@ -68,7 +72,7 @@ public class I18NextBuilder
     ///     <para>
     ///         Note: The configuring I18Next instance can only use one backend at a time. By default the last registered
     ///         backend will be used.
-    ///         You can use a ChainedBackend to combine multiple backend implementations into one.
+    ///         You can use a <see cref="ChainedBackend" /> to combine multiple backend implementations into one.
     ///     </para>
     /// </remarks>
     /// <typeparam name="T">Type of the translation backend.</typeparam>
@@ -88,7 +92,7 @@ public class I18NextBuilder
     ///     <para>
     ///         Note: The configuring I18Next instance can only use one backend at a time. By default the last registered
     ///         backend will be used.
-    ///         You can use a ChainedBackend to combine multiple backend implementations into one.
+    ///         You can use a <see cref="ChainedBackend" /> to combine multiple backend implementations into one.
     ///     </para>
     /// </remarks>
     /// <param name="factory">Translation backend factory function.</param>
@@ -160,7 +164,6 @@ public class I18NextBuilder
     ///     </para>
     ///     <para>It is possible to use multiple formatters.</para>
     /// </remarks>
-    /// <para>It is possible to use multiple formatters.</para>
     /// <typeparam name="T">The formatter plugin type.</typeparam>
     /// <returns>The current I18Next builder instance.</returns>
     public I18NextBuilder AddFormatter<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>()
@@ -491,8 +494,8 @@ public class I18NextBuilder
     ///         The default translator will use it.
     ///     </para>
     ///     <para>
-    ///         Note: The configuring default I18Next instance can only use one plural resolver at a time. By default the last
-    ///         registered plural resolver will be used.
+    ///         Note: The configuring default I18Next instance can only use one plural resolver at a time. By default
+    ///         the last registered plural resolver will be used.
     ///     </para>
     /// </remarks>
     /// <param name="pluralResolver">The plural resolver instance.</param>
@@ -513,8 +516,8 @@ public class I18NextBuilder
     ///         The default translator will use it.
     ///     </para>
     ///     <para>
-    ///         Note: The configuring default I18Next instance can only use one logger at a time. By default the last
-    ///         registered logger will be used.
+    ///         Note: The configuring default I18Next instance can only use one plural resolver at a time. By default
+    ///         the last registered plural resolver will be used.
     ///     </para>
     /// </remarks>
     /// <typeparam name="T">The plural resolver plugin type.</typeparam>
@@ -536,8 +539,8 @@ public class I18NextBuilder
     ///         The default translator will use it.
     ///     </para>
     ///     <para>
-    ///         Note: The configuring default I18Next instance can only use one plural resolver at a time. By default the last
-    ///         registered plural resolver will be used.
+    ///         Note: The configuring default I18Next instance can only use one plural resolver at a time. By default
+    ///         the last registered plural resolver will be used.
     ///     </para>
     /// </remarks>
     /// <param name="factory">Plural resolver plugin factory function.</param>
@@ -612,7 +615,7 @@ public class I18NextBuilder
     }
 
     /// <summary>
-    ///     Registers the provided instance of a translator plugin.
+    ///     Registers a new translator plugin of the given type.
     /// </summary>
     /// <remarks>
     ///     <para>
@@ -621,6 +624,7 @@ public class I18NextBuilder
     ///         It's not supported to combine multiple translator plugins.
     ///     </para>
     /// </remarks>
+    /// <typeparam name="T">The translator plugin type.</typeparam>
     /// <returns>The current I18Next builder instance.</returns>
     public I18NextBuilder AddTranslator<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>()
         where T : class, ITranslator
@@ -631,7 +635,7 @@ public class I18NextBuilder
     }
 
     /// <summary>
-    ///     Registers a new translator plugin of the given type.
+    ///     Registers the provided instance of a translator plugin.
     /// </summary>
     /// <remarks>
     ///     <para>
@@ -639,8 +643,12 @@ public class I18NextBuilder
     ///         translator will be used.
     ///         It's not supported to combine multiple translator plugins.
     ///     </para>
+    ///     <para>
+    ///         Note: Registered post processors, missing key handlers, plural resolvers and interpolators are only passed
+    ///         to the default translator.
+    ///     </para>
     /// </remarks>
-    /// <param name="translator">The translator plugin type.</param>
+    /// <param name="translator">The translator instance.</param>
     /// <returns>The current I18Next builder instance.</returns>
     public I18NextBuilder AddTranslator(ITranslator translator)
     {
@@ -671,8 +679,16 @@ public class I18NextBuilder
     }
 
     /// <summary>
-    ///     Build the final service configurations and applies them to the underlying IServiceCollection.
+    ///     Builds the final service configurations and applies them to the underlying <see cref="IServiceCollection" />.
+    ///     Registers the default plugins for the plugin types which were not registered, applies
+    ///     <see cref="WatchTranslationFiles" /> and <see cref="UseDistributedCache" /> to the registered backend, and
+    ///     registers <see cref="II18Next" />, <see cref="II18NextFactory" /> and the <c>IStringLocalizer</c> services.
     /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///         Note: <c>AddI18NextLocalization</c> calls it after the configuration callback.
+    ///     </para>
+    /// </remarks>
     public void Build()
     {
         AddSingletonIfNotPresent(DefaultLoggerFactory);
@@ -696,8 +712,14 @@ public class I18NextBuilder
     ///     Watches the translation files of the registered file based backend and loads changed namespaces again without
     ///     restarting the application. Meant for development.
     /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///         Note: <see cref="Build" /> wraps the last registered backend in a <see cref="FileWatchingBackend" />.
+    ///     </para>
+    /// </remarks>
     /// <param name="basePath">The directory containing the translation files in the <c>{lng}/{ns}.{extension}</c> layout.</param>
     /// <returns>The current I18Next builder instance.</returns>
+    /// <exception cref="ArgumentException"><paramref name="basePath" /> is <c>null</c> or empty.</exception>
     public I18NextBuilder WatchTranslationFiles(string basePath = "locales")
     {
         if (string.IsNullOrEmpty(basePath))
@@ -718,6 +740,10 @@ public class I18NextBuilder
     ///         Note: Changed translations of the registered backend are only picked up when the cached namespaces expire or
     ///         are removed from the cache.
     ///     </para>
+    ///     <para>
+    ///         Note: An <see cref="IDistributedCache" /> has to be registered, e.g. with
+    ///         <c>AddStackExchangeRedisCache</c>.
+    ///     </para>
     /// </remarks>
     /// <param name="configureBackend">Configures the cache backend, e.g. its key prefix or the expiration of namespaces.</param>
     /// <returns>The current I18Next builder instance.</returns>
@@ -732,7 +758,7 @@ public class I18NextBuilder
     /// <summary>
     ///     Allows configuration of some global I18Next options.
     /// </summary>
-    /// <param name="configure">Configuration callback.</param>
+    /// <param name="configure">Configuration callback, may be <c>null</c>.</param>
     /// <returns>The current I18Next builder instance.</returns>
     public I18NextBuilder Configure(Action<I18NextOptions> configure)
     {
@@ -778,9 +804,8 @@ public class I18NextBuilder
 
     /// <summary>
     ///     Sets one or more globally used fallback languages used by I18Next to resolve translations if the default or
-    ///     requested language does
-    ///     not provide a value for a requested key. The fallback languages will be checked in given order until a value is
-    ///     found.
+    ///     requested language does not provide a value for a requested key. The fallback languages will be checked in
+    ///     given order until a value is found.
     /// </summary>
     /// <remarks>
     ///     <para>Allowed format examples: de-DE, en-US, en, de, en-GB</para>

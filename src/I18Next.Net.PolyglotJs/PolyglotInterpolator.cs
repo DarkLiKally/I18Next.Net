@@ -8,6 +8,10 @@ using I18Next.Net.Plugins;
 
 namespace I18Next.Net.PolyglotJs;
 
+/// <summary>
+///     An interpolator for translations in Polyglot.js format: <c>%{name}</c> placeholders and plural forms separated by
+///     <c>||||</c>, selected with the <c>smart_count</c> argument. Nesting is not supported.
+/// </summary>
 public class PolyglotInterpolator : IInterpolator
 {
     private static readonly Dictionary<string, Func<int, int>> LanguageToTypeMap;
@@ -74,49 +78,49 @@ public class PolyglotInterpolator : IInterpolator
         }
     }
 
+    /// <summary>
+    ///     The delimiter separating the plural forms of a translation, <c>||||</c> by default.
+    /// </summary>
     public string PluralDelimiter { get; set; } = "||||";
 
+    /// <summary>
+    ///     Returns <c>false</c> because nesting is not supported.
+    /// </summary>
+    /// <param name="source">The interpolated translation.</param>
+    /// <returns>Always <c>false</c>.</returns>
     public bool CanNest(string source)
     {
         return false;
     }
 
+    /// <summary>
+    ///     The formatters applied to the inserted values. All formatters which can format a value are applied in order
+    ///     and the last result is used. The format is taken from the argument named after the placeholder with a
+    ///     <c>_format</c> suffix.
+    /// </summary>
     public List<IFormatter> Formatters { get; } = [];
 
     /// <summary>
-    ///     <para>
-    ///         Takes a phrase string and transforms it by choosing the correct
-    ///         plural form and interpolating it.
-    ///         <code>
-    ///             transformPhrase('Hello, %{name}!', {name: 'Spike'});
-    ///             // "Hello, Spike!"
-    ///         </code>
-    ///     </para>
-    ///     <para>
-    ///         The correct plural form is selected if substitutions.smart_count
-    ///         is set. You can pass in a number instead of an Object as `substitutions`
-    ///         as a shortcut for `smart_count`.
-    ///         <code>
-    ///             transformPhrase('%{smart_count} new messages |||| 1 new message', {smart_count: 1}, 'en');
-    ///             // "1 new message"
-    /// 
-    ///             transformPhrase('%{smart_count} new messages |||| 1 new message', {smart_count: 2}, 'en');
-    ///             // "2 new messages"
-    /// 
-    ///             transformPhrase('%{smart_count} new messages |||| 1 new message', 5, 'en');
-    ///             // "5 new messages"
-    ///         </code>
-    ///     </para>
-    ///     <para>
-    ///         You should pass in a third argument, the locale, to specify the correct plural type.
-    ///         It defaults to `'en'` with 2 plural forms.
-    ///     </para>
+    ///     Chooses the plural form of a translation and inserts the arguments into its placeholders, like the Polyglot.js
+    ///     <c>transformPhrase</c>.
     /// </summary>
-    /// <param name="source"></param>
-    /// <param name="key"></param>
-    /// <param name="language"></param>
-    /// <param name="args"></param>
-    /// <returns></returns>
+    /// <remarks>
+    ///     <para>
+    ///         If the <c>smart_count</c> argument is an <see cref="int" />, the translation is split at
+    ///         <see cref="PluralDelimiter" /> and the form is chosen by the Polyglot.js plural rules of the language part,
+    ///         e.g. <c>"%{smart_count} car |||| %{smart_count} cars"</c>. Languages without rules and missing forms use
+    ///         the first form.
+    ///     </para>
+    ///     <para>
+    ///         Placeholders are looked up in the arguments by the whole placeholder including the delimiters, e.g. the
+    ///         argument <c>%{name}</c> for the placeholder <c>%{name}</c>. Placeholders without argument are kept.
+    ///     </para>
+    /// </remarks>
+    /// <param name="source">The translation in Polyglot.js format.</param>
+    /// <param name="key">The key of the translation. Ignored.</param>
+    /// <param name="language">The language whose plural rules are used, <c>en</c> if <c>null</c>.</param>
+    /// <param name="args">The arguments, may be <c>null</c>.</param>
+    /// <returns>The interpolated translation or <c>null</c> if <paramref name="source" /> is <c>null</c>.</returns>
     public Task<string> InterpolateAsync(string source, string key, string language, IDictionary<string, object> args)
     {
         if (source == null)
@@ -180,6 +184,15 @@ public class PolyglotInterpolator : IInterpolator
         return Task.FromResult(result);
     }
 
+    /// <summary>
+    ///     Not supported, <see cref="CanNest" /> always returns <c>false</c>.
+    /// </summary>
+    /// <param name="source">The interpolated translation.</param>
+    /// <param name="language">The language of the translation.</param>
+    /// <param name="args">The arguments of the translation.</param>
+    /// <param name="translateAsync">Translates the nested keys.</param>
+    /// <returns>Never returns.</returns>
+    /// <exception cref="NotSupportedException">Always.</exception>
     public Task<string> NestAsync(string source, string language, IDictionary<string, object> args, TranslateAsyncDelegate translateAsync)
     {
         throw new NotSupportedException("Nesting is not supported by the Polyglot.js format interpolator.");

@@ -10,27 +10,24 @@ using NGettext;
 namespace I18Next.Net.Gettext;
 
 /// <summary>
-///     Backend for retrieving translations from a compiled Gettext mo-file.
+///     Backend for retrieving translations from compiled Gettext <c>{basePath}/{language}/{namespace}.mo</c> files,
+///     falling back to the folder of the language part (e.g. <c>de</c> for <c>de-AT</c>). The message ids are used as
+///     keys.
 /// </summary>
 /// <remarks>
 ///     <para>
-///         Translated string arrays are loaded as plurals and get suffixed with the corresponding plural suffix for
-///         further internal processing.
-///         Use the provided pluralization options to customize the outcome of plural suffixes.
-///         The provided pluralization rules from the mo file header is ignored. We're simply using the I18Next plural
-///         resolver later.
+///         The plural forms of a message are loaded as separate keys suffixed with a plural suffix, see
+///         <see cref="UseSimplePluralSuffix" /> and <see cref="PluralSeparator" />. The plural rules of the mo file
+///         header are ignored, the I18Next plural resolver chooses the plural form instead.
 ///     </para>
 /// </remarks>
-/// <remarks>
-///     Constructor providing a base path override.
-/// </remarks>
-/// <param name="basePath"></param>
+/// <param name="basePath">The folder containing the language folders.</param>
 public class GettextBackend(string basePath) : ITranslationBackend
 {
     private readonly string _basePath = basePath;
 
     /// <summary>
-    ///     Default constructor.
+    ///     Creates a backend loading the files from the <c>locales</c> folder.
     /// </summary>
     public GettextBackend()
         : this("locales")
@@ -43,8 +40,9 @@ public class GettextBackend(string basePath) : ITranslationBackend
     public string PluralSeparator { get; set; } = "_";
 
     /// <summary>
-    ///     Whether to use simple plural suffixes ('plural' for plural and nothing for singular).
-    ///     If set to false all translations would be suffixed with the corresponding plural number.
+    ///     Whether to use simple plural suffixes: no suffix for the first form, <c>plural</c> for the second form and the
+    ///     form number for further forms (e.g. <c>key</c>, <c>key_plural</c>, <c>key_3</c>). If set to false all
+    ///     translations are suffixed with their form number starting at 1 (e.g. <c>key_1</c>, <c>key_2</c>).
     /// </summary>
     public bool UseSimplePluralSuffix { get; set; } = true;
 

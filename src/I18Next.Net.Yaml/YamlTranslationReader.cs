@@ -12,6 +12,13 @@ namespace I18Next.Net.Yaml;
 /// </summary>
 public static class YamlTranslationReader
 {
+    /// <summary>
+    ///     Reads YAML translations into a hierarchical translation tree.
+    /// </summary>
+    /// <param name="yaml">The YAML content whose root is a mapping.</param>
+    /// <param name="namespace">The namespace assigned to the tree.</param>
+    /// <returns>The translation tree. Empty if the content has no root mapping.</returns>
+    /// <exception cref="YamlDotNet.Core.YamlException">The content is not valid YAML.</exception>
     public static ITranslationTree Read(string yaml, string @namespace = null)
     {
         var builder = new HierarchicalTranslationTreeBuilder { Namespace = @namespace };
@@ -19,6 +26,13 @@ public static class YamlTranslationReader
         return Read(yaml, builder);
     }
 
+    /// <summary>
+    ///     Reads YAML translations with the given tree builder.
+    /// </summary>
+    /// <param name="yaml">The YAML content whose root is a mapping.</param>
+    /// <param name="builder">The builder the translations are added to.</param>
+    /// <returns>The tree built by the builder.</returns>
+    /// <exception cref="YamlDotNet.Core.YamlException">The content is not valid YAML.</exception>
     public static ITranslationTree Read(string yaml, ITranslationTreeBuilder builder)
     {
         using var reader = new StringReader(yaml);
@@ -26,6 +40,14 @@ public static class YamlTranslationReader
         return Read(reader, builder);
     }
 
+    /// <summary>
+    ///     Reads YAML translations with the given tree builder. Only the first document is read and null values are
+    ///     skipped.
+    /// </summary>
+    /// <param name="reader">The reader providing the YAML content whose root is a mapping.</param>
+    /// <param name="builder">The builder the translations are added to.</param>
+    /// <returns>The tree built by the builder.</returns>
+    /// <exception cref="YamlDotNet.Core.YamlException">The content is not valid YAML.</exception>
     public static ITranslationTree Read(TextReader reader, ITranslationTreeBuilder builder)
     {
         var stream = new YamlStream();

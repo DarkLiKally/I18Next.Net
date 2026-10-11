@@ -8,7 +8,8 @@ using I18Next.Net.Plugins;
 namespace I18Next.Net;
 
 /// <summary>
-///     I18Next.Net instance.
+///     An I18Next.Net instance, the equivalent of the i18next instance: translates keys into its current language or a
+///     given language with the configured backend, translator and language detector.
 /// </summary>
 public interface II18Next
 {
@@ -18,7 +19,7 @@ public interface II18Next
     ITranslationBackend Backend { get; }
 
     /// <summary>
-    ///     Default namespace to be used to retrieve translations.
+    ///     Default namespace used for keys without namespace prefix, like the i18next <c>defaultNS</c> option.
     /// </summary>
     string DefaultNamespace { get; set; }
 
@@ -29,7 +30,8 @@ public interface II18Next
     bool DetectLanguageOnEachTranslation { get; set; }
 
     /// <summary>
-    ///     The language used to retrieve translations from the backend.
+    ///     The current language used to retrieve translations from the backend. Setting a different language raises
+    ///     <see cref="LanguageChanged" />.
     /// </summary>
     string Language { get; set; }
 
@@ -44,7 +46,7 @@ public interface II18Next
     ITranslator Translator { get; }
 
     /// <summary>
-    ///     Event fired when the default language has changed.
+    ///     Raised when <see cref="Language" /> has changed.
     /// </summary>
     event EventHandler<LanguageChangedEventArgs> LanguageChanged;
 
@@ -84,7 +86,7 @@ public interface II18Next
     Task<string> Ta(string key, object args = null);
 
     /// <summary>
-    ///     Translates the given key into the default language.
+    ///     Translates the given key into the provided language.
     /// </summary>
     /// <param name="language">Target language override.</param>
     /// <param name="key">Key to be translated.</param>

@@ -3,13 +3,14 @@
 namespace I18Next.Net.Logging;
 
 /// <summary>
-///     ILogger interface for common scenarios.
+///     A logger plugin receiving the log messages of I18Next.Net, e.g. missing translations. Implementations forward them
+///     to a logging framework.
 /// </summary>
 public interface ILogger
 {
     /// <summary>Checks whether the given log level is enabled in this logger instance.</summary>
     /// <param name="logLevel">The log level to check.</param>
-    /// <returns>Boolean whether the log level is enabled</returns>
+    /// <returns>Whether the log level is enabled.</returns>
     bool IsEnabled(LogLevel logLevel);
 
     /// <summary>Formats and writes a log message with the given level.</summary>
@@ -30,6 +31,6 @@ public interface ILogger
     ///     <code>"User {User} logged in from {Address}"</code>
     /// </param>
     /// <param name="args">An object array that contains zero or more objects to format.</param>
-    /// <example>logger.Log(LogLevel.Error, exception, "Error while processing request from {Address}", address)</example>
+    /// <example>logger.Log(LogLevel.Error, "Error while processing request from {Address}", address)</example>
     void Log(LogLevel logLevel, string message, params object[] args);
 }

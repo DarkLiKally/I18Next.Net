@@ -20,16 +20,32 @@ namespace I18Next.Net.Extensions.Backends;
 /// </summary>
 public class DistributedCacheBackend : IWritableTranslationBackend
 {
+    /// <summary>
+    ///     The default <see cref="KeyPrefix" />, <c>i18next:</c>.
+    /// </summary>
     public const string DefaultKeyPrefix = "i18next:";
 
     private readonly IDistributedCache _cache;
     private readonly ITranslationTreeBuilderFactory _treeBuilderFactory;
 
+    /// <summary>
+    ///     Creates a backend storing namespaces in the given cache and loading them into hierarchical translation trees.
+    /// </summary>
+    /// <param name="cache">The cache the namespaces are stored in.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="cache" /> is <c>null</c>.</exception>
     public DistributedCacheBackend(IDistributedCache cache)
         : this(cache, new GenericTranslationTreeBuilderFactory<HierarchicalTranslationTreeBuilder>())
     {
     }
 
+    /// <summary>
+    ///     Creates a backend storing namespaces in the given cache.
+    /// </summary>
+    /// <param name="cache">The cache the namespaces are stored in.</param>
+    /// <param name="treeBuilderFactory">Creates the builders of the loaded translation trees.</param>
+    /// <exception cref="ArgumentNullException">
+    ///     <paramref name="cache" /> or <paramref name="treeBuilderFactory" /> is <c>null</c>.
+    /// </exception>
     public DistributedCacheBackend(IDistributedCache cache, ITranslationTreeBuilderFactory treeBuilderFactory)
     {
         _cache = cache ?? throw new ArgumentNullException(nameof(cache));
@@ -58,6 +74,15 @@ public class DistributedCacheBackend : IWritableTranslationBackend
     /// </summary>
     public ILogger Logger { get; set; }
 
+    /// <summary>
+    ///     Loads a namespace stored in the cache.
+    /// </summary>
+    /// <param name="language">The language of the namespace, used as it is.</param>
+    /// <param name="namespace">The namespace.</param>
+    /// <returns>
+    ///     The stored translations or <c>null</c> if the namespace is not stored, or if loading it failed and
+    ///     <see cref="IgnoreCacheFailures" /> is enabled.
+    /// </returns>
     public async Task<ITranslationTree> LoadNamespaceAsync(string language, string @namespace)
     {
         try
@@ -75,6 +100,15 @@ public class DistributedCacheBackend : IWritableTranslationBackend
         }
     }
 
+    /// <summary>
+    ///     Stores the translations of a namespace as a JSON object of the dotted keys with <see cref="EntryOptions" />.
+    ///     Failures are ignored if <see cref="IgnoreCacheFailures" /> is enabled.
+    /// </summary>
+    /// <param name="language">The language of the namespace.</param>
+    /// <param name="namespace">The namespace.</param>
+    /// <param name="tree">The translations to store.</param>
+    /// <returns>A task completing when the namespace is stored.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="tree" /> is <c>null</c>.</exception>
     public async Task SaveNamespaceAsync(string language, string @namespace, ITranslationTree tree)
     {
         if (tree == null)
@@ -96,11 +130,20 @@ public class DistributedCacheBackend : IWritableTranslationBackend
     /// <summary>
     ///     Removes a stored namespace, e.g. after its translations were updated. Failures are not ignored.
     /// </summary>
+    /// <param name="language">The language of the namespace.</param>
+    /// <param name="namespace">The namespace.</param>
+    /// <returns>A task completing when the namespace is removed.</returns>
     public Task RemoveNamespaceAsync(string language, string @namespace)
     {
         return _cache.RemoveAsync(GetKey(language, @namespace));
     }
 
+    /// <summary>
+    ///     Gets the cache key of a namespace.
+    /// </summary>
+    /// <param name="language">The language of the namespace.</param>
+    /// <param name="namespace">The namespace.</param>
+    /// <returns>The key, <c>{prefix}{language}:{namespace}</c> by default.</returns>
     protected virtual string GetKey(string language, string @namespace)
     {
         return $"{KeyPrefix}{language}:{@namespace}";

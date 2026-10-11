@@ -7,6 +7,9 @@ namespace I18Next.Net;
 ///     files of the source language. The files have to be added as <c>AdditionalFiles</c> and the
 ///     <c>I18Next.Net.Generators</c> package has to be referenced.
 /// </summary>
+/// <param name="path">
+///     The folder containing the <c>{language}/{namespace}.json</c> files, relative to the project.
+/// </param>
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 public sealed class I18NextResourcesAttribute(string path) : Attribute
 {
@@ -26,6 +29,10 @@ public sealed class I18NextResourcesAttribute(string path) : Attribute
     /// </summary>
     public string DefaultNamespace { get; set; } = "translation";
 
+    /// <summary>
+    ///     The separator between namespace and key used in the generated keys and in the analyzed keys, which has to
+    ///     match the namespace separator of the translator.
+    /// </summary>
     public string NamespaceSeparator { get; set; } = ":";
 
     /// <summary>
