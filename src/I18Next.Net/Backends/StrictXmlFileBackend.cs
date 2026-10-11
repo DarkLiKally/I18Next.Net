@@ -78,6 +78,7 @@ public class StrictXmlFileBackend(string basePath, ITranslationTreeBuilderFactor
         }
 
         var builder = _treeBuilderFactory.Create();
+        builder.Namespace = @namespace;
 
         PopulateTreeBuilder("", parsedXml, builder);
 

@@ -75,6 +75,7 @@ public class IniFileBackend(string basePath, ITranslationTreeBuilderFactory tree
         var iniReader = new SimpleIniParser(iniContent);
 
         var builder = _treeBuilderFactory.Create();
+        builder.Namespace = @namespace;
 
         PopulateTreeBuilder(iniReader, builder);
 

@@ -76,6 +76,7 @@ public class XmlFileBackend(string basePath, ITranslationTreeBuilderFactory tree
         }
 
         var builder = _treeBuilderFactory.Create();
+        builder.Namespace = @namespace;
 
         PopulateTreeBuilder("", parsedXml, builder);
 

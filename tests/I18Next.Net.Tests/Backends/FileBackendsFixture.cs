@@ -43,6 +43,15 @@ public class FileBackendsFixture
     }
 
     [Fact]
+    public async Task LoadNamespaceAsync_ShouldSetNamespaceOfTree()
+    {
+        (await new JsonFileBackend("TestFiles").LoadNamespaceAsync("en-US", "test")).Namespace.ShouldBe("test");
+        (await new XmlFileBackend("TestFiles").LoadNamespaceAsync("en-US", "test")).Namespace.ShouldBe("test");
+        (await new IniFileBackend("TestFiles").LoadNamespaceAsync("en-US", "test")).Namespace.ShouldBe("test");
+        (await new StrictXmlFileBackend("TestFiles").LoadNamespaceAsync("en-US", "test-strict")).Namespace.ShouldBe("test-strict");
+    }
+
+    [Fact]
     public async Task JsonFileBackend_DifferentValueTypes_ShouldBeConvertedToStrings()
     {
         var tree = await new JsonFileBackend("TestFiles").LoadNamespaceAsync("en-US", "types");

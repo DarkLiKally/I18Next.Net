@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 
 using I18Next.Net.Plugins;
 
@@ -13,7 +14,7 @@ public class UppercaseFormatter : IFormatter
     /// <inheritdoc />
     public bool CanFormat(object value, string format, string language)
     {
-        return format.ToLowerInvariant() == "uppercase";
+        return string.Equals(format, "uppercase", StringComparison.OrdinalIgnoreCase);
     }
 
     /// <inheritdoc />

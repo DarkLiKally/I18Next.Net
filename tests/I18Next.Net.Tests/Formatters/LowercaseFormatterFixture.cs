@@ -19,6 +19,7 @@ public class LowercaseFormatterFixture
     public void CanFormat_ProvideOtherFormat_ShouldReturnFalse()
     {
         _formatter.CanFormat("Test", "uppercase", "en-US").ShouldBeFalse();
+        _formatter.CanFormat("Test", null, "en-US").ShouldBeFalse();
         _formatter.CanFormat("Test", "test", "en-US").ShouldBeFalse();
         _formatter.CanFormat("Test", "DD/MM/YYYY", "en-US").ShouldBeFalse();
     }
