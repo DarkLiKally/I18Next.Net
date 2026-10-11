@@ -1,0 +1,9 @@
+{
+  "title": "Hello",
+  "greeting": "Hello {{name}}",
+  "inbox_one": "One message",
+  "inbox_other": "{{count}} messages",
+  "friend": "A friend",
+  "friend_male": "A boyfriend",
+  "onlyEnglish": "Only English"
+}

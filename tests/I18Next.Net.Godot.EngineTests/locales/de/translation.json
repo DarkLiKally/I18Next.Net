@@ -1,0 +1,8 @@
+{
+  "title": "Hallo",
+  "greeting": "Hallo {{name}}",
+  "inbox_one": "Eine Nachricht",
+  "inbox_other": "{{count}} Nachrichten",
+  "friend": "Ein Freund",
+  "friend_male": "Ein fester Freund"
+}

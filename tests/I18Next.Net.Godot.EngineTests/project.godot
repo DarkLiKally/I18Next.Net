@@ -1,0 +1,13 @@
+; Engine configuration file.
+
+config_version=5
+
+[application]
+
+config/name="I18Next.Net.Godot.EngineTests"
+run/main_scene="res://EngineTests.tscn"
+config/features=PackedStringArray("4.3", "C#")
+
+[dotnet]
+
+project/assembly_name="I18Next.Net.Godot.EngineTests"

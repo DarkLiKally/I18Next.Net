@@ -31,6 +31,7 @@
   <Project Path="src/I18Next.Net.Generators.CodeFixes/I18Next.Net.Generators.CodeFixes.csproj" />
   <Project Path="src/I18Next.Net.Generators/I18Next.Net.Generators.csproj" />
   <Project Path="src/I18Next.Net.Gettext/I18Next.Net.Gettext.csproj" />
+  <Project Path="src/I18Next.Net.Godot/I18Next.Net.Godot.csproj" />
   <Project Path="src/I18Next.Net.ICU/I18Next.Net.ICU.csproj" />
   <Project Path="src/I18Next.Net.MachineTranslation/I18Next.Net.MachineTranslation.csproj" />
   <Project Path="src/I18Next.Net.Maui/I18Next.Net.Maui.csproj" />
@@ -48,6 +49,8 @@
   <Project Path="tests/I18Next.Net.EntityFrameworkCore.Tests/I18Next.Net.EntityFrameworkCore.Tests.csproj" />
   <Project Path="tests/I18Next.Net.FluentValidation.Tests/I18Next.Net.FluentValidation.Tests.csproj" />
   <Project Path="tests/I18Next.Net.Generators.Tests/I18Next.Net.Generators.Tests.csproj" />
+  <Project Path="tests/I18Next.Net.Godot.EngineTests/I18Next.Net.Godot.EngineTests.csproj" />
+  <Project Path="tests/I18Next.Net.Godot.Tests/I18Next.Net.Godot.Tests.csproj" />
   <Project Path="tests/I18Next.Net.MachineTranslation.Tests/I18Next.Net.MachineTranslation.Tests.csproj" />
   <Project Path="tests/I18Next.Net.Maui.Tests/I18Next.Net.Maui.Tests.csproj" />
   <Project Path="tests/I18Next.Net.Tests/I18Next.Net.Tests.csproj" />
