@@ -1,0 +1,16 @@
+{
+  "name": "I18Next.Net.Unity.Editor",
+  "rootNamespace": "I18Next.Net.Unity.Editor",
+  "references": [],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

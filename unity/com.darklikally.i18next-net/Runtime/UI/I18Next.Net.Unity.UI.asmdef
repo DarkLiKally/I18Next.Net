@@ -1,0 +1,28 @@
+{
+  "name": "I18Next.Net.Unity.UI",
+  "rootNamespace": "I18Next.Net.Unity",
+  "references": [
+    "I18Next.Net.Unity",
+    "UnityEngine.UI"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "I18Next.Net.dll",
+    "I18Next.Net.Abstractions.dll"
+  ],
+  "autoReferenced": true,
+  "defineConstraints": [
+    "I18NEXT_NET_UGUI"
+  ],
+  "versionDefines": [
+    {
+      "name": "com.unity.ugui",
+      "expression": "1.0.0",
+      "define": "I18NEXT_NET_UGUI"
+    }
+  ],
+  "noEngineReferences": false
+}

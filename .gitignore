@@ -655,3 +655,8 @@ Desktop.ini
 tools/**/node_modules/
 
 BenchmarkDotNet.Artifacts/
+
+# Unity package
+!tools/unity/
+!unity/**/*.meta
+!unity/**/Samples~/

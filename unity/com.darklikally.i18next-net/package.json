@@ -1,0 +1,29 @@
+{
+  "name": "com.darklikally.i18next-net",
+  "version": "2.1.0",
+  "displayName": "I18Next.Net",
+  "description": "A port of i18next for .NET. Translates Unity games with i18next JSON files from Resources, detects the system language and updates uGUI and TextMesh Pro texts when the language changes.",
+  "unity": "2021.3",
+  "documentationUrl": "https://darklikally.github.io/I18Next.Net/integrations/unity",
+  "changelogUrl": "https://github.com/DarkLiKally/I18Next.Net/blob/master/unity/com.darklikally.i18next-net/CHANGELOG.md",
+  "licensesUrl": "https://github.com/DarkLiKally/I18Next.Net/blob/master/unity/com.darklikally.i18next-net/LICENSE.md",
+  "license": "Apache-2.0",
+  "keywords": [
+    "i18next",
+    "i18n",
+    "localization",
+    "translation",
+    "l10n"
+  ],
+  "author": {
+    "name": "DarkLiKally",
+    "url": "https://github.com/DarkLiKally"
+  },
+  "samples": [
+    {
+      "displayName": "Basic",
+      "description": "Translates texts from Resources and switches the language at runtime.",
+      "path": "Samples~/Basic"
+    }
+  ]
+}

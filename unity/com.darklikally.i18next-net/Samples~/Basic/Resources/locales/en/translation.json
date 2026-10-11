@@ -1,0 +1,8 @@
+{
+  "title": "I18Next.Net for Unity",
+  "greeting": "Hello {{name}}!",
+  "apples_one": "{{count}} apple",
+  "apples_other": "{{count}} apples",
+  "addApple": "Add an apple",
+  "language": "Language"
+}

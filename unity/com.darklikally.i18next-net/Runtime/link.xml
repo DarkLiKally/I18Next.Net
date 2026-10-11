@@ -1,0 +1,4 @@
+<linker>
+  <assembly fullname="I18Next.Net" preserve="all" />
+  <assembly fullname="I18Next.Net.Abstractions" preserve="all" />
+</linker>

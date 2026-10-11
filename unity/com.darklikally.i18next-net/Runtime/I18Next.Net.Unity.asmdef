@@ -1,0 +1,17 @@
+{
+  "name": "I18Next.Net.Unity",
+  "rootNamespace": "I18Next.Net.Unity",
+  "references": [],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "I18Next.Net.dll",
+    "I18Next.Net.Abstractions.dll"
+  ],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

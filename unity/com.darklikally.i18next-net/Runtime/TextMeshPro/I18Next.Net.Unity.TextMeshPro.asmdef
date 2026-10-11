@@ -1,0 +1,33 @@
+{
+  "name": "I18Next.Net.Unity.TextMeshPro",
+  "rootNamespace": "I18Next.Net.Unity",
+  "references": [
+    "I18Next.Net.Unity",
+    "Unity.TextMeshPro"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "I18Next.Net.dll",
+    "I18Next.Net.Abstractions.dll"
+  ],
+  "autoReferenced": true,
+  "defineConstraints": [
+    "I18NEXT_NET_TEXTMESHPRO"
+  ],
+  "versionDefines": [
+    {
+      "name": "com.unity.textmeshpro",
+      "expression": "3.0.0",
+      "define": "I18NEXT_NET_TEXTMESHPRO"
+    },
+    {
+      "name": "com.unity.ugui",
+      "expression": "2.0.0",
+      "define": "I18NEXT_NET_TEXTMESHPRO"
+    }
+  ],
+  "noEngineReferences": false
+}
