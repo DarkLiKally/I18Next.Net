@@ -19,6 +19,7 @@ The documentation is available at [darklikally.github.io/I18Next.Net](https://da
 - [Typed keys with the source generator](#typed-keys-with-the-source-generator)
 - [Dependency injection and ASP.NET Core](#dependency-injection-and-aspnet-core)
 - [Blazor, WPF, .NET MAUI and Avalonia](#blazor-wpf-net-maui-and-avalonia)
+- [Unity and Godot](#unity-and-godot)
 - [Validation messages](#validation-messages)
 - [Command-line tool and machine translation](#command-line-tool-and-machine-translation)
 - [Trimming and Native AOT](#trimming-and-native-aot)
@@ -40,6 +41,7 @@ The documentation is available at [darklikally.github.io/I18Next.Net](https://da
 | `I18Next.Net.Wpf` | WPF markup extension `{i18n:T key}` updating on language and translation changes |
 | `I18Next.Net.Maui` | .NET MAUI markup extension `{i18n:T key}` and `UseI18Next()` |
 | `I18Next.Net.Avalonia` | Avalonia markup extension `{i18n:T key}` updating on language and translation changes |
+| `I18Next.Net.Godot` | Godot 4 integration: `Tr()` and auto translated controls use i18next, files load from `res://` |
 | `I18Next.Net.DataAnnotations` | Translated DataAnnotations messages and display names for MVC, minimal APIs and `Validator` |
 | `I18Next.Net.FluentValidation` | FluentValidation messages and display names from i18next |
 | `I18Next.Net.EntityFrameworkCore` | Backend and missing key handler storing translations in a database |
@@ -53,8 +55,8 @@ The documentation is available at [darklikally.github.io/I18Next.Net](https://da
 | `I18Next.Net.Generators` | Source generator for typed keys and translation methods, analyzers and code fixes for the translation files and Native AOT support |
 
 The packages target .NET Standard 2.0 (including .NET Framework 4.6.2 and later), .NET 6, .NET 8 and .NET 10. A .NET 11
-build is added automatically when building with a .NET 11 SDK. The Blazor, MAUI, Avalonia, Entity Framework Core and
-tool packages target .NET 8 and .NET 10, the WPF package .NET 8 and .NET 10 on Windows.
+build is added automatically when building with a .NET 11 SDK. The Blazor, MAUI, Avalonia, Godot, Entity Framework Core
+and tool packages target .NET 8 and .NET 10, the WPF package .NET 8 and .NET 10 on Windows.
 
 ## Installation
 
@@ -492,8 +494,11 @@ to the language part of a regional language (`de` for `de-CH`).
 | `InMemoryBackend` | `I18Next.Net` | Translations added in code |
 | `ChainedBackend` | `I18Next.Net` | Asks several backends in order, with optional caching, expiry and saving to earlier backends |
 | `FileWatchingBackend` | `I18Next.Net` | Wraps a file based backend and reloads changed files without restarting the application |
+| `ResxFileBackend` | `I18Next.Net` | .resx files from `{basePath}/{lng}/{ns}.resx` or `{basePath}/{ns}.{lng}.resx` with `{ns}.resx` for the neutral language |
+| `ResourceManagerBackend` | `I18Next.Net` | Compiled resources of a `ResourceManager`, e.g. of a .resx designer class, including satellite assemblies |
 | `DistributedCacheBackend` | `I18Next.Net.Extensions` | An `IDistributedCache` like Redis as cache in front of other backends |
 | `EntityFrameworkBackend<TContext>` | `I18Next.Net.EntityFrameworkCore` | A database table, editable at runtime |
+| `GodotFileBackend` | `I18Next.Net.Godot` | JSON files from Godot's `res://` file system |
 | `GettextBackend` | `I18Next.Net.Gettext` | Compiled gettext `.mo` files from `{basePath}/{lng}/{ns}.mo` |
 | `YamlFileBackend` | `I18Next.Net.Yaml` | YAML files from `{basePath}/{lng}/{ns}.yaml` or `.yml`, mappings and sequences like the JSON backend |
 
@@ -579,6 +584,17 @@ services.AddI18NextLocalization(i18n => i18n
     .AddHttpBackend("https://cdn.example.com/locales/{{lng}}/{{ns}}.json")
     .UseDistributedCache(cache => cache.KeyPrefix = "myapp:i18next:"));
 ```
+
+#### ResxFileBackend and ResourceManagerBackend
+
+```csharp
+var files = new ResxFileBackend("Resources") { NeutralLanguage = "en" };   // Strings.resx, Strings.de.resx or de/Strings.resx
+var compiled = new ResourceManagerBackend(Strings.ResourceManager)       // namespace "translation", satellite assemblies
+    .Add("errors", Errors.ResourceManager);
+```
+
+Applications moving from .NET resources keep their .resx files. Only string resources are used, keys with dots form
+groups. .NET placeholders like `{0}` are not converted, `dotnet i18next convert` converts .resx files to i18next JSON.
 
 #### FileWatchingBackend
 
@@ -916,6 +932,33 @@ and Avalonia apps `AppBuilder.Configure<App>().UseI18Next(i18n)`. See
 [Blazor](https://darklikally.github.io/I18Next.Net/integrations/blazor) and
 [WPF, .NET MAUI and Avalonia](https://darklikally.github.io/I18Next.Net/integrations/xaml).
 
+## Unity and Godot
+
+`I18Next.Net.Godot` makes Godot 4 C# projects (4.3 and later) use i18next: `Tr()`, `TrN()`, GDScript `tr()` and auto
+translated controls resolve through i18next, and the Godot locale and the i18next language stay in sync.
+
+```csharp
+var backend = new GodotFileBackend("res://locales");
+var i18n = new I18NextNet(backend, new DefaultTranslator(backend)) { Language = "en" };
+I18NextGodot.Register(i18n, "en", "de");
+
+_inbox.Text = this.T("inbox", new { count = 3 });
+```
+
+The Unity package `com.darklikally.i18next-net` (Unity 2021.3 and later, Mono and IL2CPP, all platforms including
+WebGL) loads the translations from `Assets/Resources/locales/{lng}/{ns}.json`, detects the system language and
+provides the **Localized Text** components for uGUI and TextMesh Pro. Install the `.tgz` of the GitHub release
+(Package Manager → Install package from tarball), or install `I18Next.Net` with NuGetForUnity and add
+`https://github.com/DarkLiKally/I18Next.Net.git?path=unity/com.darklikally.i18next-net#v2.1.0`:
+
+```csharp
+I18NextUnity.Language = "de";
+var text = I18NextUnity.T("apples", new Dictionary<string, object> { ["count"] = 3 });
+```
+
+See [Unity](https://darklikally.github.io/I18Next.Net/integrations/unity) and
+[Godot](https://darklikally.github.io/I18Next.Net/integrations/godot).
+
 ## Validation messages
 
 ```csharp
@@ -1015,7 +1058,7 @@ See [Trimming and Native AOT](https://darklikally.github.io/I18Next.Net/guide/na
 | Missing key handling | ✅ | `MissingKey` event, `IMissingKeyHandler` |
 | `saveMissing` to backend | ✅ | `FileMissingKeyHandler`, `HttpMissingKeyHandler`, `MapI18NextMissingKeys` |
 | Post processors | ✅ | sprintf, interval, pseudo localization, custom `IPostProcessor` |
-| Backends | ✅ | JSON, YAML, XML, INI, gettext, in-memory, custom `ITranslationBackend` |
+| Backends | ✅ | JSON, YAML, XML, INI, resx, gettext, in-memory, database, custom `ITranslationBackend` |
 | i18next-http-backend | ✅ | `HttpBackend`, `AddHttpBackend` with `IHttpClientFactory` |
 | i18next-chained-backend | ✅ | `ChainedBackend` with in-memory caching, expiry and saving to cache backends |
 | i18next-localstorage-backend | ✅ | `DistributedCacheBackend` |
@@ -1097,6 +1140,7 @@ npm run bench
 | [`Example.Blazor`](samples/Example.Blazor) | Blazor Web App with interactive server and WebAssembly pages, `Trans`, `LanguageSelector` and hot reload |
 | [`Example.Wpf`](samples/Example.Wpf) | WPF window with a language switcher and hot reload |
 | [`Example.Avalonia`](samples/Example.Avalonia) | Avalonia window with a language switcher and hot reload |
+| [`Example.Godot`](samples/Example.Godot) | Godot 4 C# project with auto translated controls and a language switch |
 | [`Example.Validation`](samples/Example.Validation) | Translated DataAnnotations and FluentValidation messages in MVC and minimal APIs |
 | [`Example.NativeAot`](samples/Example.NativeAot) | Native AOT application with anonymous arguments and typed models |
 | [`Example.ConsoleApp.NetCore`](samples/Example.ConsoleApp.NetCore) | Console application with and without dependency injection |

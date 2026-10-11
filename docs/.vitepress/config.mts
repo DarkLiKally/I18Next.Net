@@ -50,6 +50,8 @@ export default defineConfig({
                     { text: "ASP.NET Core", link: "/integrations/aspnetcore" },
                     { text: "Blazor", link: "/integrations/blazor" },
                     { text: "WPF, .NET MAUI and Avalonia", link: "/integrations/xaml" },
+                    { text: "Unity", link: "/integrations/unity" },
+                    { text: "Godot", link: "/integrations/godot" },
                     { text: "Validation", link: "/integrations/validation" },
                     { text: "Source generator", link: "/integrations/source-generator" }
                 ]

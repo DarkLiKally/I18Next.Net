@@ -15,8 +15,11 @@ to the language part of a regional language (`de` for `de-CH`).
 | `ChainedBackend` | `I18Next.Net` | Asks several backends in order, with optional caching and expiry |
 | `GettextBackend` | `I18Next.Net.Gettext` | Compiled gettext `.mo` files from `{basePath}/{lng}/{ns}.mo` |
 | `YamlFileBackend` | `I18Next.Net.Yaml` | YAML files from `{basePath}/{lng}/{ns}.yaml` or `.yml`, mappings and sequences like the JSON backend |
+| `ResxFileBackend` | `I18Next.Net` | .resx files from `{basePath}/{lng}/{ns}.resx` or `{basePath}/{ns}.{lng}.resx` with `{ns}.resx` for the neutral language |
+| `ResourceManagerBackend` | `I18Next.Net` | Compiled resources of a `ResourceManager`, e.g. of a .resx designer class, including satellite assemblies |
 | `DistributedCacheBackend` | `I18Next.Net.Extensions` | Namespaces cached as JSON in an `IDistributedCache`, e.g. Redis shared by several servers |
 | `EntityFrameworkBackend<TContext>` | `I18Next.Net.EntityFrameworkCore` | A database table through Entity Framework Core, editable at runtime |
+| `GodotFileBackend` | `I18Next.Net.Godot` | i18next JSON files from Godot's file system, `res://locales/{lng}/{ns}.json` by default |
 
 `InMemoryBackend`, `DistributedCacheBackend` and `EntityFrameworkBackend<TContext>` are writable
 (`IWritableTranslationBackend`), so a `ChainedBackend` can store namespaces in them.
@@ -174,6 +177,36 @@ like the `saveMissing` option of i18next. The rows have no value, so they are no
 and each key is only added once. Pass a language, e.g. the development language, to add all missing keys for it instead
 of the requested language. It is meant for development and staging environments, as every requested key ends up in the
 database.
+
+## Resx files and compiled resources
+
+Applications moving from .NET resources keep their .resx files. The `ResxFileBackend` reads them directly, both in the
+i18next layout and with the .NET naming:
+
+```
+locales/de/translation.resx      // {basePath}/{lng}/{ns}.resx
+Resources/Strings.resx           // neutral language, NeutralLanguage = "en"
+Resources/Strings.de.resx        // {basePath}/{ns}.{lng}.resx
+Resources/Strings.de-AT.resx
+```
+
+```csharp
+var backend = new ResxFileBackend("Resources") { NeutralLanguage = "en" };
+var i18n = new I18NextNet(backend, new DefaultTranslator(backend)) { DefaultNamespace = "Strings" };
+```
+
+The `ResourceManagerBackend` uses resources compiled into the assemblies, e.g. the `ResourceManager` of the designer
+class generated for a .resx file. Every namespace has its own resource manager:
+
+```csharp
+var backend = new ResourceManagerBackend(Strings.ResourceManager)      // namespace "translation"
+    .Add("errors", Errors.ResourceManager);
+```
+
+Only string resources are used, images and other resources are skipped. Keys containing dots like `menu.title` form
+groups as in JSON files. .NET placeholders like `{0}` are not converted; use i18next placeholders like `{{name}}` in the
+values, or convert the files with `dotnet i18next convert`. `ResxTranslationReader` parses .resx content for other
+backends, e.g. `new HttpBackend(...) { Parse = ResxTranslationReader.Read }`.
 
 ## Translation tree builders
 

@@ -61,6 +61,8 @@ jobs:
           -p:GeneratePackageOnBuild=false
           -p:ContinuousIntegrationBuild=true || exit 1;
           done
+      - name: Pack Unity package
+        run: tools/unity/pack.sh "${{ steps.version.outputs.version }}" artifacts/unity
       - name: Create tag
         if: github.event_name == 'workflow_dispatch'
         env:
@@ -83,8 +85,10 @@ jobs:
         run: |
           prerelease=""
           if [[ "${{ steps.version.outputs.version }}" == *-* ]]; then prerelease="--prerelease"; fi
-          gh release create "${{ steps.version.outputs.tag }}" artifacts/packages/*.nupkg --verify-tag --generate-notes $prerelease
+          gh release create "${{ steps.version.outputs.tag }}" artifacts/packages/*.nupkg artifacts/unity/*.tgz --verify-tag --generate-notes $prerelease
       - uses: actions/upload-artifact@v4
         with:
           name: packages
-          path: artifacts/packages
+          path: |
+            artifacts/packages
+            artifacts/unity

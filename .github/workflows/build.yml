@@ -51,6 +51,12 @@ jobs:
           done
       - name: Test the .NET 6 build
         run: dotnet test --project tests/I18Next.Net.Tests -c Release -f net8.0 -p:LibraryTargetFramework=net6.0
+      - name: Godot engine tests
+        run: |
+          tests/I18Next.Net.Godot.EngineTests/run.sh 4.3.0
+          tests/I18Next.Net.Godot.EngineTests/run.sh 4.7.2
+      - name: Unity package
+        run: tools/unity/pack.sh "" artifacts/packages
       - name: Native AOT
         run: |
           dotnet publish samples/Example.NativeAot -c Release -r linux-x64 -o artifacts/nativeaot

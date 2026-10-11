@@ -18,6 +18,7 @@ integrates with `Microsoft.Extensions.DependencyInjection`, `IStringLocalizer` a
 | `I18Next.Net.Wpf` | WPF markup extension `{i18n:T key}` updating on language and translation changes |
 | `I18Next.Net.Maui` | .NET MAUI markup extension `{i18n:T key}` |
 | `I18Next.Net.Avalonia` | Avalonia markup extension `{i18n:T key}` |
+| `I18Next.Net.Godot` | Godot 4 integration using i18next for `Tr()` and auto translated controls |
 | `I18Next.Net.DataAnnotations` | Translated DataAnnotations messages and display names |
 | `I18Next.Net.FluentValidation` | FluentValidation messages from i18next |
 | `I18Next.Net.EntityFrameworkCore` | Backend and missing key handler storing translations in a database |
@@ -71,11 +72,11 @@ services.AddI18NextLocalization(i18n => i18n
 - `number`, `currency`, `datetime`, `relativetime` and `list` formats matching the browser `Intl` APIs, date-fns and
   Moment.js formats
 - `getFixedT`, `keyPrefix`, `formatParams`, `returnObjects`, `joinArrays` and post processors
-- JSON, YAML, XML, INI, gettext, HTTP, delegate, in-memory, distributed cache and Entity Framework Core backends, chained
-  with caching and expiry
+- JSON, YAML, XML, INI, resx, gettext, HTTP, delegate, in-memory, distributed cache and Entity Framework Core backends,
+  chained with caching and expiry
 - Hot reload of changed translation files and saving missing keys to files, over HTTP or as metrics
 - Typed keys and translation methods generated from the translation files
-- Blazor, WPF, .NET MAUI, Avalonia, DataAnnotations and FluentValidation integrations
+- Blazor, WPF, .NET MAUI, Avalonia, Unity, Godot, DataAnnotations and FluentValidation integrations
 - Trimming and Native AOT support
 - .NET Standard 2.0, .NET 6, .NET 8 and .NET 10
 

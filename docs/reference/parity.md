@@ -41,7 +41,7 @@
 | Missing key handling | ✅ | `MissingKey` event, `IMissingKeyHandler` |
 | `saveMissing` to backend | ✅ | `FileMissingKeyHandler`, `HttpMissingKeyHandler`, `MapI18NextMissingKeys` |
 | Post processors | ✅ | sprintf, interval, pseudo localization, custom `IPostProcessor` |
-| Backends | ✅ | JSON, YAML, XML, INI, gettext, in-memory, custom `ITranslationBackend` |
+| Backends | ✅ | JSON, YAML, XML, INI, resx, gettext, in-memory, database, custom `ITranslationBackend` |
 | i18next-http-backend | ✅ | `HttpBackend`, `AddHttpBackend` with `IHttpClientFactory` |
 | i18next-chained-backend | ✅ | `ChainedBackend` with in-memory caching, expiry and saving to cache backends |
 | i18next-localstorage-backend | ✅ | `DistributedCacheBackend` |

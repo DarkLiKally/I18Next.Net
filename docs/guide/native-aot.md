@@ -32,6 +32,13 @@ i18n.T("welcome", new Dictionary<string, object> { ["name"] = "Jane" });
 i18n.Translation().Welcome("Jane");
 ```
 
+## Game engines
+
+Godot exports C# projects for iOS as Native AOT applications, which works with the source generator above. It doesn't
+convert the arguments of the `this.T(...)` extension method, pass dictionaries there or call
+`I18NextGodot.Instance.T(...)`. Unity compiles with C# 9 and IL2CPP, where the generator can't be used: pass
+dictionaries, see [Unity](/integrations/unity).
+
 ## Mapping translations to models
 
 `T<TModel>` maps string arrays, string lists and dictionaries without reflection. Other models are mapped with
