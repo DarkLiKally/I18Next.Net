@@ -53,6 +53,7 @@ internal sealed class SourceEmitter
         var keysScope = new NameScope("Keys");
         var accessors = namespaces.Select(n => (Model: n, Name: NameScope.ToPascalCase(n.Name))).ToList();
 
+        Line("/// <summary>The translation keys of all namespaces, including the namespace.</summary>");
         Line(GeneratedCode);
         Line("public static class Keys");
         Open();
@@ -70,6 +71,7 @@ internal sealed class SourceEmitter
 
             Line();
             Line($"/// <summary>Typed translations of the namespace <c>{Xml(model.Name)}</c>.</summary>");
+            Line("/// <param name=\"i18n\">The instance translating the keys.</param>");
             Line($"public static {typeName} {accessorName}({@this}{I18Next} i18n) => new {typeName}(i18n);");
             Line();
             EmitGroup(model, typeName, model.Name);
@@ -97,14 +99,23 @@ internal sealed class SourceEmitter
     {
         var scope = new NameScope(className);
 
+        Line(group.FullKey.Length > 0
+            ? $"/// <summary>The keys of the group <c>{Xml(group.FullKey)}</c>.</summary>"
+            : $"/// <summary>The keys of the namespace <c>{Xml(@namespace)}</c>.</summary>");
         Line($"public static class {className}");
         Open();
 
         if (group.FullKey.Length > 0)
+        {
+            Line($"/// <summary>The key of the group <c>{Xml(group.FullKey)}</c>.</summary>");
             Line($"public const string {scope.Add("Key")} = {NameScope.ToLiteral(GetKey(@namespace, group.FullKey))};");
+        }
 
         foreach (var key in group.Keys)
+        {
+            Line($"/// <summary>{GetSummary(key)}</summary>");
             Line($"public const string {scope.Add(NameScope.ToPascalCase(key.Name))} = {NameScope.ToLiteral(GetKey(@namespace, key.FullKey))};");
+        }
 
         foreach (var child in group.Groups)
             EmitKeys(child, scope.Add(NameScope.ToPascalCase(child.Name)), @namespace);
@@ -116,11 +127,16 @@ internal sealed class SourceEmitter
     {
         var scope = new NameScope(typeName, "_i18n", "ToObject", "ToObjectAsync", "To", "ToAsync");
 
+        Line(group.FullKey.Length > 0
+            ? $"/// <summary>Typed translations of the group <c>{Xml(group.FullKey)}</c>.</summary>"
+            : $"/// <summary>Typed translations of the namespace <c>{Xml(@namespace)}</c>.</summary>");
         Line(GeneratedCode);
         Line($"public readonly struct {typeName}");
         Open();
         Line($"private readonly {I18Next} _i18n;");
         Line();
+        Line("/// <summary>Creates the typed translations using the given instance.</summary>");
+        Line("/// <param name=\"i18n\">The instance translating the keys.</param>");
         Line($"public {typeName}({I18Next} i18n)");
         Open();
         Line("_i18n = i18n;");
@@ -131,12 +147,16 @@ internal sealed class SourceEmitter
             var key = NameScope.ToLiteral(GetKey(@namespace, group.FullKey));
 
             Line();
+            EmitGroupDocumentation(group, "Translates all values of the group", "The translated values as nested dictionaries.");
             Line($"public {ObjectDictionary} ToObject(object args = null, string language = null) => language == null ? _i18n.TObject({key}, args) : _i18n.TObject(language, {key}, args);");
             Line();
+            EmitGroupDocumentation(group, "Translates all values of the group", "The translated values as nested dictionaries.");
             Line($"public {Task}<{ObjectDictionary}> ToObjectAsync(object args = null, string language = null) => language == null ? _i18n.TaObject({key}, args) : _i18n.TaObject(language, {key}, args);");
             Line();
+            EmitGroupDocumentation(group, "Translates all values of the group and maps them to a model", "The translated values mapped to the model.", true);
             Line($"public TModel To<TModel>(object args = null, string language = null) => language == null ? _i18n.T<TModel>({key}, args) : _i18n.T<TModel>(language, {key}, args);");
             Line();
+            EmitGroupDocumentation(group, "Translates all values of the group and maps them to a model", "The translated values mapped to the model.", true);
             Line($"public {Task}<TModel> ToAsync<TModel>(object args = null, string language = null) => language == null ? _i18n.Ta<TModel>({key}, args) : _i18n.Ta<TModel>(language, {key}, args);");
         }
 
@@ -149,6 +169,7 @@ internal sealed class SourceEmitter
             var childTypeName = scope.Add(propertyName + "Group");
 
             Line();
+            Line($"/// <summary>The group <c>{Xml(child.FullKey)}</c>.</summary>");
             Line($"public {childTypeName} {propertyName} => new {childTypeName}(_i18n);");
             Line();
             EmitGroup(child, childTypeName, @namespace);
@@ -176,6 +197,7 @@ internal sealed class SourceEmitter
 
         var parameterScope = new NameScope(name, "args", "language", "count", "context", "ordinal");
         var parameters = new List<string>();
+        var parameterDocumentation = new List<string>();
         var assignments = new List<string>();
 
         var optionalCount = key.Plural && (key.Simple || key.Contexts.Count > 0);
@@ -183,6 +205,7 @@ internal sealed class SourceEmitter
         if (key.Plural && !optionalCount)
         {
             parameters.Add("int count");
+            parameterDocumentation.Add("<param name=\"count\">The count selecting the plural form.</param>");
             assignments.Add("args[\"count\"] = count;");
         }
 
@@ -193,24 +216,28 @@ internal sealed class SourceEmitter
 
             var parameterName = parameterScope.Add(NameScope.ToParameterName(placeholder));
             parameters.Add($"object {parameterName}");
+            parameterDocumentation.Add($"<param name=\"{parameterName.TrimStart('@')}\">The value of the <c>{{{{{Xml(placeholder)}}}}}</c> placeholder.</param>");
             assignments.Add($"args[{NameScope.ToLiteral(placeholder)}] = {parameterName};");
         }
 
         if (optionalCount)
         {
             parameters.Add("int? count = null");
+            parameterDocumentation.Add("<param name=\"count\">The count selecting the plural form, or <c>null</c> for the form without count.</param>");
             assignments.Add("if (count != null) args[\"count\"] = count.Value;");
         }
 
         if (key.Contexts.Count > 0)
         {
             parameters.Add("string context = null");
+            parameterDocumentation.Add("<param name=\"context\">The context selecting a variant of the translation, or <c>null</c>.</param>");
             assignments.Add("if (context != null) args[\"context\"] = context;");
         }
 
         if (key.Ordinal && key.Cardinal)
         {
             parameters.Add("bool ordinal = false");
+            parameterDocumentation.Add("<param name=\"ordinal\">Whether the count selects an ordinal form like 1st or 2nd.</param>");
             assignments.Add("if (ordinal) args[\"ordinal\"] = true;");
         }
         else if (key.Ordinal)
@@ -219,6 +246,7 @@ internal sealed class SourceEmitter
         }
 
         parameters.Add("string language = null");
+        parameterDocumentation.Add("<param name=\"language\">The language to translate into, or <c>null</c> for the current language.</param>");
 
         var literal = NameScope.ToLiteral(GetKey(@namespace, key.FullKey));
         var parameterList = string.Join(", ", parameters);
@@ -228,7 +256,12 @@ internal sealed class SourceEmitter
         foreach (var async in new[] { false, true })
         {
             Line();
-            EmitDocumentation(key);
+            Line($"/// <summary>{GetSummary(key)}</summary>");
+
+            foreach (var documentation in parameterDocumentation)
+                Line("/// " + documentation);
+
+            Line($"/// <returns>The translation{(key.IsArray ? "s" : "")}.</returns>");
             Line($"public {(async ? $"{Task}<{returnType}>" : returnType)} {name}{(async ? "Async" : "")}({parameterList})");
             Open();
 
@@ -250,7 +283,19 @@ internal sealed class SourceEmitter
         }
     }
 
-    private void EmitDocumentation(KeyModel key)
+    private void EmitGroupDocumentation(GroupModel group, string summary, string returns, bool model = false)
+    {
+        Line($"/// <summary>{summary} <c>{Xml(group.FullKey)}</c>.</summary>");
+        Line("/// <param name=\"args\">The arguments used to translate the values.</param>");
+        Line("/// <param name=\"language\">The language to translate into, or <c>null</c> for the current language.</param>");
+
+        if (model)
+            Line("/// <typeparam name=\"TModel\">The type the translations are mapped to.</typeparam>");
+
+        Line($"/// <returns>{returns}</returns>");
+    }
+
+    private static string GetSummary(KeyModel key)
     {
         var details = new List<string>();
 
@@ -268,7 +313,7 @@ internal sealed class SourceEmitter
         if (details.Count > 0)
             summary += $" ({Xml(string.Join("; ", details))})";
 
-        Line($"/// <summary>{summary.Replace("\r", "").Replace("\n", " ")}</summary>");
+        return summary.Replace("\r", "").Replace("\n", " ");
     }
 
     private string GetKey(string @namespace, string key)
