@@ -15,9 +15,9 @@ public interface IPostProcessor
     string Keyword { get; }
 
     /// <summary>
-    ///     Applies the post processing to a translation before interpolation and nesting. The default translator does not
-    ///     call it and only applies <see cref="ProcessResult" />. On .NET 6 and later the default implementation returns
-    ///     the value unchanged.
+    ///     Applies the post processing to a translation before interpolation and nesting, e.g. to add placeholders or
+    ///     nestings. Return <paramref name="value" /> unchanged to only process the result. On .NET 6 and later the default
+    ///     implementation returns the value unchanged.
     /// </summary>
     /// <param name="key">The key of the translation, without namespace.</param>
     /// <param name="value">The translation to process.</param>

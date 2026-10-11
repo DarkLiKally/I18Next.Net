@@ -71,12 +71,12 @@ public class DefaultTranslatorFixture : IDisposable
     [Fact]
     public async Task TranslateAsync_CallMultiplePostProcessors_ShouldApplyPostProcessorsInOrder()
     {
-        var postProcessor1 = Substitute.For<IPostProcessor>();
+        var postProcessor1 = CreatePostProcessor();
         postProcessor1.ProcessResult("test", "translated", Arg.Any<IDictionary<string, object>>(), "en-US", _translator).Returns("post-processed1");
         postProcessor1.Keyword.Returns("testProcess1");
-        var postProcessor2 = Substitute.For<IPostProcessor>();
+        var postProcessor2 = CreatePostProcessor();
         postProcessor2.Keyword.Returns("testProcess2");
-        var postProcessor3 = Substitute.For<IPostProcessor>();
+        var postProcessor3 = CreatePostProcessor();
         postProcessor3.ProcessResult("test", "post-processed1", Arg.Any<IDictionary<string, object>>(), "en-US", _translator).Returns("post-processed3");
         postProcessor3.Keyword.Returns("testProcess3");
 
@@ -105,7 +105,7 @@ public class DefaultTranslatorFixture : IDisposable
     [Fact]
     public async Task TranslateAsync_CustomPostProcessor_ShouldApplyPostProcessing()
     {
-        var postProcessor = Substitute.For<IPostProcessor>();
+        var postProcessor = CreatePostProcessor();
         postProcessor.ProcessResult("test", "translated", Arg.Any<IDictionary<string, object>>(), "en-US", _translator).Returns("post-processed");
         postProcessor.Keyword.Returns("testProcess");
 
@@ -208,7 +208,7 @@ public class DefaultTranslatorFixture : IDisposable
     [Fact]
     public async Task TranslateAsync_DisablePostProcessing_ShouldTranslateWithoutPostProcessing()
     {
-        var postProcessor = Substitute.For<IPostProcessor>();
+        var postProcessor = CreatePostProcessor();
         postProcessor.ProcessResult("test", "translated", null, "en-US", _translator).Returns("post-processed");
 
         _translationTree.GetValue("test", null).Returns("translated");
@@ -232,7 +232,7 @@ public class DefaultTranslatorFixture : IDisposable
     [Fact]
     public async Task TranslateAsync_DisablePostProcessingInArgs_ShouldTranslateWithoutPostProcessing()
     {
-        var postProcessor = Substitute.For<IPostProcessor>();
+        var postProcessor = CreatePostProcessor();
         postProcessor.ProcessResult("test", "translated", null, "en-US", _translator).Returns("post-processed");
 
         _translationTree.GetValue("test", Arg.Any<IDictionary<string, object>>()).Returns("translated");
@@ -257,10 +257,10 @@ public class DefaultTranslatorFixture : IDisposable
     [Fact]
     public async Task TranslateAsync_MultipleCustomPostProcessorWithDifferentKeys_ShouldApplyOnlyTheSpecifiedPostProcessors()
     {
-        var postProcessor1 = Substitute.For<IPostProcessor>();
+        var postProcessor1 = CreatePostProcessor();
         postProcessor1.ProcessResult("test", "translated", Arg.Any<IDictionary<string, object>>(), "en-US", _translator).Returns("post-processed1");
         postProcessor1.Keyword.Returns("testProcess1");
-        var postProcessor2 = Substitute.For<IPostProcessor>();
+        var postProcessor2 = CreatePostProcessor();
         postProcessor2.ProcessResult("test", "post-processed1", Arg.Any<IDictionary<string, object>>(), "en-US", _translator).Returns("post-processed2");
         postProcessor2.Keyword.Returns("testProcess2");
 
@@ -287,10 +287,10 @@ public class DefaultTranslatorFixture : IDisposable
     [Fact]
     public async Task TranslateAsync_MultipleCustomPostProcessorWithSameKey_ShouldApplyPostProcessorsInOrder()
     {
-        var postProcessor1 = Substitute.For<IPostProcessor>();
+        var postProcessor1 = CreatePostProcessor();
         postProcessor1.ProcessResult("test", "translated", Arg.Any<IDictionary<string, object>>(), "en-US", _translator).Returns("post-processed1");
         postProcessor1.Keyword.Returns("testProcess");
-        var postProcessor2 = Substitute.For<IPostProcessor>();
+        var postProcessor2 = CreatePostProcessor();
         postProcessor2.ProcessResult("test", "post-processed1", Arg.Any<IDictionary<string, object>>(), "en-US", _translator).Returns("post-processed2");
         postProcessor2.Keyword.Returns("testProcess");
 
@@ -874,5 +874,13 @@ public class DefaultTranslatorFixture : IDisposable
         await _interpolator.ReceivedWithAnyArgs(0).NestAsync(null, null, null, null);
         _pluralResolver.ReceivedWithAnyArgs(0).GetPluralSuffix(null, 0);
         _pluralResolver.ReceivedWithAnyArgs(0).NeedsPlural(null);
+    }
+
+    private static IPostProcessor CreatePostProcessor()
+    {
+        var postProcessor = Substitute.For<IPostProcessor>();
+        postProcessor.ProcessTranslation(default, default, default, default, default).ReturnsForAnyArgs(c => c.ArgAt<string>(1));
+
+        return postProcessor;
     }
 }

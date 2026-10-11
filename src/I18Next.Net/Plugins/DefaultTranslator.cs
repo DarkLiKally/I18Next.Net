@@ -504,6 +504,9 @@ public class DefaultTranslator : ITranslator
 
         var skipNesting = false;
 
+        if (AllowPostprocessing && PostProcessors.Count > 0)
+            result = HandlePostProcessing(result, language, key, args, false);
+
         if (AllowInterpolation && IsEnabledByArg(args, "interpolate"))
         {
             var skipOnVariables = AllowNesting && _interpolator is DefaultInterpolator { SkipOnVariables: true };
@@ -521,7 +524,7 @@ public class DefaultTranslator : ITranslator
                 (lang2, key2, args2) => TranslateAsync(lang2, key2, args2, options)).ConfigureAwait(false);
 
         if (AllowPostprocessing && PostProcessors.Count > 0)
-            result = HandlePostProcessing(result, language, key, args);
+            result = HandlePostProcessing(result, language, key, args, true);
 
         return result;
     }
@@ -556,7 +559,7 @@ public class DefaultTranslator : ITranslator
         return localArgs as string[];
     }
 
-    private string HandlePostProcessing(string result, string language, string key, IDictionary<string, object> args)
+    private string HandlePostProcessing(string result, string language, string key, IDictionary<string, object> args, bool processResult)
     {
         var postProcessorKeys = GetPostProcessorKeys(args);
 
@@ -569,7 +572,9 @@ public class DefaultTranslator : ITranslator
                 foreach (var postProcessor in PostProcessors)
                 {
                     if (postProcessor.Keyword == postProcessorKey)
-                        result = postProcessor.ProcessResult(key, result, args, language, this);
+                        result = processResult
+                            ? postProcessor.ProcessResult(key, result, args, language, this)
+                            : postProcessor.ProcessTranslation(key, result, args, language, this);
                 }
             }
 

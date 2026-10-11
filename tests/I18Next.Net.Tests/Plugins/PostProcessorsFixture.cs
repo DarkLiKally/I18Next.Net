@@ -132,4 +132,38 @@ public class PostProcessorsFixture
 
         i18Next.T("sprintf", new { postProcess = "sprintf", sprintf = new[] { "World" } }).ShouldBe("Hello %s");
     }
+
+    [Fact]
+    public void Translator_PostProcessor_ShouldProcessTranslationBeforeAndResultAfterInterpolation()
+    {
+        var backend = new InMemoryBackend();
+        backend.AddTranslation("en", "translation", "greeting", "Hello");
+
+        var translator = new DefaultTranslator(backend);
+        translator.PostProcessors.Add(new SuffixPostProcessor());
+
+        var i18Next = new I18NextNet(backend, translator) { Language = "en" };
+
+        i18Next.T("greeting", new { postProcess = "suffix", name = "World" }).ShouldBe("[Hello World]");
+        i18Next.T("greeting", new { name = "World" }).ShouldBe("Hello");
+
+        translator.AllowPostprocessing = false;
+
+        i18Next.T("greeting", new { postProcess = "suffix", name = "World" }).ShouldBe("Hello");
+    }
+
+    private class SuffixPostProcessor : IPostProcessor
+    {
+        public string Keyword => "suffix";
+
+        public string ProcessTranslation(string key, string value, IDictionary<string, object> args, string language, ITranslator translator)
+        {
+            return value + " {{name}}";
+        }
+
+        public string ProcessResult(string key, string value, IDictionary<string, object> args, string language, ITranslator translator)
+        {
+            return $"[{value}]";
+        }
+    }
 }

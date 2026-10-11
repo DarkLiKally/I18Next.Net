@@ -682,7 +682,7 @@ locale defaults.
 
 ### Post processors
 
-Post processors run after interpolation when their keyword is listed in the `postProcess` argument
+Post processors run when their keyword is listed in the `postProcess` argument
 (`postProcess = "sprintf"` or `postProcess = new[] { "interval", "pseudo" }`).
 
 | Post processor | Keyword | Description |
@@ -694,6 +694,28 @@ Post processors run after interpolation when their keyword is listed in the `pos
 `PseudoLocalizationOptions` configures the pseudo localization: `LanguagesToPseudo` limits it to some languages,
 `LetterMultiplier` and `RepeatedLetters` lengthen vowels to simulate longer translations, `Letters` maps the characters and
 `WrapStrings` adds brackets around the text.
+
+Custom post processors implement `IPostProcessor`. `ProcessTranslation` receives the translation before interpolation and
+nesting, `ProcessResult` the final text after them. The built-in post processors only use `ProcessResult`.
+
+```csharp
+public class ExclamationPostProcessor : IPostProcessor
+{
+    public string Keyword => "exclamation";
+
+    public string ProcessTranslation(string key, string value, IDictionary<string, object> args, string language, ITranslator translator)
+    {
+        return value + " {{name}}";
+    }
+
+    public string ProcessResult(string key, string value, IDictionary<string, object> args, string language, ITranslator translator)
+    {
+        return value + "!";
+    }
+}
+
+i18n.T("greeting", new { postProcess = "exclamation", name = "Jane" });   // Hello Jane!
+```
 
 ### Plural resolver
 
